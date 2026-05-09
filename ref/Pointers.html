@@ -1,0 +1,531 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<!-- saved from url=(0101)https://web.archive.org/web/20090105204428/http://www.haxial.com/products/compiler/docs/pointers.html -->
+<html style="--wm-toolbar-height: 83px;"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"><script src="./Pointers_files/athena.js" type="text/javascript"></script>
+<script type="text/javascript">window.addEventListener('DOMContentLoaded',function(){var v=archive_analytics.values;v.service='wb';v.server_name='wwwb-app248.us.archive.org';v.server_ms=197;archive_analytics.send_pageview({});});</script>
+<script type="text/javascript" src="./Pointers_files/bundle-playback.js" charset="utf-8"></script>
+<script type="text/javascript" src="./Pointers_files/wombat.js" charset="utf-8"></script>
+<script>window.RufflePlayer=window.RufflePlayer||{};window.RufflePlayer.config={"autoplay":"on","unmuteOverlay":"hidden","showSwfDownload":true};</script>
+<script type="text/javascript" src="./Pointers_files/ruffle.js"></script>
+<script type="text/javascript">
+    __wm.init("https://web.archive.org/web");
+  __wm.wombat("http://www.haxial.com/products/compiler/docs/pointers.html","20090105204428","https://web.archive.org/","web","https://web-static.archive.org/_static/",
+	      "1231188268");
+</script>
+<link rel="stylesheet" type="text/css" href="./Pointers_files/banner-styles.css">
+<link rel="stylesheet" type="text/css" href="./Pointers_files/iconochive.css">
+<!-- End Wayback Rewrite JS Include -->
+
+	
+	<title>Pointers</title>
+	<link href="./Pointers_files/kredocs.css" rel="stylesheet" type="text/css">
+</head>
+
+<body><!-- BEGIN WAYBACK TOOLBAR INSERT -->
+<script>__wm.rw(0);</script>
+<div id="wm-ipp-base" lang="en" style="display: block; direction: ltr; height: 83px;" toolbar-mode="auto"><template shadowrootmode="closed"><div id="wm-ipp" style="position:fixed;left:0;top:0;right:0;">
+<div id="donato" style="position:relative;width:100%;height:0;">
+  <div id="donato-base">
+    <iframe id="donato-if" src="https://archive.org/includes/donate.php?as_page=1&amp;platform=wb&amp;referer=https%3A//web.archive.org/web/20090105204428/http%3A//www.haxial.com/products/compiler/docs/pointers.html" scrolling="no" frameborder="0" style="width:100%; height:100%">
+    </iframe>
+  </div>
+</div><div id="wm-ipp-inside">
+  <div id="wm-toolbar" style="position:relative;display:flex;flex-flow:row nowrap;justify-content:space-between;" nav="async">
+    <div id="wm-logo" style="/*width:110px;*/padding-top:12px;">
+      <a href="https://web.archive.org/web/" title="Wayback Machine home page"><img src="https://web-static.archive.org/_static/images/toolbar/wayback-toolbar-logo-200.png" srcset="https://web-static.archive.org/_static/images/toolbar/wayback-toolbar-logo-100.png, https://web-static.archive.org/_static/images/toolbar/wayback-toolbar-logo-150.png 1.5x, https://web-static.archive.org/_static/images/toolbar/wayback-toolbar-logo-200.png 2x" alt="Wayback Machine" style="width:100px" border="0"></a>
+    </div>
+    <div class="c" style="display:flex;flex-flow:column nowrap;justify-content:space-between;flex:1;">
+      <form class="u" style="display:flex;flex-direction:row;flex-wrap:nowrap;" target="_top" method="get" action="https://web.archive.org/web/submit" name="wmtb" id="wmtb"><input type="text" name="url" id="wmtbURL" value="http://www.haxial.com/products/compiler/docs/pointers.html" onfocus="this.focus();this.select();" style="flex:1;" autocomplete="off"><input type="hidden" name="type" value="replay"><input type="hidden" name="date" value="20090105204428"><input type="submit" value="Go">
+      </form>
+      <div style="display:flex;flex-flow:row nowrap;align-items:flex-end;">
+                <div class="s" id="wm-nav-captures" style="flex:1;"><a class="t" href="https://web.archive.org/web/*/http://www.haxial.com/products/compiler/docs/pointers.html" title="See a list of every capture for this URL">1 capture</a><div class="r" title="Timespan for captures of this URL">5 Jan 2009</div></div>
+        <div class="k">
+          <a href="https://web.archive.org/web/20090105204428/http://www.haxial.com/products/compiler/docs/pointers.html" id="wm-graph-anchor">
+            <div id="wm-ipp-sparkline" title="Explore captures for this URL" style="position: relative">
+              <canvas id="wm-sparkline-canvas" width="775" height="27" border="0"></canvas>
+            <div class="yt" style="display: none; width: 25px; height: 27px;"></div><div class="mt" style="display: none; width: 2px; height: 27px;"></div></div>
+          </a>
+        </div>
+      </div>
+    </div>
+    <div class="n">
+      <table>
+        <tbody>
+          <!-- NEXT/PREV MONTH NAV AND MONTH INDICATOR -->
+          <tr class="m">
+            <td class="b" nowrap="nowrap">Dec</td>
+            <td class="c" id="displayMonthEl" title="You are here: 20:44:28 Jan 05, 2009">JAN</td>
+            <td class="f" nowrap="nowrap">Feb</td>
+          </tr>
+          <!-- NEXT/PREV CAPTURE NAV AND DAY OF MONTH INDICATOR -->
+          <tr class="d">
+            <td class="b" nowrap="nowrap"><span class="ta"></span></td>
+            <td class="c" id="displayDayEl" style="width:34px;font-size:22px;white-space:nowrap;" title="You are here: 20:44:28 Jan 05, 2009">05</td>
+            <td class="f" nowrap="nowrap"><span class="ta"></span></td>
+          </tr>
+          <!-- NEXT/PREV YEAR NAV AND YEAR INDICATOR -->
+          <tr class="y">
+            <td class="b" nowrap="nowrap">2008</td>
+            <td class="c" id="displayYearEl" title="You are here: 20:44:28 Jan 05, 2009">2009</td>
+            <td class="f" nowrap="nowrap">2010</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="r" style="display:flex;flex-flow:column nowrap;align-items:flex-end;justify-content:space-between;">
+      <div id="wm-btns" style="text-align:right;height:23px;">
+                <span class="xxs">
+          <div id="wm-save-snapshot-success">success</div>
+          <div id="wm-save-snapshot-fail">fail</div>
+          <a id="wm-save-snapshot-open" href="https://web.archive.org/web/20090105204428/http://www.haxial.com/products/compiler/docs/pointers.html#" title="Share via My Web Archive" style="display: none;">
+            <span class="iconochive-web"></span>
+          </a>
+          <a href="https://archive.org/account/login.php" title="Sign In" id="wm-sign-in" style="display: inline-block;">
+            <span class="iconochive-person"></span>
+          </a>
+          <span id="wm-save-snapshot-in-progress" class="iconochive-web" style="display: none;"></span>
+        </span>
+                <a class="xxs" href="https://help.archive.org/help/category/the-wayback-machine/" title="Get some help using the Wayback Machine" style="top:-6px;"><span class="iconochive-question" style="color:rgb(87,186,244);font-size:160%;"></span></a>
+        <a id="wm-tb-close" href="https://web.archive.org/web/20090105204428/http://www.haxial.com/products/compiler/docs/pointers.html#close" style="top:-2px;" title="Close the toolbar"><span class="iconochive-remove-circle" style="color:#888888;font-size:240%;"></span></a>
+      </div>
+      <div id="wm-share" class="xxs">
+        <a href="https://web.archive.org/web/20090105204428/http://web.archive.org/screenshot/http://www.haxial.com/products/compiler/docs/pointers.html" id="wm-screenshot" title="screenshot" style="visibility: hidden;">
+          <span class="wm-icon-screen-shot"></span>
+        </a>
+        <a href="https://web.archive.org/web/20090105204428/http://www.haxial.com/products/compiler/docs/pointers.html#" id="wm-video" title="video">
+          <span class="iconochive-movies"></span>
+        </a>
+        <a id="wm-share-facebook" href="https://web.archive.org/web/20090105204428/http://www.haxial.com/products/compiler/docs/pointers.html#" data-url="https://web.archive.org/web/20090105204428/http://www.haxial.com/products/compiler/docs/pointers.html" title="Share on Facebook" style="margin-right:5px;" target="_blank"><span class="iconochive-facebook" style="color:#3b5998;font-size:160%;"></span></a>
+        <a id="wm-share-twitter" href="https://web.archive.org/web/20090105204428/http://www.haxial.com/products/compiler/docs/pointers.html#" data-url="https://web.archive.org/web/20090105204428/http://www.haxial.com/products/compiler/docs/pointers.html" title="Share on Twitter" style="margin-right:5px;" target="_blank"><span class="iconochive-twitter" style="color:#1dcaff;font-size:160%;"></span></a>
+      </div>
+      <div style="padding-right:2px;text-align:right;white-space:nowrap;">
+        <a id="wm-expand" class="wm-btn wm-closed" href="https://web.archive.org/web/20090105204428/http://www.haxial.com/products/compiler/docs/pointers.html#expand"><span id="wm-expand-icon" class="iconochive-down-solid"></span> <span class="xxs" style="font-size:80%;">About this capture</span></a>
+      </div>
+    </div>
+  </div>
+    <div id="wm-capinfo" style="border-top:1px solid #777;display:none; overflow: hidden">
+        <div id="wm-capinfo-notice" source="api"></div>
+                <div id="wm-capinfo-collected-by">
+    <div style="background-color:#666;color:#fff;font-weight:bold;text-align:center;padding:2px 0;">COLLECTED BY</div>
+    <div style="padding:3px;position:relative" id="wm-collected-by-content">
+      <div style="display:inline-block;vertical-align:top;width:49%;">
+			<span class="c-logo" style="background-image:url(https://archive.org/services/img/commoncrawl)"></span>
+		<div>Collection: <a style="color:#33f;" href="https://archive.org/details/commoncrawl" target="_new"><span class="wm-title">Common Crawl</span></a></div>
+		<div style="max-height:75px;overflow:hidden;position:relative;">
+	  <div style="position:absolute;top:0;left:0;width:100%;height:75px;background:linear-gradient(to bottom,rgba(255,255,255,0) 0%,rgba(255,255,255,0) 90%,rgba(255,255,255,255) 100%);"></div>
+	  Web crawl data from Common Crawl.
+	</div>
+	      </div>
+    </div>
+    </div>
+    <div id="wm-capinfo-timestamps">
+    <div style="background-color:#666;color:#fff;font-weight:bold;text-align:center;padding:2px 0;" title="Timestamps for the elements of this page">TIMESTAMPS</div>
+    <div>
+      <div id="wm-capresources" style="margin:0 5px 5px 5px;max-height:250px;overflow-y:scroll !important"></div>
+      <div id="wm-capresources-loading" style="text-align:left;margin:0 20px 5px 5px;display:none"><img src="https://web-static.archive.org/_static/images/loading.gif" alt="loading"></div>
+    </div>
+    </div>
+  </div></div></div><link rel="stylesheet" type="text/css" href="./Pointers_files/banner-styles.css"><link rel="stylesheet" type="text/css" href="./Pointers_files/iconochive.css"><div class="wb-autocomplete-suggestions "></div></template>
+</div><div id="wm-ipp-print">The Wayback Machine - https://web.archive.org/web/20090105204428/http://www.haxial.com/products/compiler/docs/pointers.html</div>
+<script type="text/javascript">//<![CDATA[
+__wm.bt(775,27,25,2,"web","http://www.haxial.com/products/compiler/docs/pointers.html","20090105204428",1996,"https://web-static.archive.org/_static/",["https://web-static.archive.org/_static/css/banner-styles.css?v=1utQkbB3","https://web-static.archive.org/_static/css/iconochive.css?v=3PDvdIFv"], false);
+  __wm.rw(1);
+//]]></script>
+<!-- END WAYBACK TOOLBAR INSERT -->
+ 
+<div class="mainbox">
+
+<div class="MainHeading">
+<div class="HPL">The Haxial Programming Language</div>
+<div class="Title">Pointers</div>
+</div>
+
+
+<p>When a program is running/executing, the temporary data that the program creates and uses in the course of its operation is stored in fast Random-Access Memory (RAM).  The data may also be stored elsewhere (for example, on a disk) but it is primarily/usually/firstly stored in RAM.</p>
+
+<p>A pointer is a value that points to some other piece of data in RAM.  A pointer indicates a location where a piece of data is stored.  In other words, a pointer is the address of some piece of data.  Thus a pointer is like the street address of a house.  The data that the pointer points to is known as the <b>target</b> of the pointer.</p>
+
+<p>Pointers are much the same concept as references, except lower level and unchecked/unverified/uncontrolled.  Pointers are intended for low-level tasks,  system implementation, and special optimizations.  Normal application programs should use references not pointers.</p>
+
+<p>Pointers increase the risk of security and reliability defects.  To protect security and reliability, a system may deny access to pointers in all programs that run in that system, except for privileged/authorized programs or code modules.</p>
+
+<p>References uses automatic memory management, whereas pointers use manual memory management.  The automatic memory management system of references operates blithely unaware of pointers.  The existence of a pointer to a record does not prevent destruction/deletion of that record.  The removal of the last pointer to a record does not cause automatic deletion of that record.</p>
+
+<p>It is possible for a pointer to be invalid.  A pointer is invalid if it points to a non-existent or deleted record/object/variable, or points to the wrong type of data, or points to a random location.  If a pointer is not used correctly and carefully, it can cause a crash, obscure malfunction, or security hole.</p>
+
+<p>Pointers are always nullable.  Attempting to access the target of a null pointer can cause a crash (whereas for a reference, it would cause a recoverable error).</p>
+
+
+
+
+<div class="SubHeading">Pointers as RAM Addresses</div>
+
+<p>An instance of a pointer is actually a 32-bit or 64-bit unsigned integer containing a RAM address (whether it is 32-bit or 64-bit depends on the CPU and OS).  A RAM address is the ordinal of a byte in RAM.  You can view RAM as a big long sequence/array of bytes numbered from 0 to the total number of bytes of RAM minus 1.</p>
+
+<p>The ordinal of the first byte in RAM is 0.  The ordinal of the second byte in RAM is 1.  The ordinal of the third byte in RAM is 2.  Thus if the value of a pointer is 2, it points to the third byte in RAM.</p>
+
+<p>If a piece of data occupies multiple bytes, and a pointer points to that piece of data, then the pointer actually contains the ordinal of the first byte of that data.  For example, a TUInt32 (an unsigned 32-bit integer) is 4 bytes in size.  If it is stored in RAM in byte ordinals 12, 13, 14, and 15, then a pointer to this TUInt32 will contain the number 12.</p>
+
+<p>A pointer can be retargeted.  This means we make the pointer point to some other piece of data (usually of the same type).  For example, if we changed the RAM address in the pointer from 12 to 16, then it would be pointing to a different TUInt32 located immediately after the original one.</p>
+
+<p>The actual instance of a pointer does not contain anything other than the RAM address (byte ordinal).  It does not contain the size of the target data, and it does not contain anything that identifies the type of the target data.  The size and type of the target data is known only by implication, or sometimes by performing certain calculations.</p>
+
+<p>A null pointer is a pointer that points to nothing, meaning a pointer that has no target.  Null pointers are frequently convenient for various purposes.  A pointer is considered to be null if it contains a RAM address of 0 (zero).  Yes zero is also the ordinal of the first byte in RAM.  Thus zero has a dual meaning for pointers.</p>
+
+<p>In practise, the dual meaning of ordinal 0 causes no problems because operating systems typically reserve the first several kilobytes (or more) of RAM and deny access to read or modify it.  Thus 0 can safely be interpreted as a null pointer.</p>
+
+<p>With assistance from the CPU, the operating system may use "virtual memory" techniques to cause pointers to be translated to different storage locations whenever they are used.  For example, a pointer may contain an address of 12288, and the target data appears to be stored at address 12288, but it is actually stored at address 24576.  12288 is the virtual address, and 24576 is the actual address.</p>
+
+<p>In practise, programmers can usually ignore use of virtual memory by the system, because it is implemented in a way that it makes it mostly invisible to application programs running in the system.  The address translations are performed automatically behind the scenes.  Thus programmers can continue to view RAM as a big long sequence/array of bytes, even if it is actually more complex than that in reality.</p>
+
+<p>Programmers should not assume that it is safe to read or modify a byte of RAM at any address.  Usually the operating system requires that a program first allocate/reserve a range of byte ordinals before reading or modifying any byte in that range.  Usually a program requests a certain count/number of bytes be allocated, and the system gives the program a pointer to the allocated range of bytes after deciding where it will be located.</p>
+
+
+
+
+<div class="SubHeading">Pointer Type Expressions</div>
+
+<p>A type expression is used to specify the type of a variable, parameter, etc.  In a type expression, the "Ptr" operator is used to make a pointer to a type.  The "Ptr" operator has 1 operand the same as the "Ref" operator, indicating what type of data the pointer will be pointing to (the type of the target).  The actual target instance is not specified in the type expression, only the type of the target is specified.</p>
+
+<p>The following example type expression specifies a pointer to an unsigned 32-bit integer:</p>
+
+<pre class="SrcCode">Ptr[TUInt32]
+</pre>
+
+<p>The following example specifies a pointer to a read-only (unmodifiable) unsigned 32-bit integer.  This example is written twice, the second time using shortcuts.</p>
+
+<pre class="SrcCode">Ptr[ReadOnly[TUInt32]]
+Ptr ReadOnly uint32
+</pre>
+
+<p>It is possible (and sometimes useful) to define a pointer that points to another pointer.  The following type expression is a pointer to a pointer to a TUInt32.</p>
+
+<pre class="SrcCode">Ptr[Ptr[TUInt32]]
+</pre>
+
+
+
+
+
+<div class="SubHeading">Using Pointers with Functions</div>
+
+<p>When supplying a pointer as an operand to the intrinsic functions "Add", "Sub", "Mul", "Div", "BitOr", "Equal", "Less", "Minimum", and other related functions, the function uses the target of the pointer.  Likewise for references (pointers and references are consistent in this regard).</p>
+
+<p>In the following example, the variable "x" is set to the result of the addition of the target of "inA" and the target of "inB".  The pointers themselves are not added, rather the targets of the pointers are added.</p>
+
+<pre class="SrcCode">Command TestPtrs;
+    Parameter inA, Ptr[TUInt32];
+    Parameter inB, Ptr[TUInt32];
+    Variable x, TUInt32;
+    Set x, Add[inA,inB];
+EndCommand;
+</pre>
+
+<p>Unlike references, pointers are not automatically checked for being null.  The aforementioned functions do not check whether the pointer is null.  Thus if the pointer is null, the function attempts to access the target regardless, and this typically causes the program to crash.  It is the responsibility of the programmer to check if the pointer is null, if necessary.</p>
+
+<p>The following example defines a Command Implementation named "Crash" with 1 parameter.  This example invokes the Command Implementation defined in the previous example ("TestPtrs").  For the first parameter of "TestPtrs" ("inA"), "Crash" supplies its parameter named "inFoo".  For the second parameter of "TestPtrs" ("inB"), "Crash" supplies a null pointer.  The "Add" function in "TestPtrs" will typically cause the program to crash when it attempts to access the target of the null pointer.</p>
+
+<pre class="SrcCode">Command Crash;
+    Parameter inFoo, Ptr[TUInt32];
+    TestPtrs inFoo, Null;
+EndCommand;
+</pre>
+
+
+
+
+
+
+<div class="SubHeading">Pointer Functions</div>
+
+<p>The following functions can be used with variables that are of a pointer type.</p>
+
+<table class="MiscTable">
+<tbody><tr><th>Function</th><th>Description</th></tr>
+
+<tr><td class="Code">MakePtr[v]</td><td>Makes and returns a pointer to the specified variable, parameter, or attribute.  The return type is Ptr[GetType[v]].  If the operand is a pointer, then this function returns a pointer to that pointer.</td></tr>
+
+<tr><td class="Code">TargetOf[p]</td><td>The operand must be a pointer (or a reference).  This function returns the target of the pointer (directly, not a copy of the target).  Means that the target of the pointer should be used/read/modified, not the pointer itself.  If the operand is a pointer to a pointer, the result is the first target not the ultimate target.</td></tr>
+
+<tr><td class="Code">TargetOf2[p]</td><td>Shortcut for TargetOf[TargetOf[p]].  The operand must be a pointer to a pointer, or a pointer to a pointer to a pointer, etc.</td></tr>
+
+<tr><td class="Code">GetTarget[p]</td><td>The operand must be a pointer (or a reference).  This function returns either a copy of the target of the pointer, or a read-only version of the target.  Typically crashes if given a null pointer.</td></tr>
+
+<tr><td class="Code"><nobr>GetTargetSize[p]</nobr></td><td>The operand must be a pointer or reference.  Returns the size (in bytes) of the target of the operand.  Same as GetSize[TargetOf[p]].</td></tr>
+
+
+<tr><td class="Separator" colspan="2">&nbsp;</td></tr>
+<tr><td class="Code">MovePtrFwd[p,&nbsp;i]</td><td>Returns a pointer equal to the first operand (a pointer) moved forward by the number of bytes specified by the second operand (an integer type).  The return type is the same as the type of the first operand.  The RAM address in the returned pointer is equal to the RAM address in the first operand added with the the second operand.</td></tr>
+
+<tr><td class="Code">MovePtrBack[p,&nbsp;i]</td><td>Returns a pointer equal to the first operand (a pointer) moved backward by the number of bytes specified by the second operand (an integer type).  The return type is the same as the type of the first operand.  The RAM address in the returned pointer is equal to the RAM address in the first operand subtracted by the the second operand.</td></tr>
+
+<tr><td class="Code">IncrPtr[p]<br>IncrPtr[p, i]</td><td>Returns a pointer equal to the first operand (a pointer) incremented a specified number of times, meaning moved forward by a multiple of the size of the target type.  For example, if the type of the first operand is Ptr[TUInt32], and the second operand is 2, then the function returns a pointer equal to the first operand moved forward by 2×4 = 8 bytes (if the RAM address was 492 it becomes 500).  The second operand is optional, and defaults to 1 if omitted.  IncrPtr[p,i] is same as MovePtrFwd[p, Mul[GetTargetSize[p], i]].</td></tr>
+
+<tr><td class="Code">DecrPtr[p]<br>DecrPtr[p, i]</td><td>The opposite of the "IncrPtr" function.  "DecrPtr" is the same as "IncrPtr" except that "DecrPtr" moves the pointer backwards whereas "IncrPtr" moves the pointer forwards.</td></tr>
+
+
+<tr><td class="Separator" colspan="2">&nbsp;</td></tr>
+<tr><td class="Code">Same[a, b, ...]</td><td>Any of the operands can be references, pointers, or variables.  Returns true if all the operands refer to, point to, or are the same object.  Compares the identity of the objects, not whether they contain equal data values.  If all the operands are pointers, the behavior is the same as the "EqualPtr" function.</td></tr>
+
+<tr><td class="Code">NotSame[a, b]</td><td>Shortcut for Not[Same[a, b]].</td></tr>
+
+<tr><td class="Code">EqualTarget[a,&nbsp;b, ...]</td><td>Each operand must be a pointer or a reference.  Returns true if all the target values are equal (regardless of whether the pointers/references are equal).  If an operand is a pointer to a pointer, the first target is used, not the ultimate target.</td></tr>
+
+<tr><td class="Code">NotEqualTarget[a, b]</td><td>Shortcut for Not[EqualTarget[a,b]].</td></tr>
+
+<tr><td class="Code">EqualPtr[a, b, ...]</td><td>All the operands must be pointers.  Returns true if all the pointers are equal to each other.  Compares the pointers themselves (the RAM addresses), NOT the targets of the pointers.  The target values and types are completely ignored.  If pointers are equal, they point to the exact same target instance.  If pointers are not equal, they point to different targets that potentially have equal values.  If all the pointers are null, returns true.  If any but not all of the pointers are null, returns false.</td></tr>
+
+<tr><td class="Code">NotEqualPtr[a,&nbsp;b]</td><td>Shortcut for Not[EqualPtr[a,b]].</td></tr>
+
+<tr><td class="Code">LessPtr[a,&nbsp;b]</td><td>Both operands must be pointers.  The target types can be different.  Returns true if the address in the first operand is lower/less than the address in the second operand.  "LessPtr" compares the pointers themselves and ignores the targets, whereas the normal "Less" function compares the targets.</td></tr>
+
+<tr><td class="Code">GreaterPtr[a,&nbsp;b]</td><td>Both operands must be pointers.  The target types can be different.  Returns true if the address in the first operand is higher/greater than the address in the second operand.  "GreaterPtr" compares the pointers themselves and ignores the targets, whereas the normal "Greater" function compares the targets.</td></tr>
+
+<tr><td class="Code">LessEqualPtr[a,&nbsp;b]</td><td>Both operands must be pointers.  The target types can be different.  Returns true if the address in the first operand is lower/less than or equal to the address in the second operand.  The targets of the pointers are ignored.</td></tr>
+
+<tr><td class="Code">GreaterEqualPtr[a,&nbsp;b]</td><td>Both operands must be pointers.  The target types can be different.  Returns true if the address in the first operand is higher/greater than or equal to the address in the second operand.  The targets of the pointers are ignored.</td></tr>
+
+
+<tr><td class="Separator" colspan="2">&nbsp;</td></tr>
+<tr><td class="Code">IsNullPtr[p]</td><td>The operand must be a pointer.  The return type is boolean.  Returns true if the pointer is null (if the RAM address is zero).  Returns false if the pointer is not null.  The target of the pointer is ignored.</td></tr>
+
+<tr><td class="Code">NotNullPtr[p]</td><td>Shortcut for Not[IsNullPtr[p]].</td></tr>
+
+<tr><td class="Code">Null<br>null</td><td>Zero-arity function.  Used to indicate a null pointer (or reference).  A null pointer has no target.  A null pointer contains the address zero.  A null pointer can be used when the target data is missing, unsupplied, or non-applicable.</td></tr>
+
+
+<tr><td class="Separator" colspan="2">&nbsp;</td></tr>
+<tr><td class="Code">PtrToUInt[p]</td><td>Converts or typecasts a pointer to an unsigned integer type.  The return type of this function is either TUInt32 or TUInt64, depending on whether 32-bit or 64-bit pointers are being used.  The return value is the integer RAM address (ordinal of a byte in RAM).  The target of the pointer is not accessed.  If the pointer is null, the returned integer is zero.</td></tr>
+
+<tr><td class="Code">UIntToPtr[i,&nbsp;pt]</td><td>Converts or typecasts an unsigned integer to a specified pointer type, and returns the pointer.  The first operand is the integer.  The type of the first operand is either TUInt32 or TUInt64, depending on whether 32-bit or 64-bit pointers are being used.  The second operand must be a pointer type expression.  The return type is the same as the second operand.  If the second operand is omitted, it is assumed to be Ptr[TAny].</td></tr>
+
+</tbody></table>
+
+<p>The following functions have symbols for use with the symbol infix shortcut:</p>
+
+<table class="MiscTable">
+<tbody><tr><th>Name</th><th>Symbol</th></tr>
+<tr><td class="Code">Same</td><td class="CodeBg">==#</td></tr>
+<tr><td class="Code">NotSame</td><td class="CodeBg">!=#</td></tr>
+<tr><td class="Code">LessPtr</td><td class="CodeBg">&lt;#</td></tr>
+<tr><td class="Code">GreaterPtr</td><td class="CodeBg">&gt;#</td></tr>
+<tr><td class="Code">LessEqualPtr</td><td class="CodeBg">&lt;=#</td></tr>
+<tr><td class="Code">GreaterEqualPtr</td><td class="CodeBg">&gt;=#</td></tr>
+</tbody></table>
+
+<p></p>
+
+
+
+
+<div class="SubHeading">Pointer Commands</div>
+
+<p>The following commands can be used with variables that are of a pointer type.  Some commands have optional shortcut/abbreviated names.</p>
+
+<table class="MiscTable">
+
+<tbody><tr><td class="Code">MakePtr p, v;<br>mkp p, v;</td></tr>
+<tr><td>The variable/attribute supplied for the first parameter is modified to contain a pointer to the variable/attribute supplied for the second parameter.  The type of the first variable must be a pointer to the type of the second variable, or compatible.</td></tr>
+<tr><td class="Gap"></td></tr>
+
+<tr><td class="Code">Set p, x;<br>set p, x;</td></tr>
+<tr><td>If a variable/attribute of a pointer type is supplied for the first parameter, then this command becomes the same as the "SetTarget" command.  This behavior is consistent with the behavior for references.</td></tr>
+<tr><td class="Gap"></td></tr>
+
+<tr><td class="Code">SetTarget p, v;<br>sett p, v;</td></tr>
+<tr><td>Sets the value of the target of a pointer (first parameter) to the specified value (second parameter).  Does NOT set the pointer to a different target, rather it sets the target to a different value.  In other words, the specified value is copied into the target of the specified pointer.</td></tr>
+<tr><td class="Gap"></td></tr>
+
+<tr><td class="Code">SetPtr dp, sp;<br>setp dp, sp;</td></tr>
+<tr><td>Sets a pointer variable (first parameter) to contain the same address as another pointer (second parameter).  In other words, the pointer supplied in the second parameter is copied into the pointer variable supplied in the first parameter.  The type of the pointers must be the same or compatible.  The target values of both pointers are ignored (not read or modified).</td></tr>
+<tr><td class="Gap"></td></tr>
+
+<tr><td class="Code">SetPtrNull p;<br>setpnull p;</td></tr>
+<tr><td>Sets the specified pointer variable to a null pointer.  Same as:<br>SetPtr&nbsp;p,&nbsp;Null;</td></tr>
+<tr><td class="Gap"></td></tr>
+
+<tr><td class="Code">MovePtrFwd p, i;<br>mvpf p, i;</td></tr>
+<tr><td>Moves a pointer (first parameter) forward by a specified number of bytes (second parameter, an integer type).  A variable/attribute of a pointer type must be supplied for the first parameter, and it will be modified.  The value and type of the target of the pointer are ignored.  The second parameter is simply added to the RAM address in the pointer.</td></tr>
+<tr><td class="Gap"></td></tr>
+
+<tr><td class="Code">MovePtrBack p, i;<br>mvpb p, i;</td></tr>
+<tr><td>Opposite of the "MovePtrFwd" command.  Moves the pointer backwards.  The second parameter is simply subtracted from the RAM address in the pointer.</td></tr>
+<tr><td class="Gap"></td></tr>
+
+<tr><td class="Code">IncrPtr p;<br>IncrPtr p, i;<br>incp p;<br>incp p, i;</td></tr>
+<tr><td>Increments a pointer (first parameter) a specified number of times, meaning it moves the pointer forward by a multiple of the size of the target type.  For example, if the type of the first operand is Ptr[TUInt32], and the second operand is 2, then the commands moves the pointer forward by 2×4 = 8 bytes (if the RAM address was 492 it becomes 500).  The second parameter is optional, and defaults to 1 if omitted.  Same as:<br>MovePtrFwd p, Mul[GetTargetSize[p],i].</td></tr>
+<tr><td class="Gap"></td></tr>
+
+<tr><td class="Code">DecrPtr p;<br>DecrPtr p, i;<br>decp p;<br>decp p, i;</td></tr>
+<tr><td>Opposite of the "IncrPtr" command.  Decrements the pointer (moves it backwards).</td></tr>
+<tr><td class="Gap"></td></tr>
+
+<tr><td class="Code">Load type, sourcePtr, offset, variable;</td></tr>
+<tr><td>Reads a value located at an offset forward from a pointer, and puts the value into the specified variable.  Described in more detail further ahead in this documentation.</td></tr>
+<tr><td class="Gap"></td></tr>
+
+<tr><td class="Code">Store type, destinationPtr, offset, value;</td></tr>
+<tr><td>Stores the specified value to a location at an offset forward from a pointer.  Described in more detail further ahead in this documentation.</td></tr>
+
+</tbody></table>
+
+<p></p>
+
+
+
+
+<div class="SubHeading">Load and Store Commands</div>
+
+<p>The "Load" command loads/retrieves/reads a value from a specified location in memory (RAM) and puts it into a variable.  The "Store" command stores/puts/writes a value in a variable to a specified location in memory.  Thus they operate in opposite directions.</p>
+
+<p>The location in memory is specified as a pointer plus an offset (distance) in bytes.  The "Load" and "Store" commands are intended for low-level tasks, and access to them may be restricted or denied.</p>
+
+<p>The first parameter of the "Load" and "Store" commands is a <a href="https://web.archive.org/web/20090105204428/http://www.haxial.com/products/compiler/docs/attrib-types.html">type expression</a> indicating the format of the value in memory/RAM.  Usually an integer type such as "TUInt8", "TUInt32", "TSInt32", etc is supplied for this parameter.</p>
+
+<p>The second parameter of the "Load" command is a source pointer (type is Ptr[ReadOnly[TAny]]).  The second parameter of the "Store" command is a destination pointer (type is Ptr[TAny]).  The target of the supplied pointer can be any type.</p>
+
+<p>The third parameter for both "Load" and "Store" is an offset in bytes that will be added to the pointer.  For example, if the offset is 1, then the first byte at the pointer location is skipped, and the load or store begins at the second byte.  If the offset is zero, that is equivalent to not using the offset parameter.</p>
+
+<p>The fourth and final parameter for "Load" is a variable to receive the loaded value.  For the "Store" command, it is the value to store.</p>
+
+<p>The following example stores the value 1234 into an unsigned 16-bit integer located 12 bytes forward from the pointer "dp".</p>
+
+<pre class="SrcCode">Store TUInt16, dp, 12, 1234;
+</pre>
+
+<p>The following example reads the unsigned 32-bit integer located 8 bytes forward from the pointer "sp", and puts the value into the variable named "v".</p>
+
+<pre class="SrcCode">Variable v, TUInt32;
+Load TUInt32, sp, 8, v;
+</pre>
+
+
+
+<div class="SubHeading">Byte Order / Endian</div>
+
+<p>This section explains the concept of "Big Endian" versus "Little Endian".  If you already know the meaning of these, you can skip this section.</p>
+
+<p>Consider the decimal number 1036.  If the digit 6 within 1036 is incremented (to 7), then the difference between the old number (1036) and the new number (1037) is 1.  However if the digit 3 within 1036 is incremented (to 4), then the difference between the old number (1036) and the new number (1046) is 10.  Likewise if the digit 0 within 1036 is incremented, the difference is 100, and if the digit 1 is incremented, the difference is 1000.</p>
+
+<p>Thus incrementing the right-most digit (6) makes the smallest/least change to the number.  Accordingly, the digit 6 within 1036 is the <b>least significant digit</b>, and the digit 1 is the <b>most significant digit</b>.</p>
+
+<p>By convention, when writing decimal numbers within English text, we write the most significant digits first, and the least significant digits last.  English text is written left-to-right, therefore the most significant digit is the left-most digit, and the least significant digit is the right-most digit.</p>
+
+<p>Although in English text we write the most significant digit first, it is possible to devise an alternate system of writing numbers where the least significant digit is written first (least to most significant).  Thus the number 1036 would be written as "6301" in the alternate system.  It is exactly the same number with the exact same numeric meaning, however in the alternate system we have for some reason decided to write the digits in the opposite order.</p>
+
+<p>Some computer CPUs store the digits of their integers with the most significant digit first, while others store the least significant digit first.  If they store the the most significant digit first, then they are known as "Big Endian" (big end first).  If they store the least significant digits first, they are known as "Little Endian" (little end first).</p>
+
+<p>The above example used decimal numbers (radix 10) for easy comprehension, however computers are based on binary numbers (radix 2), so when we say that a CPU stores the most significant digits first, we mean binary digits not decimal digits.</p>
+
+<p>Actually we really mean radix 256 digits, also known as bytes.  The memory/RAM in a computer appears to the programmer as a big long sequence of radix 256 digits (bytes).  256 is 2 to the power of 8, and this means that a byte is equivalent to 8 binary digits (8 bits).  A byte is the smallest addressable unit in the pointer/address system of the CPU, and this is why the memory appears as a big long sequence of radix 256 digits (bytes) and not radix 2 digits (bits).</p>
+
+<p>For example, consider how the decimal number 446000991 is stored in a computer.  First we must convert that decimal number (radix 10) to bytes (radix 256).  Alternatively you can convert it to radix 2 and then form groups of 8.  The result is 4 bytes.  The most significant byte contains the number 26, and the least significant byte contains the number 95.  A Big Endian CPU stores bytes in order of most to least significant, like this:</p>
+
+<p>26,&nbsp; 149,&nbsp; 111,&nbsp; 95</p>
+
+<table class="MiscTable">
+<tbody><tr><th>Offset</th><th>Decimal</th><th>Hexadecimal</th></tr>
+<tr><td class="Code">0</td><td class="Code">26</td><td class="Code">0x1A</td></tr>
+<tr><td class="Code">1</td><td class="Code">149</td><td class="Code">0x95</td></tr>
+<tr><td class="Code">2</td><td class="Code">111</td><td class="Code">0x6F</td></tr>
+<tr><td class="Code">3</td><td class="Code">95</td><td class="Code">0x5F</td></tr>
+</tbody></table>
+
+<p>Whereas a Little Endian CPU stores the bytes in order of least to most significant, like this:</p>
+
+<p>95,&nbsp; 111,&nbsp; 149,&nbsp; 26</p>
+
+<table class="MiscTable">
+<tbody><tr><th>Offset</th><th>Decimal</th><th>Hexadecimal</th></tr>
+<tr><td class="Code">0</td><td class="Code">95</td><td class="Code">0x5F</td></tr>
+<tr><td class="Code">1</td><td class="Code">111</td><td class="Code">0x6F</td></tr>
+<tr><td class="Code">2</td><td class="Code">149</td><td class="Code">0x95</td></tr>
+<tr><td class="Code">3</td><td class="Code">26</td><td class="Code">0x1A</td></tr>
+</tbody></table>
+
+<p>If there are 2 computers and the CPU in the first computer is Little Endian while the CPU in the second computer is Big Endian, and these 2 computers want to exchange data, then one of the computers must convert the integer data to be exchanged to the Endian format of the other computer before transmission, or convert received integer data to its own format from the format of the other computer.</p>
+
+<p>Usually a file format or a network protocol is defined to be always Little Endian or always Big Endian.  If the Endian format of the CPU does not match the Endian format of the file format or network protocol, then the CPU must convert between its Endian format and the Endian format mandated/required by the file format or network protocol.</p>
+
+<p>Occasionally a file format or network protocol supports both Endian formats, and it provides a way to determine which Endian format was used when the data was created.</p>
+
+<p>Some file formats or network protocols avoid the Endian issue altogether by using only sequences of single bytes, never bigger integers formed from 2, 4, or 8 bytes that would introduce a question of Endian format.</p>
+
+
+
+
+<div class="SubHeading">Load/Store with Conversion</div>
+
+<p>By default, the "Load" and "Store" commands use whatever Endian format the host system/CPU normally/natively/optimally uses, however they can optionally be made to perform conversions to Little Endian or Big Endian formats.</p>
+
+<p>The first parameter (the type expression) may use the function named "LittleEndian" or the function named "BigEndian", to specify the format of the value in memory.</p>
+
+<p>The following example stores the value 12345 into a Little Endian format unsigned 32-bit integer located 20 bytes forward from the pointer "dp".</p>
+
+<pre class="SrcCode">Store LittleEndian[TUInt32], dp, 20, 12345;
+</pre>
+
+<p>That can also be written using shortcuts:</p>
+
+<pre class="SrcCode">Store LE uint32, dp, 20, 12345;
+</pre>
+
+<p>Or if you wanted to use Big Endian format, then it would be:</p>
+
+<pre class="SrcCode">Store BigEndian[TUInt32], dp, 20, 12345;
+Store BE uint32, dp, 20, 12345;
+</pre>
+
+<p>In the following example, a Command Implementation named "Test1" is defined.  It stores 4 values to the pointer "dstData", 2 TUInt8 values, and 2 TUInt16 values, a total of 6 bytes.  This example uses some shortcut names.</p>
+
+<pre class="SrcCode">cmd Test1;
+    prm inX, uint16;
+    prm inY, uint16;
+    prm dstData, Ptr TAny;
+    prm outSize, Out uint;
+    
+    Store uint8, dstData, 0, 0x1F;
+    Store uint8, dstData, 1, 0xAA;
+    Store BE uint16, dstData, 2, inX;
+    Store BE uint16, dstData, 4, inY;
+    Set outSize, 6;
+ecmd;
+</pre>
+
+<p>If inX is 5000 (0x1388) and inY is 3001 (0xBB9), then the 6 bytes beginning at "dstData" will be set to the following values:</p>
+
+<pre class="SrcCode">0x1F, 0xAA, 0x13, 0x88, 0x0B, 0xB9
+</pre>
+
+<p>The above example specifies Big Endian byte order.  If it specified Little Endian byte order, then the 6 bytes would be:</p>
+
+<pre class="SrcCode">0x1F, 0xAA, 0x88, 0x13, 0xB9, 0x0B
+</pre>
+
+<p>The "BigEndian" and "LittleEndian" functions can be used on the TUInt8 (uint8) and TSInt8 (sint8) types, however they have no actual effect because a TUInt8 or a TSInt8 is a single byte and is thus the same in either format.</p>
+
+
+
+
+<div class="SubHeading">Alignment</div>
+
+<p>CPUs usually run faster if the integers are stored in an aligned location, meaning a location where the address is a multiple of the size of the integer.  For example, a 4-byte integer (such as TUInt32) is fastest if located at an address that is a multiple of 4.  However alignment can waste memory in some situations, so is not always used.</p>
+
+<p>The first parameter (the type expression) may use the function named "Aligned" or the function named "Unaligned", to explicitly specify whether or not the value is aligned in memory.  The compiler can then optimize the code differently depending on whether the value is expected to be aligned or unaligned.</p>
+
+<p>The following 2 equivalent examples store the value 1234 into an unaligned Big Endian unsigned 16-bit integer located 12 bytes forward from the pointer "dp".</p>
+
+<pre class="SrcCode">Store Unaligned[BigEndian[TUInt16]], dp, 12, 1234;
+Store BigEndian[Unaligned[TUInt16]], dp, 12, 1234;
+</pre>
+
+<p>If neither "Aligned" or "Unaligned" is used, then it defaults to assuming aligned.</p>
+
+
+
+<div class="NavBox"><a href="https://web.archive.org/web/20090105204428/http://www.haxial.com/products/compiler/docs/">[Documentation main page]</a></div>
+
+</div>
+
+
+
+</body></html>

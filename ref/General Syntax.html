@@ -1,0 +1,364 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<!-- saved from url=(0102)https://web.archive.org/web/20090105190433/http://www.haxial.com/products/compiler/docs/gensyntax.html -->
+<html style="--wm-toolbar-height: 83px;"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"><script src="./General Syntax_files/athena.js" type="text/javascript"></script>
+<script type="text/javascript">window.addEventListener('DOMContentLoaded',function(){var v=archive_analytics.values;v.service='wb';v.server_name='wwwb-app248.us.archive.org';v.server_ms=437;archive_analytics.send_pageview({});});</script>
+<script type="text/javascript" src="./General Syntax_files/bundle-playback.js" charset="utf-8"></script>
+<script type="text/javascript" src="./General Syntax_files/wombat.js" charset="utf-8"></script>
+<script>window.RufflePlayer=window.RufflePlayer||{};window.RufflePlayer.config={"autoplay":"on","unmuteOverlay":"hidden","showSwfDownload":true};</script>
+<script type="text/javascript" src="./General Syntax_files/ruffle.js"></script>
+<script type="text/javascript">
+    __wm.init("https://web.archive.org/web");
+  __wm.wombat("http://www.haxial.com/products/compiler/docs/gensyntax.html","20090105190433","https://web.archive.org/","web","https://web-static.archive.org/_static/",
+	      "1231182273");
+</script>
+<link rel="stylesheet" type="text/css" href="./General Syntax_files/banner-styles.css">
+<link rel="stylesheet" type="text/css" href="./General Syntax_files/iconochive.css">
+<!-- End Wayback Rewrite JS Include -->
+
+	
+	<title>General Syntax</title>
+	<link href="./General Syntax_files/kredocs.css" rel="stylesheet" type="text/css">
+</head>
+
+<body><!-- BEGIN WAYBACK TOOLBAR INSERT -->
+<script>__wm.rw(0);</script>
+<div id="wm-ipp-base" lang="en" style="display: block; direction: ltr; height: 83px;" toolbar-mode="auto"><template shadowrootmode="closed"><div id="wm-ipp" style="position:fixed;left:0;top:0;right:0;">
+<div id="donato" style="position:relative;width:100%;height:0;">
+  <div id="donato-base">
+    <iframe id="donato-if" src="https://archive.org/includes/donate.php?as_page=1&amp;platform=wb&amp;referer=https%3A//web.archive.org/web/20090105190433/http%3A//www.haxial.com/products/compiler/docs/gensyntax.html" scrolling="no" frameborder="0" style="width:100%; height:100%">
+    </iframe>
+  </div>
+</div><div id="wm-ipp-inside">
+  <div id="wm-toolbar" style="position:relative;display:flex;flex-flow:row nowrap;justify-content:space-between;" nav="async">
+    <div id="wm-logo" style="/*width:110px;*/padding-top:12px;">
+      <a href="https://web.archive.org/web/" title="Wayback Machine home page"><img src="https://web-static.archive.org/_static/images/toolbar/wayback-toolbar-logo-200.png" srcset="https://web-static.archive.org/_static/images/toolbar/wayback-toolbar-logo-100.png, https://web-static.archive.org/_static/images/toolbar/wayback-toolbar-logo-150.png 1.5x, https://web-static.archive.org/_static/images/toolbar/wayback-toolbar-logo-200.png 2x" alt="Wayback Machine" style="width:100px" border="0"></a>
+    </div>
+    <div class="c" style="display:flex;flex-flow:column nowrap;justify-content:space-between;flex:1;">
+      <form class="u" style="display:flex;flex-direction:row;flex-wrap:nowrap;" target="_top" method="get" action="https://web.archive.org/web/submit" name="wmtb" id="wmtb"><input type="text" name="url" id="wmtbURL" value="http://www.haxial.com/products/compiler/docs/gensyntax.html" onfocus="this.focus();this.select();" style="flex:1;" autocomplete="off"><input type="hidden" name="type" value="replay"><input type="hidden" name="date" value="20090105190433"><input type="submit" value="Go">
+      </form>
+      <div style="display:flex;flex-flow:row nowrap;align-items:flex-end;">
+                <div class="s" id="wm-nav-captures" style="flex:1;"><a class="t" href="https://web.archive.org/web/*/http://www.haxial.com/products/compiler/docs/gensyntax.html" title="See a list of every capture for this URL">2 captures</a><div class="r" title="Timespan for captures of this URL">5 Jun 2008 - 5 Jan 2009</div></div>
+        <div class="k">
+          <a href="https://web.archive.org/web/20090105190433/http://www.haxial.com/products/compiler/docs/gensyntax.html" id="wm-graph-anchor">
+            <div id="wm-ipp-sparkline" title="Explore captures for this URL" style="position: relative">
+              <canvas id="wm-sparkline-canvas" width="775" height="27" border="0"></canvas>
+            <div class="yt" style="display: none; width: 25px; height: 27px;"></div><div class="mt" style="display: none; width: 2px; height: 27px;"></div></div>
+          </a>
+        </div>
+      </div>
+    </div>
+    <div class="n">
+      <table>
+        <tbody>
+          <!-- NEXT/PREV MONTH NAV AND MONTH INDICATOR -->
+          <tr class="m">
+            <td class="b" nowrap="nowrap"><a href="https://web.archive.org/web/20080605083958/http://www.haxial.com/products/compiler/docs/gensyntax.html" title="08:39:58 Jun 5, 2008">Jun</a></td>
+            <td class="c" id="displayMonthEl" title="You are here: 19:04:33 Jan 05, 2009">JAN</td>
+            <td class="f" nowrap="nowrap">Feb</td>
+          </tr>
+          <!-- NEXT/PREV CAPTURE NAV AND DAY OF MONTH INDICATOR -->
+          <tr class="d">
+            <td class="b" nowrap="nowrap"><a href="https://web.archive.org/web/20080605083958/http://www.haxial.com/products/compiler/docs/gensyntax.html" title="08:39:58 Jun 5, 2008"><span class="ta"></span></a></td>
+            <td class="c" id="displayDayEl" style="width:34px;font-size:22px;white-space:nowrap;" title="You are here: 19:04:33 Jan 05, 2009">05</td>
+            <td class="f" nowrap="nowrap"><span class="ta"></span></td>
+          </tr>
+          <!-- NEXT/PREV YEAR NAV AND YEAR INDICATOR -->
+          <tr class="y">
+            <td class="b" nowrap="nowrap">2008</td>
+            <td class="c" id="displayYearEl" title="You are here: 19:04:33 Jan 05, 2009">2009</td>
+            <td class="f" nowrap="nowrap">2010</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="r" style="display:flex;flex-flow:column nowrap;align-items:flex-end;justify-content:space-between;">
+      <div id="wm-btns" style="text-align:right;height:23px;">
+                <span class="xxs">
+          <div id="wm-save-snapshot-success">success</div>
+          <div id="wm-save-snapshot-fail">fail</div>
+          <a id="wm-save-snapshot-open" href="https://web.archive.org/web/20090105190433/http://www.haxial.com/products/compiler/docs/gensyntax.html#" title="Share via My Web Archive" style="display: none;">
+            <span class="iconochive-web"></span>
+          </a>
+          <a href="https://archive.org/account/login.php" title="Sign In" id="wm-sign-in" style="display: inline-block;">
+            <span class="iconochive-person"></span>
+          </a>
+          <span id="wm-save-snapshot-in-progress" class="iconochive-web" style="display: none;"></span>
+        </span>
+                <a class="xxs" href="https://help.archive.org/help/category/the-wayback-machine/" title="Get some help using the Wayback Machine" style="top:-6px;"><span class="iconochive-question" style="color:rgb(87,186,244);font-size:160%;"></span></a>
+        <a id="wm-tb-close" href="https://web.archive.org/web/20090105190433/http://www.haxial.com/products/compiler/docs/gensyntax.html#close" style="top:-2px;" title="Close the toolbar"><span class="iconochive-remove-circle" style="color:#888888;font-size:240%;"></span></a>
+      </div>
+      <div id="wm-share" class="xxs">
+        <a href="https://web.archive.org/web/20090105190433/http://web.archive.org/screenshot/http://www.haxial.com/products/compiler/docs/gensyntax.html" id="wm-screenshot" title="screenshot" style="visibility: hidden;">
+          <span class="wm-icon-screen-shot"></span>
+        </a>
+        <a href="https://web.archive.org/web/20090105190433/http://www.haxial.com/products/compiler/docs/gensyntax.html#" id="wm-video" title="video">
+          <span class="iconochive-movies"></span>
+        </a>
+        <a id="wm-share-facebook" href="https://web.archive.org/web/20090105190433/http://www.haxial.com/products/compiler/docs/gensyntax.html#" data-url="https://web.archive.org/web/20090105190433/http://www.haxial.com/products/compiler/docs/gensyntax.html" title="Share on Facebook" style="margin-right:5px;" target="_blank"><span class="iconochive-facebook" style="color:#3b5998;font-size:160%;"></span></a>
+        <a id="wm-share-twitter" href="https://web.archive.org/web/20090105190433/http://www.haxial.com/products/compiler/docs/gensyntax.html#" data-url="https://web.archive.org/web/20090105190433/http://www.haxial.com/products/compiler/docs/gensyntax.html" title="Share on Twitter" style="margin-right:5px;" target="_blank"><span class="iconochive-twitter" style="color:#1dcaff;font-size:160%;"></span></a>
+      </div>
+      <div style="padding-right:2px;text-align:right;white-space:nowrap;">
+        <a id="wm-expand" class="wm-btn wm-closed" href="https://web.archive.org/web/20090105190433/http://www.haxial.com/products/compiler/docs/gensyntax.html#expand"><span id="wm-expand-icon" class="iconochive-down-solid"></span> <span class="xxs" style="font-size:80%;">About this capture</span></a>
+      </div>
+    </div>
+  </div>
+    <div id="wm-capinfo" style="border-top:1px solid #777;display:none; overflow: hidden">
+        <div id="wm-capinfo-notice" source="api"></div>
+                <div id="wm-capinfo-collected-by">
+    <div style="background-color:#666;color:#fff;font-weight:bold;text-align:center;padding:2px 0;">COLLECTED BY</div>
+    <div style="padding:3px;position:relative" id="wm-collected-by-content">
+      <div style="display:inline-block;vertical-align:top;width:49%;">
+			<span class="c-logo" style="background-image:url(https://archive.org/services/img/commoncrawl)"></span>
+		<div>Collection: <a style="color:#33f;" href="https://archive.org/details/commoncrawl" target="_new"><span class="wm-title">Common Crawl</span></a></div>
+		<div style="max-height:75px;overflow:hidden;position:relative;">
+	  <div style="position:absolute;top:0;left:0;width:100%;height:75px;background:linear-gradient(to bottom,rgba(255,255,255,0) 0%,rgba(255,255,255,0) 90%,rgba(255,255,255,255) 100%);"></div>
+	  Web crawl data from Common Crawl.
+	</div>
+	      </div>
+    </div>
+    </div>
+    <div id="wm-capinfo-timestamps">
+    <div style="background-color:#666;color:#fff;font-weight:bold;text-align:center;padding:2px 0;" title="Timestamps for the elements of this page">TIMESTAMPS</div>
+    <div>
+      <div id="wm-capresources" style="margin:0 5px 5px 5px;max-height:250px;overflow-y:scroll !important"></div>
+      <div id="wm-capresources-loading" style="text-align:left;margin:0 20px 5px 5px;display:none"><img src="https://web-static.archive.org/_static/images/loading.gif" alt="loading"></div>
+    </div>
+    </div>
+  </div></div></div><link rel="stylesheet" type="text/css" href="./General Syntax_files/banner-styles.css"><link rel="stylesheet" type="text/css" href="./General Syntax_files/iconochive.css"><div class="wb-autocomplete-suggestions "></div></template>
+</div><div id="wm-ipp-print">The Wayback Machine - https://web.archive.org/web/20090105190433/http://www.haxial.com/products/compiler/docs/gensyntax.html</div>
+<script type="text/javascript">//<![CDATA[
+__wm.bt(775,27,25,2,"web","http://www.haxial.com/products/compiler/docs/gensyntax.html","20090105190433",1996,"https://web-static.archive.org/_static/",["https://web-static.archive.org/_static/css/banner-styles.css?v=1utQkbB3","https://web-static.archive.org/_static/css/iconochive.css?v=3PDvdIFv"], false);
+  __wm.rw(1);
+//]]></script>
+<!-- END WAYBACK TOOLBAR INSERT -->
+ 
+<div class="mainbox">
+
+<div class="MainHeading">
+<div class="HPL">The Haxial Programming Language</div>
+<div class="Title">General Syntax</div>
+</div>
+
+<p>KL has a very simple and consistent structure.  Except for comments, EVERY line in the source code is a command invocation (an invocation of a command).  There are commands for doing all sorts of things and performing all sorts of actions.</p>
+
+<p>The name of the command being invoked is always at the beginning of the line.  The command name cannot contain any spaces.  Then following the command name, there is always a list of parameters separated by commas (except if the command has no parameters).  Then the line always finishes with a semicolon (";").</p>
+
+<p>It is very consistent.  Compare with the C++ language.  In C++, some lines must end with a semicolon, while other lines cannot.  There is not really much sense to the rules regarding which lines require a semicolon and which lines require absence of a semicolon.   Whereas in KL, EVERY line ends with a semicolon, making it easy to remember the rule.</p>
+
+<p>So keep in mind that KL source code consists of a list of COMMANDS (invocations of commands, to be precise).  Excluding comments, every line is a command invocation.  Command name, then parameters separated by commas, then semicolon.  The command name is separated from the first parameter by a space character.</p>
+
+<pre class="SrcCode">NameOfCommand;
+NameOfCommand Param;
+NameOfCommand Param1, Param2;
+NameOfCommand Param1, Param2, Param3;
+NameOfCommand Param1, Param2, Param3, Param4;
+</pre>
+
+<p>Parameters are information to pass to the command.  The command uses the information from the parameters to do whatever it does (in other words, the parameters affect the operation of the command).</p>
+
+<p>Look at this line of KL source code:</p>
+
+<pre class="SrcCode">module MyProgram;
+</pre>
+
+<p>That line is an invocation of a command.  What is the name of the command?  Remember the command name is always at the beginning.   Thus the command name is "module".  What does this "module" command do?  It defines (makes) a new module (modules are a convenient way of grouping things together).   This command invocation has 1 parameter and in the above example, "MyProgram" has been passed for that parameter.  The "module" command interprets it as the name of the new module to define.</p>
+
+<p>Now look at this line of KL source code:</p>
+
+<pre class="SrcCode">var x, uint, 123;
+</pre>
+
+<p>That line is an invocation of a command.  What is the name of the command?  Remember the command name is always at the beginning.   Thus the command name is "var".  What does this "var" command do?  It defines a new variable (where a variable is a place to store a number or other value).  There are 3 parameters, separated by commas.  Thus the first parameter is "x", the second parameter is "uint", and the third parameter is "123".  How parameters are interpreted depends on which command is being invoked (meaning what command name was specified).</p>
+
+<p>Now look at this line of KL source code:</p>
+
+<pre class="SrcCode">MText.AppendChar msg, x;
+</pre>
+
+<p>That line is an invocation of a command.  What is the name of the command?  Remember the command name is always at the beginning.  However this command name has a dot (".") in it.  "MText" is the name of a module (a kind of grouping), and "AppendChar" is the name of a command inside that module.  The full name of the command is thus "MText.AppendChar".</p>
+
+<p>This is similar to how people have a first name and a family name (surname).  In KL, we say the surname (module name) first, unlike English-speaking countries where the surname is usually said second.  Also, in English we usually separate the first name and surname with a space, whereas in KL we separate it with dot (".").</p>
+
+
+
+
+<div class="SubHeading">Your Own Commands</div>
+
+<p>Now for something slightly confusing.  Look at this line of KL source code:</p>
+
+<pre class="SrcCode">cmd Test;
+</pre>
+
+<p>That line is an invocation of a command.  What is the name of the command?  Remember the command name is always at the beginning.   Thus the command name is "cmd".  What does this "cmd" command do?  It makes a new command!</p>
+
+<p>Yes, you can use the command named "cmd" to make/write/define your own commands.  A command that you made consists of invocations of other commands (to be precise, the implementation of your command consists of invocations of other commands).</p>
+
+<p>Being able to make your own commands is essential.  Without this important capability, you would only be able to write rather small programs.  Large programs would quickly become unmanageable.  For example, if you make a command that consists of 20 invocations of other commands, you can invoke your command in multiple places instead of repeating those 20 invocations in each one of those places.  How to write your own commands is explained in more detail elsewhere.</p>
+
+<p>Be careful to avoid confusing Command <b>Invocations</b> with Command <b>Implementations</b>.  They are 2 different but related things.  It can be very confusing if you are reading something that talks about command invocations but in your mind you think it is talking about command implementations, or vice-versa.</p>
+
+<p>A command <b>invocation</b> is an invocation of a command, meaning a line of source code where you specify that you want a certain command to be invoked/executed/run/performed/done at that point in your program.</p>
+
+<p>Whereas a command <b>implementation</b> is the implementation of a command, meaning the list of other commands to be invoked when this command is invoked.  Thus a command implementation consists of a list of command invocations.</p>
+
+<p>If you are reading something and it just says "command" without saying whether it means a command invocation or a command implementation, then you must determine which it means by looking at the context (how the word "command" is used).</p>
+
+
+
+
+<div class="SubHeading">Parameters</div>
+
+<p>Parameters are used to transfer information into, and out of, a command.  Most parameters are input, some are output, and some are both input and output ("in/out").</p>
+
+<p>When invoking a command, one of the following can be supplied for each parameter.  These things are explained in more detail elsewhere (this is an overview).</p>
+
+<ul class="Tight">
+<li> A literal constant number/value.
+</li><li> A constant number specified by a name not literally (including enumerations).
+</li><li> A local variable (a variable in the current Command Implementation).
+</li><li> A variable in a record (the value of an attribute in a record instance).
+</li><li> An expression (an arithmetic calculation).
+</li></ul>
+
+<p>Some types of parameters cannot accept some of the above.  For example, an output parameter cannot accept an expression resulting in a number.  Instead it requires that a destination storage location (for receiving the outgoing value) be specified.</p>
+
+<p>Note that an invocation of a command (including parameter values) cannot contain an invocation of another command.  Instead the other command must be invoked as the next or previous command invocation.  Command invocations are organized as a list (with sections), not a hierarchy.  (When reading this paragraph, remember to not confuse command invocations with implementations!)</p>
+
+
+
+<div class="SubHeading">Comments</div>
+
+<p>A "comment" in the source code is some text that explains part of the program, or provides some extra explanatory, useful, or relevant information, etc.  The compiler ignores/skips all text that is marked as being within a comment.</p>
+
+<p><b>**** TO DO: ****</b> Comments using curly brackets to be removed, in favor of using C-style /* */ and // comments, because curly brackets are too valuable as symbols to be used for comments. *******</p>
+
+<p>To write a comment, enclose it in curly brackets.  For example:</p>
+
+<pre class="SrcCode">{This is a test comment.}
+var x, uint, 123;
+</pre>
+
+<p>Comments can be placed on lines by themselves, and also at the end of lines:</p>
+
+<pre class="SrcCode">var x, uint, 123;  {This is a test comment.}
+</pre>
+
+<p>A comment can span multiple lines of text (it can have line breaks inside it).</p>
+
+<p>Comments can be nested, meaning a comment can contain another comment.  For example this is valid:</p>
+
+<pre class="SrcCode">{A test comment {with nested comment}}
+var x, uint, 123;
+</pre>
+
+<p>You can temporarily disable some commands in your source code by placing them inside a comment:</p>
+
+<pre class="SrcCode">{var x, uint, 123;
+var y, uint, 123;}
+</pre>
+
+<p>Because comments can be nested, it is easy to use a comment to disable multiple lines of code containing some small comments (without having to remove those inner comments).</p>
+
+<p>Comments separate words as do spaces.  In the following spaceless example, "foo" and "bar" are interpreted as 2 separate words.  The comment is not blindly removed.</p><p>
+
+</p><pre class="SrcCode">foo{comment}bar
+</pre>
+
+<p>An alternate style of single-line comment is also supported.  These comments begin with 2 forward-slash characters ("//") and continue until the end of the line (the line break character marks the end of the comment).  A space is usually written after the "//" but this is not mandatory.  For example:</p>
+
+<pre class="SrcCode">// This is a test comment.
+var x, uint, 123;  // Another comment here.
+//A third comment.
+</pre>
+
+<p>If "//" appears within a curly bracket comment, it is ignored the same as if it were 2 letter or space characters (the curly bracket comment disables checking for "//").  Thus a curly bracket comment can be used to disable multiple lines of source code that include some "//" comments.</p>
+
+
+
+
+
+<div class="SubHeading">Symbol Operators</div>
+
+<p>Symbols such as "+", "*", "/", etc are used as operators.  For example, "/" is used as the division operator.</p>
+
+<p>A symbol operator can consist of multiple symbol characters.  For example, "&lt;=" is interpreted as a single operator known as the "less-than-or-equal-to" operator.  Note that while "+" is interpreted as the addition operator, "++" would mean a different operator, but if you put a space between them (as in "+ +") then you have 2 addition operators.</p>
+
+<p>Note that whitespace, alphabetic, numeric characters, and underscore separate symbol operators, but symbol characters appearing together without space between them are interpreted as single operators.  For example "x,+y" (without space) is interpreted as "x &nbsp;,+&nbsp; y" not as "x, &nbsp;+y" and that results in an error message saying that ",+" is not a valid/recognized operator.  So separate your symbol operators with spaces.</p>
+
+
+
+
+
+<div class="SubHeading">Names</div>
+
+<p>A name (for example the name of a command or a variable) can contain only the following characters:</p>
+
+<ul class="Tight">
+<li> abcdefghijklmnopqrstuvwxyz
+</li><li> ABCDEFGHIJKLMNOPQRSTUVWXYZ
+</li><li> 0123456789
+</li><li> _
+</li></ul>
+
+<p>A name cannot contain:</p>
+
+<ul class="Tight">
+<li> Whitespace characters including normal space, tab, line break.
+</li><li> Symbol or punctuation characters such as "+", "-", "/", "*", ".", "!".
+</li><li> Latin alphabetic characters (a-z) that have diacritical/accent marks.
+</li><li> Any other character.
+</li></ul>
+
+<p>A name can optionally contain the underscore ("_") character.  For example you can write a name as "pizzaIsGreat" or you might prefer to write it as "pizza_is_great".  You cannot write it with spaces as "pizza is great".</p>
+
+<p>The name cannot begin with a "0" to "9" digit but can contain "0" to "9" elsewhere within the name or at the end.  This rule makes it easy and quick for the compiler to distinguish between names and numbers.</p>
+
+<p>Names are case-sensitive.  For example, "tortilla" and "Tortilla" are interpreted as different names.</p>
+
+
+
+
+
+<div class="SubHeading">Whitespace</div>
+
+<p>The main whitespace characters are:</p>
+
+<ol>
+<li> The normal space character.  Produced when you press the big spacebar key on your keyboard to put a space between words.
+</li><li> The tab character.  Produced by the "Tab" key.  Usually advances the position of the next character to the next tab-stop position.
+</li><li> The line break character.  Produced by the "Enter" key ("Return" on some keyboards).  Advances the position of the next character down and left, to the beginning of the next line/row. 2 makes a blank line.  Also known as "newline" or "linefeed" character.
+</li><li> The carriage return character.  An unnecessary and obsolete character used in conjunction with (or instead of) the line break character.
+</li><li> The non-breaking space character.  Same as the normal space except the words either side are supposed to be kept on the same line/row at all times.  Not permitted in KL source code text.
+</li></ol>
+
+<p>Whitespace characters are NOT ignored by the compiler.  If all whitespace characters are removed from the source code, or whitespace is randomly inserted, it will most likely become invalid.  Whitespace is optional in some places, and required in other places, and prohibited in some other places.</p>
+
+<p>That sounds complicated, but in practise the whitespace rules are intuitive and easy to remember, and the compiler is not an anal-retentive space nazi.  Usually it is obvious when you have broken a whitespace rule because it looks wrong.  For example "t&nbsp;esting" looks wrong.  Obviously you cannot insert whitespace in the middle of a word, number, or multi-character symbol operator.  If you do, the compiler will interpret it as 2 separate words/numbers/operators, changing the meaning.</p>
+
+<p>Where you have 1 whitespace character that is allowed to be where it is, you have the option of replacing it with 1 or more whitespace characters (of same or different or mixed types) without changing the meaning of your program.  Multiple whitespace characters are treated the same as 1 whitespace character.</p>
+
+<p>If you have 2 adjacent words with no whitespace or symbol characters between them, they will be interpreted as 1 word because obviously there is nothing to separate them.  Multi-character symbol operators are much the same -- they need to be separated with something or they will be interpreted as 1 operator (and that may result in an error message saying it is an invalid operator).</p>
+
+<p>Separating everything with spaces is not required.  For example, as we progress from left to right in "foo+bar", the change from alphabetic characters to a symbolic character is sufficient to end the word "foo" (because words are prohibited from containing symbolic characters).  On the other hand, in "foo3bar" the "3" does not cause separation because words are permitted to contain numeric digit characters, and thus if you did want it separated you would have to insert spaces.</p>
+
+<p>The compiler does not interpret whitespace in any way that is considered to be unrobust, such as counting the number of whitespace characters to determine the meaning of the program, or changing the meaning of the program merely by using 2 whitespace characters in place of 1.</p>
+
+<p>Commands are normally written 1 per line, however this is not a requirement.  Multiple commands can be on the same line, and a command can be split across multiple lines, without changing the meaning of the program (provided you do not put a line break in the middle of a word/name/etc, ofcourse).  You can freely insert blank lines between commands.</p>
+
+<p>Commands can be indented using 1 or more tab characters (or normal spaces but tabs are preferred for identing).  Indenting has no effect on the meaning of your program, however sensible indenting does make it much easier for you to read.</p>
+
+<p>Command invocations are terminated with a semicolon character, not with a line break character.  This makes it more robust.  For example, if some source code or snippet of source code is printed to paper or in a book or displayed on a website, there may be a command invocation that is longer than the width of the page or available space, requiring that a line break (or virtual line break) be inserted so it can be continued on the next line.  If line breaks were used to terminate command invocations instead of semicolons, the font size would have to be reduced until the entire command invocation can be displayed on 1 line, otherwise the meaning of the program would be changed or the syntax would be incorrect.</p>
+
+<p>Where there is a special whitespace rule applying to a particular situation, it is noted in the section of the documentation applying to that situation.</p>
+
+
+
+
+
+<div class="NavBox"><a href="https://web.archive.org/web/20090105190433/http://www.haxial.com/products/compiler/docs/">[Documentation main page]</a></div>
+
+</div>
+
+
+
+</body></html>

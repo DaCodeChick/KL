@@ -1,0 +1,16 @@
+{Test repeat loops}
+
+module Main;
+
+cmd Main;
+	var counter, uint;
+	set counter, 0;
+	
+	repeat 5;
+		set counter, counter + 1;
+	erepeat;
+	
+	{counter should be 5}
+ecmd;
+
+emodule Main;

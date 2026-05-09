@@ -1,0 +1,18 @@
+{Test basic arithmetic and variables}
+
+module Main;
+
+cmd Main;
+	var x, uint;
+	var y, uint;
+	
+	set x, 10;
+	set y, 20;
+	
+	var result, uint;
+	set result, x + y;
+	
+	{Result should be 30}
+ecmd;
+
+emodule Main;

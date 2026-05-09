@@ -1,0 +1,663 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<!-- saved from url=(0105)https://web.archive.org/web/20080605011122/http://www.haxial.com/products/compiler/docs/flow-control.html -->
+<html style="--wm-toolbar-height: 83px;"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"><script src="./Flow Control_files/athena.js" type="text/javascript"></script>
+<script type="text/javascript">window.addEventListener('DOMContentLoaded',function(){var v=archive_analytics.values;v.service='wb';v.server_name='wwwb-app248.us.archive.org';v.server_ms=1187;archive_analytics.send_pageview({});});</script>
+<script type="text/javascript" src="./Flow Control_files/bundle-playback.js" charset="utf-8"></script>
+<script type="text/javascript" src="./Flow Control_files/wombat.js" charset="utf-8"></script>
+<script>window.RufflePlayer=window.RufflePlayer||{};window.RufflePlayer.config={"autoplay":"on","unmuteOverlay":"hidden","showSwfDownload":true};</script>
+<script type="text/javascript" src="./Flow Control_files/ruffle.js"></script>
+<script type="text/javascript">
+    __wm.init("https://web.archive.org/web");
+  __wm.wombat("http://www.haxial.com:80/products/compiler/docs/flow-control.html","20080605011122","https://web.archive.org/","web","https://web-static.archive.org/_static/",
+	      "1212628282");
+</script>
+<link rel="stylesheet" type="text/css" href="./Flow Control_files/banner-styles.css">
+<link rel="stylesheet" type="text/css" href="./Flow Control_files/iconochive.css">
+<!-- End Wayback Rewrite JS Include -->
+
+	
+	<title>Flow Control</title>
+	<link href="./Flow Control_files/kredocs.css" rel="stylesheet" type="text/css">
+</head>
+
+<body><!-- BEGIN WAYBACK TOOLBAR INSERT -->
+<script>__wm.rw(0);</script>
+<div id="wm-ipp-base" lang="en" style="display: block; direction: ltr; height: 83px;" toolbar-mode="auto"><template shadowrootmode="closed"><div id="wm-ipp" style="position:fixed;left:0;top:0;right:0;">
+<div id="donato" style="position:relative;width:100%;height:0;">
+  <div id="donato-base">
+    <iframe id="donato-if" src="https://archive.org/includes/donate.php?as_page=1&amp;platform=wb&amp;referer=https%3A//web.archive.org/web/20080605011122/http%3A//www.haxial.com/products/compiler/docs/flow-control.html" scrolling="no" frameborder="0" style="width:100%; height:100%">
+    </iframe>
+  </div>
+</div><div id="wm-ipp-inside">
+  <div id="wm-toolbar" style="position:relative;display:flex;flex-flow:row nowrap;justify-content:space-between;" nav="async">
+    <div id="wm-logo" style="/*width:110px;*/padding-top:12px;">
+      <a href="https://web.archive.org/web/" title="Wayback Machine home page"><img src="https://web-static.archive.org/_static/images/toolbar/wayback-toolbar-logo-200.png" srcset="https://web-static.archive.org/_static/images/toolbar/wayback-toolbar-logo-100.png, https://web-static.archive.org/_static/images/toolbar/wayback-toolbar-logo-150.png 1.5x, https://web-static.archive.org/_static/images/toolbar/wayback-toolbar-logo-200.png 2x" alt="Wayback Machine" style="width:100px" border="0"></a>
+    </div>
+    <div class="c" style="display:flex;flex-flow:column nowrap;justify-content:space-between;flex:1;">
+      <form class="u" style="display:flex;flex-direction:row;flex-wrap:nowrap;" target="_top" method="get" action="https://web.archive.org/web/submit" name="wmtb" id="wmtb"><input type="text" name="url" id="wmtbURL" value="http://www.haxial.com/products/compiler/docs/flow-control.html" onfocus="this.focus();this.select();" style="flex:1;" autocomplete="off"><input type="hidden" name="type" value="replay"><input type="hidden" name="date" value="20080605011122"><input type="submit" value="Go">
+      </form>
+      <div style="display:flex;flex-flow:row nowrap;align-items:flex-end;">
+                <div class="s" id="wm-nav-captures" style="flex:1;"><a class="t" href="https://web.archive.org/web/*/http://www.haxial.com/products/compiler/docs/flow-control.html" title="See a list of every capture for this URL">1 capture</a><div class="r" title="Timespan for captures of this URL">5 Jun 2008</div></div>
+        <div class="k">
+          <a href="https://web.archive.org/web/20080605011122/http://www.haxial.com/products/compiler/docs/flow-control.html" id="wm-graph-anchor">
+            <div id="wm-ipp-sparkline" title="Explore captures for this URL" style="position: relative">
+              <canvas id="wm-sparkline-canvas" width="775" height="27" border="0"></canvas>
+            <div class="yt" style="display: none; width: 25px; height: 27px;"></div><div class="mt" style="display: none; width: 2px; height: 27px;"></div></div>
+          </a>
+        </div>
+      </div>
+    </div>
+    <div class="n">
+      <table>
+        <tbody>
+          <!-- NEXT/PREV MONTH NAV AND MONTH INDICATOR -->
+          <tr class="m">
+            <td class="b" nowrap="nowrap">May</td>
+            <td class="c" id="displayMonthEl" title="You are here: 01:11:22 Jun 05, 2008">JUN</td>
+            <td class="f" nowrap="nowrap">Jul</td>
+          </tr>
+          <!-- NEXT/PREV CAPTURE NAV AND DAY OF MONTH INDICATOR -->
+          <tr class="d">
+            <td class="b" nowrap="nowrap"><span class="ta"></span></td>
+            <td class="c" id="displayDayEl" style="width:34px;font-size:22px;white-space:nowrap;" title="You are here: 01:11:22 Jun 05, 2008">05</td>
+            <td class="f" nowrap="nowrap"><span class="ta"></span></td>
+          </tr>
+          <!-- NEXT/PREV YEAR NAV AND YEAR INDICATOR -->
+          <tr class="y">
+            <td class="b" nowrap="nowrap">2007</td>
+            <td class="c" id="displayYearEl" title="You are here: 01:11:22 Jun 05, 2008">2008</td>
+            <td class="f" nowrap="nowrap">2009</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="r" style="display:flex;flex-flow:column nowrap;align-items:flex-end;justify-content:space-between;">
+      <div id="wm-btns" style="text-align:right;height:23px;">
+                <span class="xxs">
+          <div id="wm-save-snapshot-success">success</div>
+          <div id="wm-save-snapshot-fail">fail</div>
+          <a id="wm-save-snapshot-open" href="https://web.archive.org/web/20080605011122/http://www.haxial.com/products/compiler/docs/flow-control.html#" title="Share via My Web Archive" style="display: none;">
+            <span class="iconochive-web"></span>
+          </a>
+          <a href="https://archive.org/account/login.php" title="Sign In" id="wm-sign-in" style="display: inline-block;">
+            <span class="iconochive-person"></span>
+          </a>
+          <span id="wm-save-snapshot-in-progress" class="iconochive-web" style="display: none;"></span>
+        </span>
+                <a class="xxs" href="https://help.archive.org/help/category/the-wayback-machine/" title="Get some help using the Wayback Machine" style="top:-6px;"><span class="iconochive-question" style="color:rgb(87,186,244);font-size:160%;"></span></a>
+        <a id="wm-tb-close" href="https://web.archive.org/web/20080605011122/http://www.haxial.com/products/compiler/docs/flow-control.html#close" style="top:-2px;" title="Close the toolbar"><span class="iconochive-remove-circle" style="color:#888888;font-size:240%;"></span></a>
+      </div>
+      <div id="wm-share" class="xxs">
+        <a href="https://web.archive.org/web/20080605011122/http://web.archive.org/screenshot/http://www.haxial.com/products/compiler/docs/flow-control.html" id="wm-screenshot" title="screenshot" style="visibility: hidden;">
+          <span class="wm-icon-screen-shot"></span>
+        </a>
+        <a href="https://web.archive.org/web/20080605011122/http://www.haxial.com/products/compiler/docs/flow-control.html#" id="wm-video" title="video">
+          <span class="iconochive-movies"></span>
+        </a>
+        <a id="wm-share-facebook" href="https://web.archive.org/web/20080605011122/http://www.haxial.com/products/compiler/docs/flow-control.html#" data-url="https://web.archive.org/web/20080605011122/http://www.haxial.com:80/products/compiler/docs/flow-control.html" title="Share on Facebook" style="margin-right:5px;" target="_blank"><span class="iconochive-facebook" style="color:#3b5998;font-size:160%;"></span></a>
+        <a id="wm-share-twitter" href="https://web.archive.org/web/20080605011122/http://www.haxial.com/products/compiler/docs/flow-control.html#" data-url="https://web.archive.org/web/20080605011122/http://www.haxial.com:80/products/compiler/docs/flow-control.html" title="Share on Twitter" style="margin-right:5px;" target="_blank"><span class="iconochive-twitter" style="color:#1dcaff;font-size:160%;"></span></a>
+      </div>
+      <div style="padding-right:2px;text-align:right;white-space:nowrap;">
+        <a id="wm-expand" class="wm-btn wm-closed" href="https://web.archive.org/web/20080605011122/http://www.haxial.com/products/compiler/docs/flow-control.html#expand"><span id="wm-expand-icon" class="iconochive-down-solid"></span> <span class="xxs" style="font-size:80%;">About this capture</span></a>
+      </div>
+    </div>
+  </div>
+    <div id="wm-capinfo" style="border-top:1px solid #777;display:none; overflow: hidden">
+        <div id="wm-capinfo-notice" source="api"></div>
+                <div id="wm-capinfo-collected-by">
+    <div style="background-color:#666;color:#fff;font-weight:bold;text-align:center;padding:2px 0;">COLLECTED BY</div>
+    <div style="padding:3px;position:relative" id="wm-collected-by-content">
+            <div style="display:inline-block;vertical-align:top;width:50%;">
+			<span class="c-logo" style="background-image:url(https://archive.org/services/img/alexacrawls);"></span>
+		Organization: <a style="color:#33f;" href="https://archive.org/details/alexacrawls" target="_new"><span class="wm-title">Alexa Crawls</span></a>
+		<div style="max-height:75px;overflow:hidden;position:relative;">
+	  <div style="position:absolute;top:0;left:0;width:100%;height:75px;background:linear-gradient(to bottom,rgba(255,255,255,0) 0%,rgba(255,255,255,0) 90%,rgba(255,255,255,255) 100%);"></div>
+	  Starting in 1996, <a href="http://www.alexa.com/">Alexa Internet</a> has been donating their crawl data to the Internet Archive.  Flowing in every day, these data are added to the <a href="http://web.archive.org/">Wayback Machine</a> after an embargo period.
+	</div>
+	      </div>
+      <div style="display:inline-block;vertical-align:top;width:49%;">
+			<span class="c-logo" style="background-image:url(https://archive.org/services/img/51_crawl)"></span>
+		<div>Collection: <a style="color:#33f;" href="https://archive.org/details/51_crawl" target="_new"><span class="wm-title">51_crawl</span></a></div>
+		<div style="max-height:75px;overflow:hidden;position:relative;">
+	  <div style="position:absolute;top:0;left:0;width:100%;height:75px;background:linear-gradient(to bottom,rgba(255,255,255,0) 0%,rgba(255,255,255,0) 90%,rgba(255,255,255,255) 100%);"></div>
+	  this data is currently not publicly accessible.
+	</div>
+	      </div>
+    </div>
+    </div>
+    <div id="wm-capinfo-timestamps">
+    <div style="background-color:#666;color:#fff;font-weight:bold;text-align:center;padding:2px 0;" title="Timestamps for the elements of this page">TIMESTAMPS</div>
+    <div>
+      <div id="wm-capresources" style="margin:0 5px 5px 5px;max-height:250px;overflow-y:scroll !important"></div>
+      <div id="wm-capresources-loading" style="text-align:left;margin:0 20px 5px 5px;display:none"><img src="https://web-static.archive.org/_static/images/loading.gif" alt="loading"></div>
+    </div>
+    </div>
+  </div></div></div><link rel="stylesheet" type="text/css" href="./Flow Control_files/banner-styles.css"><link rel="stylesheet" type="text/css" href="./Flow Control_files/iconochive.css"><div class="wb-autocomplete-suggestions "></div></template>
+</div><div id="wm-ipp-print">The Wayback Machine - https://web.archive.org/web/20080605011122/http://www.haxial.com:80/products/compiler/docs/flow-control.html</div>
+<script type="text/javascript">//<![CDATA[
+__wm.bt(775,27,25,2,"web","http://www.haxial.com/products/compiler/docs/flow-control.html","20080605011122",1996,"https://web-static.archive.org/_static/",["https://web-static.archive.org/_static/css/banner-styles.css?v=1utQkbB3","https://web-static.archive.org/_static/css/iconochive.css?v=3PDvdIFv"], false);
+  __wm.rw(1);
+//]]></script>
+<!-- END WAYBACK TOOLBAR INSERT -->
+ 
+<div class="mainbox">
+
+<div class="MainHeading">
+<div class="HPL">The Haxial Programming Language</div>
+<div class="Title">Flow Control</div>
+</div>
+
+<div class="SubHeading">"If/Else" Commands</div>
+
+<p>The "If" command can be used to conditionally skip some commands.  The "If" command has 1 parameter, the condition.  An expression is usually supplied.  Following the "If" command, the command(s) to be conditionally skipped should appear, followed by an "EndIf" command that indicates the end of the "If" section.</p>
+
+<p>If the condition evaluates to true, then the commands within the "If" section will be executed.  If the condition evaluates to false, then the commands within the "If" section will be skipped.</p>
+
+<p>In the following example, the 2 "Set" commands will only be executed if the value of the variable "a" is equal to 5.   If it is not equal to 5, the 2 "Set" commands are skipped (not executed).</p>
+
+<pre class="SrcCode">If a == 5;
+    Set a, 6;
+    Set b, 11;
+EndIf;
+</pre>
+
+<p>Using the "Else" command, it is possible to provide alternate commands that will be executed in the event of the condition evaluating to false.  In the following example, if "a" is equal to 5, then "b" is set to 11, but if "a" is NOT equal to 5, then "b" is set to 66.  Only 1 of the 2 "Set" commands will be executed, depending on whether "a" equals 5.</p>
+
+<pre class="SrcCode">If a == 5;
+    Set b, 11;
+Else;
+    Set b, 66;
+EndIf;
+</pre>
+
+<p>Using the "ElseIf" command, it is possible to provide alternate conditions (and associated alternate commands to be executed).  If the condition in the "If" command evaluates to false, then the next "ElseIf" command will be executed, and if the condition in the "ElseIf" command evaluates to true, then the commands associated with the "ElseIf" command will be executed.</p>
+
+<p>In the following example, if "a" equals 5, then "b" is set to 11.  If "a" does NOT equal 5, then it checks whether "a" equals 7, and if it does, then "b" is set to 22.  If "a" does NOT equal 7 (and does not equal 5), then "b" is set to 66.  Only 1 of the 3 "Set" commands will be executed.</p>
+
+<pre class="SrcCode">If a == 5;
+    Set b, 11;
+ElseIf a == 7;
+    Set b, 22;
+Else;
+    Set b, 66;
+EndIf;
+</pre>
+
+<p>The "Else" command is optional, but if it is present in an "If" sequence then there can be no more than 1 and it must be last (after all/any "ElseIf" commands).</p>
+
+<p>Multiple "ElseIf" commands can be present in an "If" sequence, as in the following example.  The first "If" or "ElseIf" with a condition that evaluates to true will have its associated commands executed.  The conditions are evaluated sequentially in the same order as they appear (top to bottom).  Thus in the following example, if "a" equals 30, then 3 comparisons/checks are performed ("a == 10", then "a == 20", then "a == 30").</p>
+
+<pre class="SrcCode">{Assume "a" equals 30.}
+If a == 10;       {EXECUTED}
+    Set a, 1111;  {NOT EXECUTED}
+ElseIf a == 20;   {EXECUTED}
+    Set a, 2222;  {NOT EXECUTED}
+ElseIf a == 30;   {EXECUTED}
+    Set a, 3333;  {EXECUTED}
+ElseIf a == 40;   {NOT EXECUTED}
+    Set a, 4444;  {NOT EXECUTED}
+ElseIf a == 50;   {NOT EXECUTED}
+    Set a, 5555;  {NOT EXECUTED}
+EndIf;
+</pre>
+
+<p>The "==" operator/function tests whether 2 values are equal.  It is also possible to test whether a value is less than another value, etc.  The main operators are summarized below.  For more information, see the <a href="https://web.archive.org/web/20080605011122/http://www.haxial.com/products/compiler/docs/expressions.html">Expressions</a> section of this documentation.</p>
+
+<table class="MiscTable">
+<tbody><tr><th>Name</th><th>Symbol</th><th>Description</th></tr>
+<tr><td>Equal</td><td class="CodeBg">==</td><td>If the 2 values are equal.</td></tr>
+<tr><td>NotEqual</td><td class="CodeBg">!=</td><td>If the 2 values are not equal.</td></tr>
+<tr><td>Less</td><td class="CodeBg">&lt;</td><td>If the first value is less than the second value.</td></tr>
+<tr><td>Greater</td><td class="CodeBg">&gt;</td><td>If the first value is greater than the second value.</td></tr>
+<tr><td>LessEqual</td><td class="CodeBg">&lt;=</td><td>If the first value is less than or equal to the second value.</td></tr>
+<tr><td>GreaterEqual</td><td class="CodeBg">&gt;=</td><td>If the first value is greater than or equal to the second value.</td></tr>
+<tr><td>And</td><td class="CodeBg">&amp;&amp;</td><td>If the 2 values are both true.</td></tr>
+<tr><td>NotAnd</td><td class="CodeBg">!&amp;&amp;</td><td>If the 2 values are not both true.</td></tr>
+<tr><td>Or</td><td class="CodeBg">||</td><td>If either of the 2 values are true (or both).</td></tr>
+<tr><td>NotOr</td><td class="CodeBg">!||</td><td>If neither of the 2 values are true.</td></tr>
+</tbody></table>
+
+<p>To write a condition for an "If" command that is satisfied (true) if either of 2 other conditions are true, use the "Or" operator/function.  In the following example, "q" will be set to 123 if "a" is equal to "b", or if "x" is equal to "y".</p>
+
+<pre class="SrcCode">If (a == b) || (x == y);
+    Set q, 123;
+EndIf;
+</pre>
+
+<p>In the following example, "q" is set to 123 if "n" is in the range 100 to 200 (inclusive), or if "n" is zero.</p>
+
+<pre class="SrcCode">If ((n &gt;= 100) &amp;&amp; (n &lt;= 200)) || (n == 0);
+    Set q, 123;
+EndIf;
+</pre>
+
+<p>Note that expressions are evaluated simply left-to-right.  Therefore, the following 2 commands are equivalent:</p>
+
+<pre class="SrcCode">If a == b &amp;&amp; x == y;
+If ((a == b) &amp;&amp; x) == y;
+</pre>
+
+<p>Here is a Truth Table for the logical operators, displaying the result of "a $ b" where "$" is one the logical operators such as "AND":</p>
+
+<table class="MiscTable">
+<tbody><tr><th>a</th><th>b</th><th>AND</th><th>OR</th><th>NAND</th><th>NOR</th><th>XOR</th></tr>
+<tr><th>False</th><th>False</th><td>False</td><td>False</td><td>True</td><td>True</td><td>False</td></tr>
+<tr><th>False</th><th>True</th><td>False</td><td>True</td><td>True</td><td>False</td><td>True</td></tr>
+<tr><th>True</th><th>False</th><td>False</td><td>True</td><td>True</td><td>False</td><td>True</td></tr>
+<tr><th>True</th><th>True</th><td>True</td><td>True</td><td>False</td><td>False</td><td>False</td></tr>
+</tbody></table>
+
+<p>"If" commands can be nested, meaning an "If" sequence can appear inside another "If" sequence (either alone or amongst other commands).  The nested inner "If" sequence operates in exactly the same manner as if it were not nested.  However, the outer "If" sequence controls whether the inner "If" sequence will be executed.  For example:</p>
+
+<pre class="SrcCode">If n &lt; 0;  {if "n" is negative}
+    If n &lt; -1000;
+        DoSplendidThings;
+    EndIf;
+    Set n, -1;
+Else;  {"n" is positive}
+    If n &gt; 1000;
+        DoWonderfulThings;
+    EndIf;
+    Set n, 1;
+EndIf;
+</pre>
+
+<p>When using a nested "If" sequence, ensure that you do not forget to provide an "EndIf" command for both the nested inner "If" sequence and the outer "If" sequence.  Accidentally omitting an "EndIf" command can result in a confusing/ambiguous/invalid interpretation.</p>
+
+<p>"If" commands can be nested to at least 10 levels deep.</p>
+
+<p>The "IfNot" command operates the same as the "If" command except with the opposite interpretation of the boolean condition.  The following 2 examples are equivalent.  The second uses the function "Not".</p>
+
+<pre class="SrcCode">IfNot condition;
+   {...}
+EndIf;
+If Not[condition];
+   {...}
+EndIf;
+</pre>
+
+<p>The "If" and other commands have shortcut names that are easier to type.  You can use either the full name or the shortcut name.</p>
+
+<table class="MiscTable">
+<tbody><tr><th>Name</th><th>Shortcut</th></tr>
+<tr><td class="Code">If</td><td class="Code">if</td></tr>
+<tr><td class="Code">IfNot</td><td class="Code">ifnot</td></tr>
+<tr><td class="Code">ElseIf</td><td class="Code">elif</td></tr>
+<tr><td class="Code">Else</td><td class="Code">else</td></tr>
+<tr><td class="Code">EndIf</td><td class="Code">eif</td></tr>
+</tbody></table>
+
+<p>Here is an example using shortcut names:</p>
+
+<pre class="SrcCode">if a == 5;
+    set b, 11;
+elif a == 7;
+    set b, 22;
+else;
+    set b, 66;
+eif;
+</pre>
+
+
+
+
+
+
+<div class="SubHeading">Unconditional Goto</div>
+
+<p>The "goto" command can be used to cause execution of the program to jump to (go to) a different location within the current Command Implementation, either forwards or backwards.  The goto command has 1 parameter, the name of the location to jump to.  The location is separately defined using the "loc" (location) command.  The "loc" command has 1 parameter, a name to assign to this location (the location is where the "loc" command is).  For example:</p>
+
+<pre class="SrcCode">goto test;
+set a, 123; {this is skipped}
+loc test;   {the destination}
+</pre>
+
+<p>The goto command cannot be used to jump to a location in a different Command Implementation.  The goto command and its corresponding named destination location must be within the same Command Implementation, with either appearing first.</p>
+
+<p>There can be multiple goto commands in different places (within the same Command Implementation) that jump to the same named destination location.  There cannot be 2 locations with the same name.  Location names have the same restrictions as variable names (no spaces, symbols, etc).</p>
+
+<p>Some people have claimed that goto commands/statements in programming languages are harmful and should not be used.  This nonsense originates from a letter written to a magazine/journal by a man named Edsger Dijkstra in 1968:</p>
+
+<blockquote>"Letters to the editor: go to statement considered harmful" by Edsger W. Dijkstra, Communications of the ACM, Volume 11, Issue 3 (March 1968), pages 147-148.</blockquote>
+
+<p>However, Dijkstra issued handwritten manuscripts and rarely used computers, and owned only 1 computer late in his life, and did not do any programming on it.  He never did any real programming (meaning he never created a real-world software product used for real-world non-theoretical tasks).</p>
+
+<blockquote>"Dijkstra eschewed the use of computers in his own work for many decades. Even after he succumbed to his UT [University of Texas] colleagues' encouragement and acquired a Macintosh computer, he used it only for e-mail and for browsing the World Wide Web. He had no use for word processors, believing that one should be able to write a letter or article without rough drafts, rewriting, or any significant editing."
+<br>("In Memoriam of Edsger Wybe Dijkstra" by Jayadev Misra and Hamilton Richards, University of Texas at Austin, 3 Nov 2003.)</blockquote>
+
+<p>Certainly "goto" can be abused, but so can kitchen knives.  That is no reason to ban kitchen knives.  Almost anything in a programming language can be abused.  If we removed all the features that can be abused, there would be nothing remaining in the language.</p>
+
+<p>It is clear to experienced competent software engineers involved in the production of real-world software that "goto" is useful and helpful in some situations, and is only harmful if abused or used excessively.</p>
+
+
+
+
+<div class="SubHeading">Repeat</div>
+
+<p>One or more commands can be executed repeatedly using the "repeat" command.  Following is an example of an infinite loop (never-ending repetition):</p>
+
+<pre class="SrcCode">var msg, TText;
+var counter, uint, 0;
+repeat;
+    incr counter;  {add 1 to counter}
+    MText.Set msg, "Never say die ";
+    MText.AppendDecInt msg, counter;
+    MCLI.Output msg;
+erepeat;
+</pre>
+
+<p>To exit/abort a repetition from inside the repetition, either the "goto" or "break" command can be used.  The "break" command causes execution to jump to the command after the "erepeat" command.  For example:</p>
+
+<pre class="SrcCode">var msg, TText;
+var sq, uint, 2;
+repeat;
+    MText.Set msg, "sq contains ";
+    MText.AppendDecInt msg, sq;
+    MCLI.Output msg;
+    if sq == 65536;
+        break;
+    eif;
+    set sq, sq * sq;
+erepeat;
+MCLI.Output "The end.";
+</pre>
+
+<p>To repeat a certain number of times (to perform a certain number of iterations), supply a count for the first parameter of the "repeat" command.  The following example performs the commands 5 times:</p>
+
+<pre class="SrcCode">var n, uint;
+set n, 3 + 2;
+repeat n;
+    MCLI.Output "I have MPD.";
+    MCLI.Output "No I don't!";
+erepeat;
+</pre>
+
+<p>In the above example, the variable "n" is not modified by the "repeat" command, and any modification of "n" within the repeat section (during the repetition) does not change the number of repetitions performed.</p>
+
+<p>The count supplied to the "repeat" command can be zero.  In that case, the commands within the repeat section are not executed.  (Whereas if the count parameter is omitted entirely, the repetition count defaults to infinity.)</p>
+
+<p>The first parameter of the "repeat" command (the repetition count) can be an expression.  The expression is calculated once when the repetition starts, not recalculated with each iteration.  The repetition count is typecast to an unsigned integer.  If it is negative, an error is generated.</p>
+
+<p>"repeat" commands can be nested, meaning a repeat section can be inside another repeat section.  For example:</p>
+
+<pre class="SrcCode">var rowCount, uint, 3;
+var columnCount, uint, 6;
+var msg, TText;
+repeat rowCount;
+    MText.AppendChar msg, '|';
+    repeat columnCount;
+        MText.AppendChar msg, '*';
+    erepeat;
+    MText.AppendChar msg, '|';
+    MText.AppendLineBreak msg;
+erepeat;
+MCLI.Output msg;
+</pre>
+
+<p>That produces this output text:</p>
+
+<pre class="SrcCode">|******|
+|******|
+|******|
+</pre>
+
+<p>When using nested repeats, multiple repeat sections can be aborted simultaneously by providing a parameter to the "break" command -- a constant number indicating the number of repeat sections to abort (if no parameter is supplied, it defaults to 1).  For example:</p>
+
+<pre class="SrcCode">repeat 10;
+    repeat 15;
+        repeat 25;
+            break 2;
+            MCLI.Output "Innermost";  {NOT EXECUTED}
+        erepeat;
+        MCLI.Output "Middle";  {NOT EXECUTED}
+    erepeat;
+    {The "break 2" jumps to here.}
+    MCLI.Output "Outermost";  {EXECUTED}
+erepeat;
+</pre>
+
+<p>To end the current iteration early and immediately begin the next iteration, use the "continue" command.  It causes execution to jump to the end of the repeat section (but without aborting the repetition) and from there execution will return to the beginning of the repeat section for the next iteration (unless the current iteration is the last iteration).  It does not change the total number of iterations performed, it affects only the current iteration.  Example:</p>
+
+<pre class="SrcCode">repeat 10;
+    MCLI.Output "Apples";   {EXECUTED}
+    continue;
+    MCLI.Output "Oranges";  {NOT EXECUTED}
+erepeat;
+</pre>
+
+<p>That is equivalent to:</p>
+
+<pre class="SrcCode">repeat 10;
+    MCLI.Output "Apples";   {EXECUTED}
+    goto bottom;
+    MCLI.Output "Oranges";  {NOT EXECUTED}
+    loc bottom;
+erepeat;
+</pre>
+
+<p>A "repeat" command is equivalent to a certain arrangement of goto commands.  Consider this example:</p>
+
+<pre class="SrcCode">repeat n * 3;
+    MCLI.Output "Say hello";
+    MCLI.Output "to my little friend";
+erepeat;
+</pre>
+
+<p>That is equivalent to:</p>
+
+<pre class="SrcCode">var countDown, uint;
+set countDown, n * 3;
+goto bottom;
+loc top;
+MCLI.Output "Say hello";
+MCLI.Output "to my little friend";
+loc bottom;
+GotoIfDecr countDown, top;
+</pre>
+
+<p></p>
+
+
+
+<div class="SubHeading">Switch</div>
+
+<p>**** MORE INFO TO BE WRITTEN ****</p>
+
+
+<div class="SubHeading">Multi-Value Switch</div>
+
+<p>This proposed feature allows multiple values to be used with a "switch" command.  If you have nested switch commands (switch commands inside the cases of a switch commands, or if/else commands inside the cases of a switch command), then you might use a multi-value switch instead.  For example, consider this example with nested switch commands:</p>
+
+<pre class="SrcCode">switch a;
+    case 1;
+        switch b;
+            case 60;
+                {...}
+            case 70;
+                {...}
+        eswitch;
+    case 2;
+        switch b;
+            case 880;
+                {...}
+            case 881;
+                {...}
+        eswitch;
+    case 3;
+        switch b;
+            case 70;
+                {...}
+            case 80;
+                {...}
+        eswitch;
+eswitch;
+</pre>
+
+<p>It could be rewritten as a multi-value switch like this:</p>
+
+<pre class="SrcCode">switch a, b;
+    case 1, 60;
+        {...}
+    case 1, 70;
+        {...}
+    case 2, 880;
+        {...}
+    case 2, 881;
+        {...}
+    case 3, 70;
+        {...}
+    case 3, 80;
+        {...}
+eswitch;
+</pre>
+
+<p>Consider the following example using if/else and goto commands.</p>
+
+<pre class="SrcCode">if b &amp;&amp; c;
+    goto doX3;
+eif;
+if a;
+    set x, 1;
+elif b || c;
+    set x, 2;
+else;
+    loc doX3;
+    set x, 3;
+eif;
+</pre>
+
+<p>It could potentially be rewritten as a multi-value switch like this:</p>
+
+<pre class="SrcCode">switch a, b, c;
+    case true, false, false;
+    case true, false, true;
+    case true, true, false;
+        set x, 1;
+    case false, true, false;
+    case false, false, true;
+        set x, 2;
+    default;
+        set x, 3;
+eswitch;
+</pre>
+
+
+
+
+<div class="SubHeading">Action Switch</div>
+
+<p>When using a complex if/else sequence, sometimes it is good to separate the actions/results from the logic testing of the conditions, especially when there are multiple conditions that should be directed to the same lengthy chunk of code.</p>
+
+<p>In the following example, the actions are not performed within the complex if/else sequence.  Instead the if/else sequence merely determines which action to perform, and then the lengthy action is performed after the entire if/else sequence using a switch to perform only the selected action.</p>
+
+<pre class="SrcCode">if b &amp;&amp; c;
+    set action, 3;
+elif a;
+    set action, 1;
+elif b || c;
+    set action, 2;
+elif !d;
+    set action, 1;
+else;
+    set action, 3;
+eif;
+
+switch action;
+    case 1;
+        {...}
+    case 2;
+        {...}
+    case 3;
+        {...}
+eswitch;
+</pre>
+
+
+
+
+<div class="SubHeading">Conditional Goto</div>
+
+<p>The conditional goto commands perform a goto operation only if a certain condition is satisfied.  They have 2 parameters.  The first parameter is the value, variable, condition, or expression.  The second parameter is the name of the destination location.</p>
+
+<table class="MiscTable">
+<tbody><tr><th>Command</th><th>Description</th></tr>
+<tr><td class="Code">GotoIf</td><td>"Goto if value is true".  Execution jumps to the specified location if the value is true.  The value must be a boolean.</td></tr>
+<tr><td class="Code">GotoIfNot</td><td>"Goto if value is not true".  Execution jumps to the specified location if the value is false.  The value must be a boolean.</td></tr>
+<tr><td class="Code">GotoIfEQZ</td><td>"Goto if value is equal to zero".  Execution jumps to the specified location if the value is equal to zero.</td></tr>
+<tr><td class="Code">GotoIfNEQZ</td><td>"Goto if value is not equal to zero".  Execution jumps to the specified location if the value is not equal to zero.</td></tr>
+<tr><td class="Code">GotoIfDecr</td><td>"Goto if variable was decremented".  The variable is decremented if it is greater than zero.  In other words, check if the variable is greater than zero, and if it is, then subtract 1 from it and goto the specified location.  If the variable is zero or negative, it is not changed and the goto is not performed.  It is impossible for this command to cause arithmetic overflow or underflow.</td></tr>
+</tbody></table>
+
+<p>A decompiler or disassembler may emit a "GotoIf", or "GotoIfDecr", etc., command instead of trying to reconstruct/guess the original higher-level "If", "Repeat", or other command.  (A decompiler is a utility that converts compiled code back to source code, or rather compiled code to degraded source code.)</p>
+
+<p>Following is an example of using the "GotoIf" command:</p>
+
+<pre class="SrcCode">loc test;
+{...}
+GotoIf a == b, test;
+</pre>
+
+<p>That is equivalent to:</p>
+
+<pre class="SrcCode">loc test;
+{...}
+if a == b;
+    goto test;
+eif;
+</pre>
+
+<p>Following is an example of using the "GotoIfEQZ" command:</p>
+
+<pre class="SrcCode">loc test;
+{...}
+GotoIfEQZ n, test;
+</pre>
+
+<p>That is equivalent to:</p>
+
+<pre class="SrcCode">loc test;
+{...}
+if n == 0;
+    goto test;
+eif;
+</pre>
+
+<p>Consider this if/else sequence of commands:</p>
+
+<pre class="SrcCode">if n == 1;
+    DoInterestingThings;
+elif n == 2;
+    DoGreatThings;
+else;
+    DoSplendidThings;
+eif;
+</pre>
+
+<p>That is equivalent to:</p>
+
+<pre class="SrcCode">GotoIfNot n == 1, secondTest;
+DoInterestingThings;
+goto theEnd;
+
+loc secondTest;
+GotoIfNot n == 2, defaultSection;
+DoGreatThings;
+goto theEnd;
+
+loc defaultSection;
+DoSplendidThings;
+loc theEnd;
+</pre>
+
+
+
+
+
+
+<div class="NavBox"><a href="https://web.archive.org/web/20080605011122/http://www.haxial.com/products/compiler/docs/">[Documentation main page]</a></div>
+
+</div>
+
+
+
+</body></html>

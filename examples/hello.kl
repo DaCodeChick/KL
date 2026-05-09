@@ -1,0 +1,9 @@
+{Simple "Hello World" program for KL MVP Phase 1}
+
+module Main;
+
+cmd Main;
+	MCLI.Output "Hello from KL!";
+ecmd;
+
+emodule Main;

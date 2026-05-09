@@ -1,0 +1,267 @@
+{Example program for Haxial Compiler}
+
+
+module MyProgram;
+
+cmd Initialize;
+	MCLI.Output "Hello world!";
+
+	var temperature, uint;
+	set temperature, 19;
+	var msg, TText;
+	MText.Set msg, "The temperature is ";
+	{The following line should be:
+		MText.AppendDecInt msg, temperature;
+	But that is not working currently, so instead we are using AppendUInt32.}
+	MText.AppendUInt32 msg, temperature, kDecimal;
+	MText.AppendChar msg, '<deg>';
+	MText.AppendChar msg, 'C';
+	MCLI.Output msg;
+	
+	var ch, char;
+	set ch, 'z';
+	MText.Set msg, "I need some more ";
+	MText.AppendRepeatedChar msg, ch, 5;
+	MText.Append msg, "<apos>s.";
+	MCLI.Output msg;
+	
+	{Test arrays.}
+	var ary, TArray[uint32];
+	MArray.AppendItem ary, 200;
+	MArray.AppendItem ary, 666;
+	MArray.AppendItem ary, 46;
+	MArray.SetItem ary, 2, 47;
+	MText.Set msg, "Array test:  ";
+	var aryValue, uint32;
+	MArray.GetItem ary, 0, aryValue;
+	MText.AppendUInt32 msg, aryValue, kDecimal;
+	MText.AppendChar msg, ',';
+	MArray.GetItem ary, 1, aryValue;
+	MText.AppendUInt32 msg, aryValue, kDecimal;
+	MText.AppendChar msg, ',';
+	MArray.GetItem ary, 2, aryValue;
+	MText.AppendUInt32 msg, aryValue, kDecimal;
+	MCLI.Output msg;
+
+	{Following we demonstrate the invocation of a Command Implementation.}
+	var val, uint32;
+	MText.Set msg, "Invocation test:  ";
+	MyProgram.AppendSecretCodeNumber msg, 19, val;
+	MText.AppendChar msg, ' ';
+	MyProgram.AppendSecretCodeNumber msg, 66, val;
+	MText.AppendChar msg, ' ';
+	MyProgram.AppendSecretCodeNumber msg, 46, val;
+	MText.AppendChar msg, ' ';
+	MText.AppendUInt32 msg, val, kDecimal;
+	MCLI.Output msg;
+	
+	MyProgram.TestSomeArithmetic;
+	
+	{Test the MText.ToInteger command}
+	MText.ClearAndReuse msg;
+	MText.AppendChar msg, '6';
+	MText.AppendChar msg, '1';
+	MText.AppendChar msg, '2';
+	MText.ToInteger msg, 0, val;
+	MText.AppendChar msg, '=';
+	MText.AppendUInt32 msg, val, kDecimal;
+	MText.Insert msg, 0, "Text-to-integer test:  ";
+	MCLI.Output msg;
+	
+	{Test different number style}
+	MText.Set msg, "Number Style test:   ";
+	set val, 1500674;
+	MText.AppendUInt32 msg, val, kDecimal | kDigitGrouping3;
+	MText.AppendRepeatedChar msg, ' ', 4;
+	MText.AppendUInt32 msg, val, kHexadecimal | kDigitGrouping4 | kMinWholeDigits8 | kRadixPrefix;
+	MText.AppendRepeatedChar msg, ' ', 4;
+	MText.AppendUInt32 msg, val, kBinary | kRadixPrefix;
+	MCLI.Output msg;
+	
+	{Test the "goto" command}
+	goto skiptest;
+	MCLI.Output "This will be skipped";
+	loc skiptest;
+	MCLI.Output "Goto test.";
+	
+	MyProgram.RepetitionTest;
+	
+	{Test the If/ElseIf/Else/EndIf (if/elif/else/eif) commands.}
+	set val, 15;
+	if val == 10;
+		MCLI.Output "<quot>If/Else<quot> test reports 10.";
+	elif val == 12;
+		MCLI.Output "<quot>If/Else<quot> test reports 12.";
+	elif (val == 14) || (val == 15);
+		MCLI.Output "<quot>If/Else<quot> test reports 14 or 15.";
+	else;
+		MCLI.Output "<quot>If/Else<quot> test reports something else.";
+	eif;
+
+	{Test the MURL module.}
+	var url, TURL;
+	MURL.SetScheme url, "http";
+	MURL.SetHostName url, "www.haxial.com";
+	MURL.AppendPathName url, "Foo", kFolder;
+	MURL.AppendPathName url, "Bar", kFolder;
+	MURL.AppendPathName url, "", kGoParent;
+	MURL.AppendPathName url, "TestFile.txt", kFile;
+	MyProgram.PrintURL url;
+
+	{Test reading a file}
+	var urlForFile, TURL;
+	MURL.SetPathStart urlForFile, kProgramFolder;
+	{MURL.AppendPathName urlForFile, "Test Folder", kFolder;}
+	MURL.AppendPathName urlForFile, "TestTextFile.txt", kFile;
+	var openedFile, Ref TFile;
+	MFile.Open openedFile, urlForFile, kReadAccess | kModifyAccess;
+	MFile.Load openedFile, 0, 100, msg;
+	MFile.Close openedFile;
+	MCLI.Output "Contents of test file:";
+	MCLI.Output msg;
+	
+	{Test creating a file}
+	{This is commented out, but it should work, you can uncomment it to try it}
+	{
+	MText.Set msg, "Jaded zombies acted quaintly but kept driving their oxen forward.";
+	var newFileURL, TURL;
+	MURL.SetPathStart newFileURL, kProgramFolder;
+	MURL.AppendPathName newFileURL, "TestNewFile.txt", kFile;
+	var newFile, Ref TFile;
+	MFile.Create newFile, newFileURL, kReadAccess | kModifyAccess | kOpenExisting;
+	MFile.SetData newFile, msg;
+	MFile.Close newFile;
+	}
+ecmd;
+
+cmd AppendSecretCodeNumber;
+	prm inMsg, Ref[TText];
+	prm inCodeNum, uint;
+	prm outTest, Out[uint];
+	
+	MText.AppendChar inMsg, 'X';
+	MText.AppendChar inMsg, 'B';
+	MText.AppendChar inMsg, '-';
+	MText.AppendUInt32 inMsg, inCodeNum, kDecimal;
+	
+	set outTest, 1234;
+ecmd;
+
+cmd TestSomeArithmetic;
+	MCLI.Output "Testing some arithmetic...";
+	var msg, TText;
+	var test1, uint;
+	var test2, uint;
+	
+	set test1, Mul[Add[24,62], Add[51,28]];
+	set test2, (24 + 62) * (51 + 28);
+	
+	MText.AppendUInt32 msg, test1, kDecimal;
+	MText.AppendChar msg, '=';
+	MText.AppendUInt32 msg, test2, kDecimal;
+	MCLI.Output msg;
+		
+	var a, uint;	set a, 6275 * 100;
+	var b, uint;	set b, 62;
+	var x, uint;	set x, 51;
+	var y, uint;	set y, 28;
+	set test1, a + b / Add[x,y*(6/3)] - (52 * Sub[34,1]);
+	set test2, Sub[Div[Add[a,b], Add[x,Mul[y,Div[6,3]]]], Mul[52,Sub[34,1]]];
+	{answer to the above should be 4149}
+	{note divide and multiply are NOT given higher precedence than add and subtract}
+
+	MText.ClearAndReuse msg;
+	MText.AppendUInt32 msg, test1, kDecimal;
+	MText.AppendChar msg, '=';
+	MText.AppendUInt32 msg, test2, kDecimal;
+	MCLI.Output msg;
+	
+	set test1, Max[Add[a, b, x, y], 6500];
+	set test2, Max[a + b + x + y, 6500];
+	MText.ClearAndReuse msg;
+	MText.AppendUInt32 msg, test1, kDecimal;
+	MText.AppendChar msg, '=';
+	MText.AppendUInt32 msg, test2, kDecimal;
+	MCLI.Output msg;
+	
+	set test1, Min[a, b, x, y + 1];
+	set test2, b <? (y + 1) <? a <? x;
+	MText.ClearAndReuse msg;
+	MText.AppendUInt32 msg, test1, kDecimal;
+	MText.AppendChar msg, '=';
+	MText.AppendUInt32 msg, test2, kDecimal;
+	MCLI.Output msg;	
+ecmd;
+
+cmd RepetitionTest;
+	repeat 3 + 1;
+		MCLI.Output "Let's do it 3 times. No! 4!";
+	erepeat;
+
+	{Test nested repeats}
+	var rowCount, uint;
+	set rowCount, 3;
+	var columnCount, uint;
+	set columnCount, 6;
+	var msg, TText;
+	repeat rowCount;
+		MText.AppendChar msg, '|';
+		repeat columnCount;
+			MText.AppendChar msg, '*';
+		erepeat;
+		MText.AppendChar msg, '|';
+		MText.AppendLineBreak msg;
+	erepeat;
+	MCLI.Output msg;
+ecmd;
+
+cmd PrintURL;
+	prm inURL, Ref ReadOnly TURL;
+	
+	var urlText, TText;
+	var itemName, TText;
+	var itemCount, uint;
+	var itemOrd, uint;
+	var pathItemType, MURL.TPathItemType;
+	var lastSlashOffset, uint;
+	var isEmpty, bool;
+
+	MURL.GetScheme inURL, urlText;
+	MText.IsEmpty urlText, isEmpty;
+	if Not[isEmpty];
+		MText.Append urlText, "://";
+		
+		MURL.GetHostName inURL, itemName;
+		MText.IsEmpty itemName, isEmpty;
+		if Not[isEmpty];
+			MText.Append urlText, itemName;
+			MText.AppendChar urlText, '/';
+		eif;
+	eif;
+	
+	MURL.GetPathCount inURL, itemCount;
+	repeat itemCount;
+		MURL.GetPathName inURL, itemOrd, itemName, pathItemType;
+		if pathItemType == MURL.TPathItemType.kGoParent;
+			MText.Append urlText, "..";
+		else;
+			MText.Append urlText, itemName;
+		eif;
+		MText.GetSize urlText, lastSlashOffset;
+		MText.AppendChar urlText, '/';
+		set itemOrd, itemOrd + 1;
+	erepeat;
+	
+	{Remove last slash if the last item is not a folder.}
+	if pathItemType != MURL.TPathItemType.kFolder;
+		MText.Truncate urlText, lastSlashOffset;
+	eif;
+		
+	MCLI.Output urlText;
+ecmd;
+
+emodule MyProgram;
+
+
+{Select which Command Implementation will run first when the program is run.}
+SetInitCmd MyProgram.Initialize;
