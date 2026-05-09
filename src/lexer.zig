@@ -43,9 +43,9 @@ pub const TokenType = enum {
     kw_inline,
 
     // Type keywords
-    kw_uint, // lowercase alias for TUInt32
-    kw_sint, // lowercase alias for TSInt32
-    kw_bool, // lowercase alias for TBool
+    kw_uint,
+    kw_sint,
+    kw_bool,
     kw_char, // character type
     kw_ref, // Ref keyword
     kw_out, // Out keyword
