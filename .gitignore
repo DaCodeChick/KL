@@ -1,3 +1,15 @@
 .zig-cache/
 zig-out/
 *.o
+*.s
+# Compiled KL executables (exclude from root and examples/)
+/*.kl-exe
+/examples/*.kl-exe
+# Any executable without extension in root
+/System
+/test_add
+/test_mod
+/arithmetic
+/exit_test
+/hello
+

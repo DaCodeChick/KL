@@ -519,11 +519,7 @@ pub const SemanticAnalyzer = struct {
             std.mem.eql(u8, func_name, "Sub") or
             std.mem.eql(u8, func_name, "Mul") or
             std.mem.eql(u8, func_name, "Div") or
-            std.mem.eql(u8, func_name, "Mod") or
-            std.mem.eql(u8, func_name, "Subtract") or
-            std.mem.eql(u8, func_name, "Multiply") or
-            std.mem.eql(u8, func_name, "Divide") or
-            std.mem.eql(u8, func_name, "Modulo"))
+            std.mem.eql(u8, func_name, "DivRem"))
         {
             // Variadic arithmetic: require at least 1 argument
             if (call.arguments.items.len == 0) {

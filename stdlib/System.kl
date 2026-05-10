@@ -68,11 +68,11 @@ Function Mul[values...: uint32] Return uint32;
 }
 Function Div[values...: uint32] Return uint32;
 
-{ Modulo - Returns remainder of division
+{ DivRem - Returns remainder of division
   Takes exactly 2 arguments:
-    Mod[10, 3] returns 1
+    DivRem[10, 3] returns 1
 }
-Function Mod[a: uint32, b: uint32] Return uint32;
+Function DivRem[a: uint32, b: uint32] Return uint32;
 
 {═══════════════════════════════════════════════════════════════════════════════}
 { System I/O Commands                                                            }

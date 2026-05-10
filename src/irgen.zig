@@ -522,8 +522,7 @@ pub const IRGenerator = struct {
                 }
                 
                 // Check if this is a built-in variadic operation
-                if (std.mem.eql(u8, call.function_name, "Add") or 
-                    std.mem.eql(u8, call.function_name, "add")) {
+                if (std.mem.eql(u8, call.function_name, "Add")) {
                     if (call.arguments.items.len == 0) return error.OutOfMemory; // Need at least 1 arg
                     
                     // Single argument: just return it
@@ -543,9 +542,7 @@ pub const IRGenerator = struct {
                     return accumulator;
                 }
                 
-                if (std.mem.eql(u8, call.function_name, "Sub") or 
-                    std.mem.eql(u8, call.function_name, "sub") or
-                    std.mem.eql(u8, call.function_name, "Subtract")) {
+                if (std.mem.eql(u8, call.function_name, "Sub")) {
                     if (call.arguments.items.len == 0) return error.OutOfMemory;
                     
                     if (call.arguments.items.len == 1) {
@@ -563,9 +560,7 @@ pub const IRGenerator = struct {
                     return accumulator;
                 }
                 
-                if (std.mem.eql(u8, call.function_name, "Mul") or 
-                    std.mem.eql(u8, call.function_name, "mul") or
-                    std.mem.eql(u8, call.function_name, "Multiply")) {
+                if (std.mem.eql(u8, call.function_name, "Mul")) {
                     if (call.arguments.items.len == 0) return error.OutOfMemory;
                     
                     if (call.arguments.items.len == 1) {
@@ -583,9 +578,7 @@ pub const IRGenerator = struct {
                     return accumulator;
                 }
                 
-                if (std.mem.eql(u8, call.function_name, "Div") or 
-                    std.mem.eql(u8, call.function_name, "div") or
-                    std.mem.eql(u8, call.function_name, "Divide")) {
+                if (std.mem.eql(u8, call.function_name, "Div")) {
                     if (call.arguments.items.len == 0) return error.OutOfMemory;
                     
                     if (call.arguments.items.len == 1) {
@@ -603,9 +596,7 @@ pub const IRGenerator = struct {
                     return accumulator;
                 }
                 
-                if (std.mem.eql(u8, call.function_name, "Mod") or 
-                    std.mem.eql(u8, call.function_name, "mod") or
-                    std.mem.eql(u8, call.function_name, "Modulo")) {
+                if (std.mem.eql(u8, call.function_name, "DivRem")) {
                     if (call.arguments.items.len != 2) return error.OutOfMemory;
                     const left = try self.generateExpression(call.arguments.items[0]);
                     const right = try self.generateExpression(call.arguments.items[1]);

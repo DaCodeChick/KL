@@ -1,11 +1,11 @@
 {Test modulo operation}
 
-Module TestMod
+Module TestMod;
 
-Command TestMod
-    { Test Mod: 17 % 5 = 2 }
-    var result = Mod[17, 5];
+Command Main;
+    { Test DivRem: 17 % 5 = 2 }
+    var result, sint32, DivRem[17, 5];
     System.Exit[result];
-EndCommand
+EndCommand;
 
-EndModule
+EndModule;
