@@ -1,18 +1,17 @@
 {Test if/else control flow}
 
-module Main;
+Module Main
 
-cmd Main;
-	var x, uint;
-	set x, 15;
+Command Main
+	Variable x = 15
 	
-	if x == 10;
-		MCLI.Output "x is 10";
-	elif x == 15;
-		MCLI.Output "x is 15";
-	else;
-		MCLI.Output "x is something else";
-	eif;
-ecmd;
+	If Equal[x, 10]
+		Variable msg1 = "x is 10"
+	ElseIf Equal[x, 15]
+		Variable msg2 = "x is 15"
+	Else
+		Variable msg3 = "x is something else"
+	EndIf
+EndCommand
 
-emodule Main;
+EndModule

@@ -1,9 +1,9 @@
 {Simple "Hello World" program for KL MVP Phase 1}
 
-module Main;
+Module Main
 
-cmd Main;
-	MCLI.Output "Hello from KL!";
-ecmd;
+Command Main
+	Variable msg = "Hello from KL!"
+EndCommand
 
-emodule Main;
+EndModule

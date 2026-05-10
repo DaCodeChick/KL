@@ -1,16 +1,15 @@
 {Test repeat loops}
 
-module Main;
+Module Main
 
-cmd Main;
-	var counter, uint;
-	set counter, 0;
+Command Main
+	Variable counter = 0
 	
-	repeat 5;
-		set counter, counter + 1;
-	erepeat;
+	Repeat 5
+		counter = Add[counter, 1]
+	EndRepeat
 	
 	{counter should be 5}
-ecmd;
+EndCommand
 
-emodule Main;
+EndModule

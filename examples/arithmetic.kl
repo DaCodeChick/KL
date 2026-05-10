@@ -1,18 +1,13 @@
 {Test basic arithmetic and variables}
 
-module Main;
+Module Main
 
-cmd Main;
-	var x, uint;
-	var y, uint;
-	
-	set x, 10;
-	set y, 20;
-	
-	var result, uint;
-	set result, x + y;
+Command Main
+	Variable x = 10
+	Variable y = 20
+	Variable result = Add[x, y]
 	
 	{Result should be 30}
-ecmd;
+EndCommand
 
-emodule Main;
+EndModule

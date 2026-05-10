@@ -25,10 +25,9 @@ pub const TokenType = enum {
     kw_module,
     kw_emodule,
     kw_cmd,
-    kw_ecmd,
     kw_command,
+    kw_ecmd,
     kw_var,
-    kw_variable,
     kw_prm,
 
     // Keywords - commands
@@ -605,8 +604,7 @@ fn getKeywordType(lexeme: []const u8) ?TokenType {
         .{ "EndCommand", .kw_ecmd },
         .{ "Command", .kw_command },
         .{ "var", .kw_var },
-        .{ "Var", .kw_var },
-        .{ "Variable", .kw_variable },
+        .{ "Variable", .kw_var },
         .{ "prm", .kw_prm },
         .{ "Parameter", .kw_prm },
 

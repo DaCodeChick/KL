@@ -173,7 +173,7 @@ pub const Parser = struct {
     /// Parse a statement (commands/control flow)
     fn parseStatement(self: *Parser) ParseError!ast.Node {
         return switch (self.current_token.type) {
-            .kw_var, .kw_variable => self.parseVarDecl(),
+            .kw_var => self.parseVarDecl(),
             .kw_if => self.parseIfStatement(),
             .kw_repeat => self.parseRepeatStatement(),
             .kw_break => self.parseBreakStatement(),
@@ -197,7 +197,7 @@ pub const Parser = struct {
     /// Parse variable declaration
     fn parseVarDecl(self: *Parser) !ast.Node {
         // Accept both "Var" and "Variable"
-        if (self.current_token.type == .kw_var or self.current_token.type == .kw_variable) {
+        if (self.current_token.type == .kw_var) {
             try self.advance();
         } else {
             return error.UnexpectedToken;
@@ -863,7 +863,7 @@ test "parse variable declaration with assignment" {
     const source =
         \\Module TestModule
         \\Command Test
-        \\Var x = 42
+        \\var x = 42
         \\EndCommand
         \\EndModule
     ;
