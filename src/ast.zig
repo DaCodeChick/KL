@@ -160,8 +160,8 @@ pub const FunctionImplNode = struct {
     location: SourceLocation,
     name: []const u8,
     parameters: std.ArrayList(*ParamDeclNode),
-    return_expr: ?Node, // For declaration-only native functions, this is null; otherwise contains Return expression
-    return_type: ?KLType, // For now, inferred from return_expr
+    body: std.ArrayList(Node), // Function body statements
+    return_type: ?KLType, // For now, inferred from return statements
     options: FunctionOptions,
     // Native hook: if present, this function has a native implementation
     // The slice points directly into the source buffer (zero-allocation)
@@ -178,7 +178,7 @@ pub const FunctionImplNode = struct {
             .location = location,
             .name = name,
             .parameters = .{ .items = &.{}, .capacity = 0 },
-            .return_expr = null,
+            .body = .{ .items = &.{}, .capacity = 0 },
             .return_type = null,
             .options = .{},
             .native_hook = null,
@@ -191,9 +191,10 @@ pub const FunctionImplNode = struct {
             param.deinit(allocator);
         }
         self.parameters.deinit(allocator);
-        if (self.return_expr) |expr| {
-            expr.deinit(allocator);
+        for (self.body.items) |stmt| {
+            stmt.deinit(allocator);
         }
+        self.body.deinit(allocator);
         allocator.destroy(self);
     }
 };

@@ -4,7 +4,7 @@
 {
   This is the core standard library for KL. It provides:
   - Arithmetic operator wrappers (Add, Sub, Mul, Div)
-  - Core intrinsic operations (Invoke)
+  - Core system intrinsics (Print, Exit, etc.)
   
   HOW TO ADD NATIVE INTRINSICS:
   ==============================
@@ -26,8 +26,15 @@
 Module System;
 
 {═══════════════════════════════════════════════════════════════════════════════}
-{ Arithmetic Functions - Variadic Operator Wrappers                             }
-{═══════════════════════════════════════════════════════════════════════════════}
+{ Arithmetic Functions - Currently Compiler-Intrinsic                            }
+{═════════════════════════════════════════════════════════════════════════════════}
+{
+  These arithmetic functions are currently handled by the compiler via hardcoded
+  expansion in src/irgen.zig. In the future, they will be true stdlib functions
+  using Count/Get intrinsics for variadic parameter access.
+  
+  For now, these are just forward declarations to document the API.
+}
 
 { Add - Variadic addition
   Can be called with 1+ arguments:
@@ -35,10 +42,7 @@ Module System;
     Add[1, 2] returns 3
     Add[1, 2, 3] returns 6
 }
-Function Add;
-    Parameter values...: uint32;
-    Return values;
-EndFunction;
+Function Add[values...: uint32] Return uint32;
 
 { Subtract - Variadic subtraction (left-to-right)
   Can be called with 1+ arguments:
@@ -46,10 +50,7 @@ EndFunction;
     Sub[10, 3] returns 7
     Sub[10, 3, 2] returns 5
 }
-Function Sub;
-    Parameter values...: uint32;
-    Return values;
-EndFunction;
+Function Sub[values...: uint32] Return uint32;
 
 { Multiply - Variadic multiplication
   Can be called with 1+ arguments:
@@ -57,31 +58,36 @@ EndFunction;
     Mul[2, 3] returns 6
     Mul[2, 3, 4] returns 24
 }
-Function Mul;
-    Parameter values...: uint32;
-    Return values;
-EndFunction;
+Function Mul[values...: uint32] Return uint32;
 
 { Divide - Variadic division (left-to-right)
   Can be called with 1+ arguments:
     Div[100] returns 100
-    Div[100, 5] returns 20
-    Div[100, 5, 2] returns 10
+    Div[100, 2] returns 50
+    Div[100, 2, 5] returns 10
 }
-Function Div;
-    Parameter values...: uint32;
-    Return values;
-EndFunction;
+Function Div[values...: uint32] Return uint32;
+
+{ Modulo - Returns remainder of division
+  Takes exactly 2 arguments:
+    Mod[10, 3] returns 1
+}
+Function Mod[a: uint32, b: uint32] Return uint32;
 
 {═══════════════════════════════════════════════════════════════════════════════}
-{ Core Intrinsics                                                                }
+{ System I/O Commands                                                            }
 {═══════════════════════════════════════════════════════════════════════════════}
 
-{ Invoke - Call a function through a reference
-  This is a native intrinsic because it requires runtime dispatch.
-  Declaration-only syntax for native intrinsics.
-}
-{@native kl_invoke}
-Function Invoke[funcRef, args...] Return callResult;
+{ Print - Output text without newline }
+{@native kl_sys_print}
+Command Print[text: text];
+
+{ PrintLine - Output text with newline }
+{@native kl_sys_println}
+Command PrintLine[text: text];
+
+{ Exit - Terminate program with exit code }
+{@native kl_sys_exit}
+Command Exit[code: sint32];
 
 EndModule;

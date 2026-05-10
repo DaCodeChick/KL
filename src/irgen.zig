@@ -106,14 +106,15 @@ pub const IRGenerator = struct {
             _ = i;
         }
         
-        // Generate IR for return expression
-        if (func_node.return_expr) |return_expr| {
-            const return_value = try self.generateExpression(return_expr);
-            const entry = &func.basic_blocks.items[0];
-            try entry.addInstruction(.{ .ret = .{ .value = return_value } });
-        } else {
-            // No return expression - add void return
-            const entry = &func.basic_blocks.items[0];
+        // Generate IR for function body statements
+        for (func_node.body.items) |stmt| {
+            try self.generateStatement(stmt);
+        }
+        
+        // If function doesn't end with a return, add void return
+        const entry = &func.basic_blocks.items[0];
+        if (entry.instructions.items.len == 0 or 
+            entry.instructions.items[entry.instructions.items.len - 1] != .ret) {
             try entry.addInstruction(.{ .ret = .{ .value = null } });
         }
         
@@ -129,6 +130,7 @@ pub const IRGenerator = struct {
             .assignment => |assignment| try self.generateAssign(assignment),
             .if_stmt => |if_stmt| try self.generateIf(if_stmt),
             .repeat_stmt => |repeat| try self.generateRepeat(repeat),
+            .return_stmt => |return_stmt| try self.generateReturn(return_stmt),
             .command_invocation => |cmd| {
                 // Standalone command invocation
                 try self.generateCommandInvocation(cmd);
@@ -183,6 +185,20 @@ pub const IRGenerator = struct {
                 .value = value,
             },
         });
+    }
+    
+    /// Generate IR for return statement
+    fn generateReturn(self: *IRGenerator, return_stmt: *ast.ReturnStmtNode) error{OutOfMemory, UndefinedVariable}!void {
+        const block = self.current_block.?;
+        
+        // Generate return value expression if present
+        const return_value = if (return_stmt.value) |val|
+            try self.generateExpression(val)
+        else
+            null;
+        
+        // Add return instruction
+        try block.addInstruction(.{ .ret = .{ .value = return_value } });
     }
     
     /// Generate IR for command invocation
@@ -453,6 +469,58 @@ pub const IRGenerator = struct {
             },
             
             .function_call => |call| {
+                // Check for Count and Get intrinsics first
+                if (std.mem.eql(u8, call.function_name, "Count")) {
+                    // Count[variadic_param] - returns the count of variadic arguments
+                    // For now, we'll emit an intrinsic call that the runtime will handle
+                    if (call.arguments.items.len != 1) return error.OutOfMemory;
+                    
+                    const param_arg = call.arguments.items[0];
+                    const param_value = try self.generateExpression(param_arg);
+                    
+                    const dest_temp = self.nextTemp();
+                    const dest = ir.Value{ .temporary = dest_temp };
+                    
+                    var args = try self.allocator.alloc(ir.Value, 1);
+                    args[0] = param_value;
+                    
+                    try block.addInstruction(.{
+                        .intrinsic = .{
+                            .dest = dest,
+                            .native_hook = "kl_variadic_count",
+                            .args = args,
+                        },
+                    });
+                    
+                    return dest;
+                }
+                
+                if (std.mem.eql(u8, call.function_name, "Get")) {
+                    // Get[variadic_param, index] - returns the element at index
+                    // For now, we'll emit an intrinsic call that the runtime will handle
+                    if (call.arguments.items.len != 2) return error.OutOfMemory;
+                    
+                    const param_value = try self.generateExpression(call.arguments.items[0]);
+                    const index_value = try self.generateExpression(call.arguments.items[1]);
+                    
+                    const dest_temp = self.nextTemp();
+                    const dest = ir.Value{ .temporary = dest_temp };
+                    
+                    var args = try self.allocator.alloc(ir.Value, 2);
+                    args[0] = param_value;
+                    args[1] = index_value;
+                    
+                    try block.addInstruction(.{
+                        .intrinsic = .{
+                            .dest = dest,
+                            .native_hook = "kl_variadic_get",
+                            .args = args,
+                        },
+                    });
+                    
+                    return dest;
+                }
+                
                 // Check if this is a built-in variadic operation
                 if (std.mem.eql(u8, call.function_name, "Add") or 
                     std.mem.eql(u8, call.function_name, "add")) {

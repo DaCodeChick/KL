@@ -196,9 +196,9 @@ pub const SemanticAnalyzer = struct {
             try self.declareSymbol(param.name, .{ .parameter = param }, param.location);
         }
         
-        // Analyze return expression if present
-        if (func.return_expr) |expr| {
-            _ = try self.analyzeExpression(expr);
+        // Analyze function body statements
+        for (func.body.items) |stmt| {
+            try self.analyzeStatement(stmt);
         }
     }
     
@@ -442,6 +442,77 @@ pub const SemanticAnalyzer = struct {
     fn analyzeFunctionCall(self: *SemanticAnalyzer, call: *ast.FunctionCallNode) CompilerError!KLType {
         // For MVP, support basic arithmetic functions
         const func_name = call.function_name;
+        
+        // Variadic intrinsics
+        if (std.mem.eql(u8, func_name, "Count")) {
+            // Count[variadic_param] - returns sint32 count of elements
+            if (call.arguments.items.len != 1) {
+                try self.err_reporter.report(
+                    call.location,
+                    CompilerError.InvalidSyntax,
+                    "Count expects exactly 1 argument (variadic parameter)",
+                    .{},
+                );
+                return CompilerError.InvalidSyntax;
+            }
+            
+            // Verify argument is an identifier (the variadic parameter name)
+            const arg = call.arguments.items[0];
+            if (arg != .identifier) {
+                try self.err_reporter.report(
+                    call.location,
+                    CompilerError.InvalidSyntax,
+                    "Count argument must be a variadic parameter name",
+                    .{},
+                );
+                return CompilerError.InvalidSyntax;
+            }
+            
+            // Return sint32 for count
+            return .{ .sint32 = {} };
+        }
+        
+        if (std.mem.eql(u8, func_name, "Get")) {
+            // Get[variadic_param, index] - returns element type
+            if (call.arguments.items.len != 2) {
+                try self.err_reporter.report(
+                    call.location,
+                    CompilerError.InvalidSyntax,
+                    "Get expects exactly 2 arguments (variadic parameter, index)",
+                    .{},
+                );
+                return CompilerError.InvalidSyntax;
+            }
+            
+            // Verify first argument is an identifier (the variadic parameter name)
+            const param_arg = call.arguments.items[0];
+            if (param_arg != .identifier) {
+                try self.err_reporter.report(
+                    call.location,
+                    CompilerError.InvalidSyntax,
+                    "Get first argument must be a variadic parameter name",
+                    .{},
+                );
+                return CompilerError.InvalidSyntax;
+            }
+            
+            // Verify second argument is an integer index
+            const index_arg = call.arguments.items[1];
+            const index_type = try self.analyzeExpression(index_arg);
+            if (!index_type.isInteger()) {
+                try self.err_reporter.report(
+                    call.location,
+                    CompilerError.TypeMismatch,
+                    "Get index must be an integer",
+                    .{},
+                );
+                return CompilerError.TypeMismatch;
+            }
+            
+            // For MVP, assume uint32 element type (matches variadic param type in System.kl)
+            // In a full implementation, we'd look up the actual variadic parameter type
+            return .{ .uint32 = {} };
+        }
         
         // Arithmetic functions
         if (std.mem.eql(u8, func_name, "Add") or

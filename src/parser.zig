@@ -139,8 +139,12 @@ pub const Parser = struct {
         const cmd_node = try ast.CommandImplNode.init(self.allocator, cmd_loc, cmd_name);
         errdefer cmd_node.deinit(self.allocator);
         
-        // Parse parameters if present
-        if (self.current_token.type == .lbracket) {
+        // Check for declaration-only syntax: Command Name[params...];
+        // vs full body syntax: Command Name; ... EndCommand;
+        const is_declaration_only = self.current_token.type == .lbracket;
+        
+        if (is_declaration_only) {
+            // Declaration-only syntax for native commands
             try self.advance(); // consume '['
             
             while (self.current_token.type != .rbracket and 
@@ -162,8 +166,13 @@ pub const Parser = struct {
             }
             
             try self.expect(.rbracket);
+            
+            // Declaration-only: expect semicolon, no EndCommand
+            try self.expect(.semicolon);
+            return cmd_node;
         }
         
+        // Full body syntax: Command Name; ... EndCommand;
         // Command declaration requires semicolon
         try self.expect(.semicolon);
         
@@ -197,9 +206,19 @@ pub const Parser = struct {
         const param_loc = self.current_token.location;
         try self.expect(.identifier);
         
-        // For MVP, we'll use a default type (TInt32)
-        // TODO: Parse actual type expressions
-        const param_type = types.KLType{ .sint32 = {} };
+        // Check for variadic marker (...)
+        var is_variadic = false;
+        if (self.current_token.type == .ellipsis) {
+            is_variadic = true;
+            try self.advance();
+        }
+        
+        // Parse optional type annotation (: type)
+        var param_type = types.KLType{ .sint32 = {} }; // default type
+        if (self.current_token.type == .colon) {
+            try self.advance(); // consume ':'
+            param_type = try self.parseType();
+        }
         
         const param_node = try ast.ParamDeclNode.init(
             self.allocator,
@@ -208,6 +227,7 @@ pub const Parser = struct {
             param_type,
             null
         );
+        param_node.is_variadic = is_variadic;
         
         return param_node;
     }
@@ -506,8 +526,15 @@ pub const Parser = struct {
         const return_loc = self.current_token.location;
         try self.expect(.kw_return);
         
-        // TODO: Parse optional return value expression
-        const return_node = try ast.ReturnStmtNode.init(self.allocator, return_loc, null);
+        // Parse optional return value expression
+        var return_value: ?ast.Node = null;
+        // Check if there's an expression (not semicolon or EOF)
+        if (self.current_token.type != .semicolon and 
+            self.current_token.type != .eof) {
+            return_value = try self.parseExpression();
+        }
+        
+        const return_node = try ast.ReturnStmtNode.init(self.allocator, return_loc, return_value);
         
         return ast.Node{ .return_stmt = return_node };
     }
@@ -897,8 +924,12 @@ pub const Parser = struct {
                     try self.advance();
                 }
                 
-                // For now, use a default type
-                const param_type = types.KLType{ .uint32 = {} };
+                // Parse optional type annotation (: type)
+                var param_type = types.KLType{ .uint32 = {} }; // default type
+                if (self.current_token.type == .colon) {
+                    try self.advance(); // consume ':'
+                    param_type = try self.parseType();
+                }
                 
                 const param_node = try ast.ParamDeclNode.init(
                     self.allocator,
@@ -926,15 +957,10 @@ pub const Parser = struct {
             
             try self.expect(.rbracket);
             
-            // Expect: Return <identifier>
+            // Expect: Return <type>
             try self.expect(.kw_return);
-            const return_identifier = self.current_token.lexeme;
-            const return_loc = self.current_token.location;
-            try self.expect(.identifier);
-            
-            // Create an identifier node for the return value
-            const id_node = try ast.IdentifierNode.init(self.allocator, return_loc, return_identifier);
-            func_node.return_expr = ast.Node{ .identifier = id_node };
+            const return_type = try self.parseType();
+            func_node.return_type = return_type;
             
             // Declaration-only: expect semicolon, no EndFunction
             try self.expect(.semicolon);
@@ -979,13 +1005,13 @@ pub const Parser = struct {
                 try self.expect(.semicolon);
             }
             
-            // Parse Return statement
-            if (self.current_token.type == .kw_return) {
-                try self.advance();
-                const return_expr = try self.parseExpression();
-                func_node.return_expr = return_expr;
+            // Parse function body statements until EndFunction
+            while (self.current_token.type != .kw_efunction and 
+                   self.current_token.type != .eof) {
+                const stmt = try self.parseStatement();
+                try func_node.body.append(self.allocator, stmt);
                 
-                // Require semicolon after Return
+                // Require semicolon after each statement
                 try self.expect(.semicolon);
             }
             
