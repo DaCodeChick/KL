@@ -4,6 +4,7 @@ const KLType = @import("types.zig").KLType;
 const ErrorReporter = @import("error.zig").ErrorReporter;
 const SourceLocation = @import("error.zig").SourceLocation;
 const CompilerError = @import("error.zig").CompilerError;
+const ghost = @import("ghost.zig");
 
 /// Symbol in the symbol table
 pub const Symbol = struct {
@@ -72,6 +73,8 @@ pub const SemanticAnalyzer = struct {
     err_reporter: *ErrorReporter,
     global_scope: *Scope,
     current_scope: *Scope,
+    system_module: ?*ast.ModuleNode = null,
+    qualified_names: std.array_list.AlignedManaged([]const u8, null),
     
     pub fn init(allocator: std.mem.Allocator, err_reporter: *ErrorReporter) !*SemanticAnalyzer {
         const analyzer = try allocator.create(SemanticAnalyzer);
@@ -82,14 +85,49 @@ pub const SemanticAnalyzer = struct {
             .err_reporter = err_reporter,
             .global_scope = global_scope,
             .current_scope = global_scope,
+            .system_module = null,
+            .qualified_names = std.array_list.AlignedManaged([]const u8, null).init(allocator),
         };
+        
+        // Generate and register the System ghost module
+        try analyzer.loadSystemModule();
         
         return analyzer;
     }
     
     pub fn deinit(self: *SemanticAnalyzer) void {
+        // Free allocated qualified names
+        for (self.qualified_names.items) |name| {
+            self.allocator.free(name);
+        }
+        self.qualified_names.deinit();
+        
+        if (self.system_module) |sys_mod| {
+            sys_mod.deinit(self.allocator);
+        }
         self.global_scope.deinit();
         self.allocator.destroy(self);
+    }
+    
+    /// Load the System ghost module into the global scope
+    fn loadSystemModule(self: *SemanticAnalyzer) !void {
+        self.system_module = try ghost.generateSystemModule(self.allocator);
+        const sys_mod = self.system_module.?;
+        
+        // Register System module
+        try self.declareSymbol(sys_mod.name, .{ .module = sys_mod }, sys_mod.location);
+        
+        // Register all System commands with qualified names (System.Print, etc.)
+        for (sys_mod.commands.items) |cmd| {
+            const qualified_name = try std.fmt.allocPrint(
+                self.allocator,
+                "{s}.{s}",
+                .{ sys_mod.name, cmd.name },
+            );
+            // Track the allocated name for cleanup
+            try self.qualified_names.append(qualified_name);
+            try self.declareSymbol(qualified_name, .{ .command = cmd }, cmd.location);
+        }
     }
     
     /// Analyze a module

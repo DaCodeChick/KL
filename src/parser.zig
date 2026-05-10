@@ -380,9 +380,32 @@ pub const Parser = struct {
 
     /// Parse identifier statement (assignment or command invocation)
     fn parseIdentifierStatement(self: *Parser) !ast.Node {
-        const id_name = self.current_token.lexeme;
+        var id_name = self.current_token.lexeme;
         const id_loc = self.current_token.location;
         try self.advance();
+        
+        // Check for qualified name (e.g., System.Exit)
+        if (self.current_token.type == .dot) {
+            try self.advance();
+            if (self.current_token.type != .identifier) {
+                try self.error_reporter.report(
+                    self.current_token.location,
+                    error.InvalidSyntax,
+                    "Expected identifier after '.'",
+                    .{},
+                );
+                return error.UnexpectedToken;
+            }
+            
+            // Build qualified name: "Module.Command"
+            const qualified_name = try std.fmt.allocPrint(
+                self.allocator,
+                "{s}.{s}",
+                .{ id_name, self.current_token.lexeme },
+            );
+            id_name = qualified_name;
+            try self.advance();
+        }
         
         // Check for assignment operators
         if (self.current_token.type == .op_assign) {

@@ -1,5 +1,6 @@
 const std = @import("std");
 const types = @import("types.zig");
+const ast = @import("ast.zig");
 
 /// Intermediate Representation for KL compiler
 /// This represents a low-level, platform-independent representation
@@ -165,6 +166,13 @@ pub const Instruction = union(enum) {
         args: []Value,
     },
     
+    /// Intrinsic call (System runtime functions)
+    intrinsic: struct {
+        dest: ?Value,  // null for void intrinsics
+        intrinsic_id: ast.IntrinsicId,
+        args: []Value,
+    },
+    
     /// Return from function
     ret: struct {
         value: ?Value,
@@ -235,6 +243,18 @@ fn printInstruction(instr: Instruction, writer: anytype) !void {
                 try writer.print("{any} = call {s}(", .{dest, op.function});
             } else {
                 try writer.print("call {s}(", .{op.function});
+            }
+            for (op.args, 0..) |arg, i| {
+                if (i > 0) try writer.writeAll(", ");
+                try writer.print("{any}", .{arg});
+            }
+            try writer.writeAll(")");
+        },
+        .intrinsic => |op| {
+            if (op.dest) |dest| {
+                try writer.print("{any} = intrinsic {any}(", .{dest, op.intrinsic_id});
+            } else {
+                try writer.print("intrinsic {any}(", .{op.intrinsic_id});
             }
             for (op.args, 0..) |arg, i| {
                 if (i > 0) try writer.writeAll(", ");

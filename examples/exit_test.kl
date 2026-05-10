@@ -1,0 +1,9 @@
+{Test System.Exit intrinsic}
+
+Module Main
+
+Command Main
+	System.Exit[42]
+EndCommand
+
+EndModule

@@ -1,6 +1,7 @@
 const std = @import("std");
 const ir = @import("ir.zig");
 const backend = @import("backend.zig");
+const ast = @import("ast.zig");
 
 /// Assembly code generator for x86-64
 pub const AsmGenerator = struct {
@@ -206,6 +207,7 @@ pub const AsmGenerator = struct {
             .gt => |op| try self.emitComparison("g", op),
             .ge => |op| try self.emitComparison("ge", op),
             .call => |op| try self.emitCall(op),
+            .intrinsic => |op| try self.emitIntrinsic(op),
             .ret => |op| try self.emitReturn(op),
             .jump => |op| try self.emitJump(op),
             .branch => |op| try self.emitBranch(op),
@@ -251,6 +253,9 @@ pub const AsmGenerator = struct {
             .att => try self.print("    movq -{d}(%rbp), %rax\n", .{offset}),
             .intel => try self.print("    mov rax, [rbp - {d}]\n", .{offset}),
         }
+        
+        // Store the loaded value to the destination
+        try self.emitStoreValue(op.dest);
     }
     
     fn emitStoreLocal(self: *AsmGenerator, op: anytype) !void {
@@ -302,6 +307,32 @@ pub const AsmGenerator = struct {
                 switch (self.format) {
                     .att => try self.print("    movq -{d}(%rbp), %rax\n", .{temp_offset}),
                     .intel => try self.print("    mov rax, [rbp - {d}]\n", .{temp_offset}),
+                }
+            },
+        }
+    }
+    
+    fn emitStoreValue(self: *AsmGenerator, value: ir.Value) !void {
+        switch (value) {
+            .constant => {
+                // Can't store to a constant
+                switch (self.format) {
+                    .att => try self.writeAll("    # ERROR: Cannot store to constant\n"),
+                    .intel => try self.writeAll("    ; ERROR: Cannot store to constant\n"),
+                }
+            },
+            .local => |local_idx| {
+                const local_offset = (local_idx + 1) * 8;
+                switch (self.format) {
+                    .att => try self.print("    movq %rax, -{d}(%rbp)\n", .{local_offset}),
+                    .intel => try self.print("    mov [rbp - {d}], rax\n", .{local_offset}),
+                }
+            },
+            .temporary => |temp_idx| {
+                const temp_offset = 1024 + (temp_idx * 8);
+                switch (self.format) {
+                    .att => try self.print("    movq %rax, -{d}(%rbp)\n", .{temp_offset}),
+                    .intel => try self.print("    mov [rbp - {d}], rax\n", .{temp_offset}),
                 }
             },
         }
@@ -458,6 +489,63 @@ pub const AsmGenerator = struct {
                 },
                 else => {},
             }
+        }
+    }
+    
+    fn emitIntrinsic(self: *AsmGenerator, op: anytype) !void {
+        // Emit code for System runtime intrinsics
+        switch (op.intrinsic_id) {
+            .system_print, .system_println => {
+                // For now, emit a comment
+                // In a real implementation, this would call libc printf or write syscall
+                const intrinsic_name = if (op.intrinsic_id == .system_print) "Print" else "PrintLn";
+                
+                switch (self.format) {
+                    .att => {
+                        try self.print("    # Intrinsic: System.{s}\n", .{intrinsic_name});
+                        // TODO: Implement actual print functionality
+                        // For MVP, we'll skip this for now
+                        // A real implementation would:
+                        // 1. Load string pointer from args[0]
+                        // 2. Call libc printf or use write syscall
+                        // 3. For PrintLn, add a newline
+                    },
+                    .intel => {
+                        try self.print("    ; Intrinsic: System.{s}\n", .{intrinsic_name});
+                    },
+                }
+            },
+            .system_exit => {
+                // Exit syscall: exit(code)
+                // Load exit code into rdi (first argument register)
+                if (op.args.len > 0) {
+                    try self.emitLoadValue(op.args[0]);
+                    switch (self.format) {
+                        .att => {
+                            try self.writeAll("    movq %rax, %rdi\n");
+                            try self.writeAll("    movq $60, %rax  # sys_exit\n");
+                            try self.writeAll("    syscall\n");
+                        },
+                        .intel => {
+                            try self.writeAll("    mov rdi, rax\n");
+                            try self.writeAll("    mov rax, 60  ; sys_exit\n");
+                            try self.writeAll("    syscall\n");
+                        },
+                    }
+                }
+            },
+            .none => {
+                switch (self.format) {
+                    .att => try self.writeAll("    # Unknown intrinsic\n"),
+                    .intel => try self.writeAll("    ; Unknown intrinsic\n"),
+                }
+            },
+            else => {
+                switch (self.format) {
+                    .att => try self.writeAll("    # TODO: Unimplemented intrinsic\n"),
+                    .intel => try self.writeAll("    ; TODO: Unimplemented intrinsic\n"),
+                }
+            },
         }
     }
     

@@ -3,6 +3,7 @@ const ast = @import("ast.zig");
 const ir = @import("ir.zig");
 const types = @import("types.zig");
 const sema = @import("sema.zig");
+const ghost = @import("ghost.zig");
 
 /// IR Generator - converts analyzed AST to IR
 pub const IRGenerator = struct {
@@ -137,6 +138,28 @@ pub const IRGenerator = struct {
     fn generateCommandInvocation(self: *IRGenerator, cmd: *ast.CommandInvocationNode) error{OutOfMemory, UndefinedVariable}!void {
         const block = self.current_block.?;
         
+        // Check if this is a System intrinsic
+        if (ghost.isSystemIntrinsic(cmd.command_name)) {
+            const intrinsic_id = ghost.getIntrinsicId(cmd.command_name);
+            
+            // Generate arguments
+            var args = try self.allocator.alloc(ir.Value, cmd.arguments.items.len);
+            for (cmd.arguments.items, 0..) |arg, i| {
+                args[i] = try self.generateExpression(arg);
+            }
+            
+            // Most System intrinsics don't return values
+            try block.addInstruction(.{
+                .intrinsic = .{
+                    .dest = null,
+                    .intrinsic_id = intrinsic_id,
+                    .args = args,
+                },
+            });
+            return;
+        }
+        
+        // Regular command invocation
         // Generate arguments
         var args = try self.allocator.alloc(ir.Value, cmd.arguments.items.len);
         for (cmd.arguments.items, 0..) |arg, i| {
@@ -201,9 +224,9 @@ pub const IRGenerator = struct {
         }
         
         // Create endif block
-        var endif_block = ir.BasicBlock.init(self.allocator, endif_label);
-        self.current_block = &endif_block;
+        const endif_block = ir.BasicBlock.init(self.allocator, endif_label);
         try func.addBlock(endif_block);
+        self.current_block = &func.basic_blocks.items[func.basic_blocks.items.len - 1];
     }
     
     /// Generate IR for repeat statement
@@ -239,7 +262,6 @@ pub const IRGenerator = struct {
         
         // Jump to loop check
         try block.addInstruction(.{ .jump = .{ .target = loop_label } });
-        try func.addBlock(block.*);
         
         // Loop check block
         var loop_block = ir.BasicBlock.init(self.allocator, loop_label);
@@ -304,9 +326,10 @@ pub const IRGenerator = struct {
         try body_block.addInstruction(.{ .jump = .{ .target = loop_label } });
         try func.addBlock(body_block);
         
-        // End block
-        var end_block = ir.BasicBlock.init(self.allocator, end_label);
-        self.current_block = &end_block;
+        // End block - where execution continues after the loop
+        const end_block = ir.BasicBlock.init(self.allocator, end_label);
+        try func.addBlock(end_block);
+        self.current_block = &func.basic_blocks.items[func.basic_blocks.items.len - 1];
     }
     
     /// Generate IR for an expression
