@@ -540,3 +540,86 @@ test "sema - type mismatch on initialization" {
     try testing.expectError(CompilerError.TypeMismatch, result);
     try testing.expect(err_reporter.hasErrors());
 }
+
+test "sema - analyze simple module" {
+    const allocator = testing.allocator;
+    
+    var err_reporter = ErrorReporter.init(allocator);
+    defer err_reporter.deinit();
+    
+    var analyzer = try SemanticAnalyzer.init(allocator, &err_reporter);
+    defer analyzer.deinit();
+    
+    // Create a simple module with one command
+    const module = try ast.ModuleNode.init(
+        allocator,
+        .{ .line = 1, .column = 1, .file = "<test>" },
+        "TestModule",
+    );
+    defer module.deinit(allocator);
+    
+    // Create a command
+    const cmd = try ast.CommandImplNode.init(
+        allocator,
+        .{ .line = 2, .column = 1, .file = "<test>" },
+        "Main",
+    );
+    try module.commands.append(allocator, cmd);
+    
+    // Add a variable declaration to the command
+    const var_decl = try ast.VarDeclNode.init(
+        allocator,
+        .{ .line = 3, .column = 1, .file = "<test>" },
+        "x",
+        .sint32,
+        .{ .int_literal = try ast.IntLiteralNode.init(
+            allocator,
+            .{ .line = 3, .column = 10, .file = "<test>" },
+            42,
+        ) },
+    );
+    try cmd.body.append(allocator, .{ .var_decl = var_decl });
+    
+    // Should succeed
+    try analyzer.analyzeModule(module);
+    
+    // Verify no errors
+    try testing.expect(!err_reporter.hasErrors());
+}
+
+test "sema - binary operation type checking" {
+    const allocator = testing.allocator;
+    
+    var err_reporter = ErrorReporter.init(allocator);
+    defer err_reporter.deinit();
+    
+    var analyzer = try SemanticAnalyzer.init(allocator, &err_reporter);
+    defer analyzer.deinit();
+    
+    // Create: 5 + 3
+    const left = ast.Node{ .int_literal = try ast.IntLiteralNode.init(
+        allocator,
+        .{ .line = 1, .column = 1, .file = "<test>" },
+        5,
+    ) };
+    const right = ast.Node{ .int_literal = try ast.IntLiteralNode.init(
+        allocator,
+        .{ .line = 1, .column = 5, .file = "<test>" },
+        3,
+    ) };
+    const bin_op = try ast.BinaryOpNode.init(
+        allocator,
+        .{ .line = 1, .column = 3, .file = "<test>" },
+        .add,
+        left,
+        right,
+    );
+    defer bin_op.deinit(allocator);
+    
+    // Analyze the binary operation
+    const result_type = try analyzer.analyzeBinaryOp(bin_op);
+    
+    // Should return sint32 (the type of the operands)
+    try testing.expectEqual(KLType.sint32, result_type);
+    try testing.expect(!err_reporter.hasErrors());
+}
