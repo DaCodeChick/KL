@@ -5,13 +5,14 @@ pub const error_handling = @import("error.zig");
 pub const lexer = @import("lexer.zig");
 pub const ast = @import("ast.zig");
 pub const parser = @import("parser.zig");
+pub const sema = @import("sema.zig");
 
 pub fn main() !void {
     const allocator = std.heap.c_allocator;
     
     std.debug.print("KL Compiler - Phase 1 MVP\n", .{});
-    std.debug.print("Parser implementation complete!\n", .{});
-    std.debug.print("Run 'zig build test' to see parser tests\n", .{});
+    std.debug.print("Lexer, Parser, and Semantic Analyzer complete!\n", .{});
+    std.debug.print("Run 'zig build test' to see all tests\n", .{});
     
     // Demo: parse a simple inline program
     const source =
@@ -51,9 +52,24 @@ pub fn main() !void {
         std.debug.print("  - {s} ({d} statements)\n", .{cmd.name, cmd.body.items.len});
     }
     
+    // Semantic analysis
+    std.debug.print("\nRunning semantic analysis...\n", .{});
+    var analyzer = try sema.SemanticAnalyzer.init(allocator, &err_reporter);
+    defer analyzer.deinit();
+    
+    analyzer.analyzeModule(module) catch |err| {
+        std.debug.print("Semantic error: {any}\n", .{err});
+        if (err_reporter.diagnostics.items.len > 0) {
+            for (err_reporter.diagnostics.items) |e| {
+                std.debug.print("  {}: {s}\n", .{e.location, e.message});
+            }
+        }
+        return err;
+    };
+    
+    std.debug.print("✓ Semantic analysis passed!\n", .{});
+    
     std.debug.print("\nNext steps:\n", .{});
-    std.debug.print("  - Semantic analysis\n", .{});
-    std.debug.print("  - Type checking\n", .{});
     std.debug.print("  - Code generation (x86-64 native)\n", .{});
 }
 
