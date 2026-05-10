@@ -258,7 +258,7 @@ pub const Parser = struct {
                    self.current_token.type != .kw_else and
                    self.current_token.type != .eof) {
                 const stmt = try self.parseStatement();
-                try elif_body.append(stmt);
+                try elif_body.append(self.allocator, stmt);
             }
             
             try if_node.elif_clauses.append(self.allocator, .{
@@ -275,7 +275,7 @@ pub const Parser = struct {
             while (self.current_token.type != .kw_endif and
                    self.current_token.type != .eof) {
                 const stmt = try self.parseStatement();
-                try else_body.append(stmt);
+                try else_body.append(self.allocator, stmt);
             }
             
             if_node.else_body = else_body;
@@ -670,10 +670,10 @@ test "parse simple integer literal" {
     const allocator = testing.allocator;
     
     const source = "42";
-    var err_reporter = ErrorReporter.init(allocator, source);
+    var err_reporter = ErrorReporter.init(allocator);
     defer err_reporter.deinit();
     
-    var lex = Lexer.init(allocator, source);
+    var lex = Lexer.init(source, "<test>", allocator, &err_reporter);
     var parser = try Parser.init(allocator, &lex, &err_reporter);
     
     const expr = try parser.parseExpression();
@@ -684,7 +684,7 @@ test "parse simple integer literal" {
     }
     
     try testing.expect(expr == .int_literal);
-    try testing.expectEqual(@as(i64, 42), expr.int_literal.lexeme);
+    try testing.expectEqual(@as(i64, 42), expr.int_literal.value);
 }
 
 test "parse simple addition with infix" {
@@ -692,10 +692,10 @@ test "parse simple addition with infix" {
     const allocator = testing.allocator;
     
     const source = "5 + 3";
-    var err_reporter = ErrorReporter.init(allocator, source);
+    var err_reporter = ErrorReporter.init(allocator);
     defer err_reporter.deinit();
     
-    var lex = Lexer.init(allocator, source);
+    var lex = Lexer.init(source, "<test>", allocator, &err_reporter);
     var parser = try Parser.init(allocator, &lex, &err_reporter);
     
     const expr = try parser.parseExpression();
@@ -714,10 +714,10 @@ test "parse prefix function call Add[56, 89]" {
     const allocator = testing.allocator;
     
     const source = "Add[56, 89]";
-    var err_reporter = ErrorReporter.init(allocator, source);
+    var err_reporter = ErrorReporter.init(allocator);
     defer err_reporter.deinit();
     
-    var lex = Lexer.init(allocator, source);
+    var lex = Lexer.init(source, "<test>", allocator, &err_reporter);
     var parser = try Parser.init(allocator, &lex, &err_reporter);
     
     const expr = try parser.parseExpression();
@@ -738,10 +738,10 @@ test "parse left-to-right evaluation" {
     
     // In KL: 2 + 3 * 4 = (2 + 3) * 4 = 20 (left-to-right, no precedence)
     const source = "2 + 3 * 4";
-    var err_reporter = ErrorReporter.init(allocator, source);
+    var err_reporter = ErrorReporter.init(allocator);
     defer err_reporter.deinit();
     
-    var lex = Lexer.init(allocator, source);
+    var lex = Lexer.init(source, "<test>", allocator, &err_reporter);
     var parser = try Parser.init(allocator, &lex, &err_reporter);
     
     const expr = try parser.parseExpression();
@@ -772,10 +772,10 @@ test "parse simple module" {
         \\EndModule
     ;
     
-    var err_reporter = ErrorReporter.init(allocator, source);
+    var err_reporter = ErrorReporter.init(allocator);
     defer err_reporter.deinit();
     
-    var lex = Lexer.init(allocator, source);
+    var lex = Lexer.init(source, "<test>", allocator, &err_reporter);
     var parser = try Parser.init(allocator, &lex, &err_reporter);
     
     const module = try parser.parseModule();
@@ -797,10 +797,10 @@ test "parse command with parameters" {
         \\EndModule
     ;
     
-    var err_reporter = ErrorReporter.init(allocator, source);
+    var err_reporter = ErrorReporter.init(allocator);
     defer err_reporter.deinit();
     
-    var lex = Lexer.init(allocator, source);
+    var lex = Lexer.init(source, "<test>", allocator, &err_reporter);
     var parser = try Parser.init(allocator, &lex, &err_reporter);
     
     const module = try parser.parseModule();
@@ -827,10 +827,10 @@ test "parse if statement" {
         \\EndModule
     ;
     
-    var err_reporter = ErrorReporter.init(allocator, source);
+    var err_reporter = ErrorReporter.init(allocator);
     defer err_reporter.deinit();
     
-    var lex = Lexer.init(allocator, source);
+    var lex = Lexer.init(source, "<test>", allocator, &err_reporter);
     var parser = try Parser.init(allocator, &lex, &err_reporter);
     
     const module = try parser.parseModule();
@@ -854,10 +854,10 @@ test "parse repeat statement" {
         \\EndModule
     ;
     
-    var err_reporter = ErrorReporter.init(allocator, source);
+    var err_reporter = ErrorReporter.init(allocator);
     defer err_reporter.deinit();
     
-    var lex = Lexer.init(allocator, source);
+    var lex = Lexer.init(source, "<test>", allocator, &err_reporter);
     var parser = try Parser.init(allocator, &lex, &err_reporter);
     
     const module = try parser.parseModule();
@@ -880,10 +880,10 @@ test "parse variable declaration with assignment" {
         \\EndModule
     ;
     
-    var err_reporter = ErrorReporter.init(allocator, source);
+    var err_reporter = ErrorReporter.init(allocator);
     defer err_reporter.deinit();
     
-    var lex = Lexer.init(allocator, source);
+    var lex = Lexer.init(source, "<test>", allocator, &err_reporter);
     var parser = try Parser.init(allocator, &lex, &err_reporter);
     
     const module = try parser.parseModule();
@@ -907,10 +907,10 @@ test "parse assignment statement" {
         \\EndModule
     ;
     
-    var err_reporter = ErrorReporter.init(allocator, source);
+    var err_reporter = ErrorReporter.init(allocator);
     defer err_reporter.deinit();
     
-    var lex = Lexer.init(allocator, source);
+    var lex = Lexer.init(source, "<test>", allocator, &err_reporter);
     var parser = try Parser.init(allocator, &lex, &err_reporter);
     
     const module = try parser.parseModule();
@@ -934,10 +934,10 @@ test "parse command invocation" {
         \\EndModule
     ;
     
-    var err_reporter = ErrorReporter.init(allocator, source);
+    var err_reporter = ErrorReporter.init(allocator);
     defer err_reporter.deinit();
     
-    var lex = Lexer.init(allocator, source);
+    var lex = Lexer.init(source, "<test>", allocator, &err_reporter);
     var parser = try Parser.init(allocator, &lex, &err_reporter);
     
     const module = try parser.parseModule();

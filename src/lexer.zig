@@ -597,6 +597,7 @@ fn getKeywordType(lexeme: []const u8) ?TokenType {
 
         // Declarations
         .{ "module", .kw_module },
+        .{ "Module", .kw_module },
         .{ "emodule", .kw_emodule },
         .{ "EndModule", .kw_emodule },
         .{ "cmd", .kw_cmd },
