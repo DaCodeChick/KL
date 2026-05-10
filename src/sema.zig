@@ -371,11 +371,16 @@ pub const SemanticAnalyzer = struct {
         // For MVP, support basic arithmetic functions
         const func_name = call.function_name;
         
+        // Arithmetic functions
         if (std.mem.eql(u8, func_name, "Add") or
             std.mem.eql(u8, func_name, "Sub") or
             std.mem.eql(u8, func_name, "Mul") or
             std.mem.eql(u8, func_name, "Div") or
-            std.mem.eql(u8, func_name, "Mod"))
+            std.mem.eql(u8, func_name, "Mod") or
+            std.mem.eql(u8, func_name, "Subtract") or
+            std.mem.eql(u8, func_name, "Multiply") or
+            std.mem.eql(u8, func_name, "Divide") or
+            std.mem.eql(u8, func_name, "Modulo"))
         {
             // Require 2 arguments
             if (call.arguments.items.len != 2) {
@@ -412,6 +417,44 @@ pub const SemanticAnalyzer = struct {
             }
             
             return arg1_type;
+        }
+        
+        // Comparison functions
+        if (std.mem.eql(u8, func_name, "Equal") or
+            std.mem.eql(u8, func_name, "NotEqual") or
+            std.mem.eql(u8, func_name, "LessThan") or
+            std.mem.eql(u8, func_name, "GreaterThan") or
+            std.mem.eql(u8, func_name, "LessOrEqual") or
+            std.mem.eql(u8, func_name, "GreaterOrEqual") or
+            std.mem.eql(u8, func_name, "Equals") or
+            std.mem.eql(u8, func_name, "Less") or
+            std.mem.eql(u8, func_name, "Greater"))
+        {
+            // Require 2 arguments
+            if (call.arguments.items.len != 2) {
+                try self.err_reporter.report(
+                    call.location,
+                    CompilerError.InvalidSyntax,
+                    "Function '{s}' expects 2 arguments, got {d}",
+                    .{ func_name, call.arguments.items.len },
+                );
+                return CompilerError.InvalidSyntax;
+            }
+            
+            const arg1_type = try self.analyzeExpression(call.arguments.items[0]);
+            const arg2_type = try self.analyzeExpression(call.arguments.items[1]);
+            
+            if (!arg1_type.isCompatible(arg2_type)) {
+                try self.err_reporter.report(
+                    call.location,
+                    CompilerError.TypeMismatch,
+                    "Comparison function requires compatible argument types",
+                    .{},
+                );
+                return CompilerError.TypeMismatch;
+            }
+            
+            return KLType{ .bool_type = {} };
         }
         
         // Unknown function

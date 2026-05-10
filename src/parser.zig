@@ -207,15 +207,17 @@ pub const Parser = struct {
         const var_loc = self.current_token.location;
         try self.expect(.identifier);
         
-        // For MVP, default to TInt32
-        // TODO: Parse type expressions
-        const var_type = types.KLType{ .sint32 = {} };
-        
         var initial_value: ?ast.Node = null;
         if (self.current_token.type == .op_assign) {
             try self.advance();
             initial_value = try self.parseExpression();
         }
+        
+        // Infer type from initial value, or default to sint32
+        const var_type = if (initial_value) |val|
+            self.inferType(val)
+        else
+            types.KLType{ .sint32 = {} };
         
         const var_node = try ast.VarDeclNode.init(
             self.allocator,
@@ -657,6 +659,19 @@ pub const Parser = struct {
             .op_and => .logic_and,
             .op_or => .logic_or,
             else => unreachable,
+        };
+    }
+    
+    /// Infer KL type from an expression node (basic type inference)
+    fn inferType(self: *Parser, expr: ast.Node) types.KLType {
+        _ = self;
+        return switch (expr) {
+            .int_literal => types.KLType{ .sint32 = {} },
+            .char_literal => types.KLType{ .char = {} },
+            .string_literal => types.KLType{ .text = {} },
+            .binary_op => types.KLType{ .sint32 = {} }, // Assume int for now
+            .function_call => types.KLType{ .sint32 = {} }, // Assume int for now
+            else => types.KLType{ .sint32 = {} }, // Default
         };
     }
 };

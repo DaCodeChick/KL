@@ -41,8 +41,23 @@ pub const AsmGenerator = struct {
     pub fn generate(self: *AsmGenerator, program: *const ir.Program) !void {
         try self.emitHeader();
         
+        // Generate all KL functions
         for (program.functions.items) |*func| {
             try self.generateFunction(func);
+        }
+        
+        // Generate main entry point
+        // If there's a function called "Main", call it
+        // Otherwise, call the first function
+        if (program.functions.items.len > 0) {
+            var main_func_name: []const u8 = program.functions.items[0].name;
+            for (program.functions.items) |*func| {
+                if (std.mem.eql(u8, func.name, "Main")) {
+                    main_func_name = "Main";
+                    break;
+                }
+            }
+            try self.generateMainWrapper(main_func_name);
         }
         
         try self.emitFooter();
@@ -104,8 +119,10 @@ pub const AsmGenerator = struct {
                 try self.writeAll("    pushq %rbp\n");
                 try self.writeAll("    movq %rsp, %rbp\n");
                 
-                // Allocate stack space for locals if needed
-                const stack_size = func.locals.items.len * 8;
+                // Allocate stack space for locals (first 128 slots) and temporaries (next 128 slots)
+                // This is simplified - a real compiler would calculate exact needs
+                const stack_size = 2048; // 256 * 8 bytes
+                _ = func; // We'll use a fixed size for now
                 if (stack_size > 0) {
                     try self.print("    subq ${d}, %rsp\n", .{stack_size});
                 }
@@ -114,7 +131,8 @@ pub const AsmGenerator = struct {
                 try self.writeAll("    push rbp\n");
                 try self.writeAll("    mov rbp, rsp\n");
                 
-                const stack_size = func.locals.items.len * 8;
+                const stack_size = 2048;
+                _ = func;
                 if (stack_size > 0) {
                     try self.print("    sub rsp, {d}\n", .{stack_size});
                 }
@@ -131,6 +149,33 @@ pub const AsmGenerator = struct {
             },
             .intel => {
                 try self.writeAll("    mov rsp, rbp\n");
+                try self.writeAll("    pop rbp\n");
+                try self.writeAll("    ret\n\n");
+            },
+        }
+    }
+    
+    fn generateMainWrapper(self: *AsmGenerator, kl_func_name: []const u8) !void {
+        // Generate a C-compatible main function that calls the specified KL function
+        switch (self.format) {
+            .att => {
+                try self.writeAll(".globl main\n");
+                try self.writeAll(".type main, @function\n");
+                try self.writeAll("main:\n");
+                try self.writeAll("    pushq %rbp\n");
+                try self.writeAll("    movq %rsp, %rbp\n");
+                try self.print("    call {s}\n", .{kl_func_name});
+                try self.writeAll("    xorq %rax, %rax  # Return 0\n");
+                try self.writeAll("    popq %rbp\n");
+                try self.writeAll("    ret\n\n");
+            },
+            .intel => {
+                try self.writeAll("global main\n");
+                try self.writeAll("main:\n");
+                try self.writeAll("    push rbp\n");
+                try self.writeAll("    mov rbp, rsp\n");
+                try self.print("    call {s}\n", .{kl_func_name});
+                try self.writeAll("    xor rax, rax  ; Return 0\n");
                 try self.writeAll("    pop rbp\n");
                 try self.writeAll("    ret\n\n");
             },
@@ -154,6 +199,13 @@ pub const AsmGenerator = struct {
             .add => |op| try self.emitBinaryOp("add", op),
             .sub => |op| try self.emitBinaryOp("sub", op),
             .mul => |op| try self.emitBinaryOp("imul", op),
+            .eq => |op| try self.emitComparison("e", op),
+            .ne => |op| try self.emitComparison("ne", op),
+            .lt => |op| try self.emitComparison("l", op),
+            .le => |op| try self.emitComparison("le", op),
+            .gt => |op| try self.emitComparison("g", op),
+            .ge => |op| try self.emitComparison("ge", op),
+            .call => |op| try self.emitCall(op),
             .ret => |op| try self.emitReturn(op),
             .jump => |op| try self.emitJump(op),
             .branch => |op| try self.emitBranch(op),
@@ -203,17 +255,84 @@ pub const AsmGenerator = struct {
     
     fn emitStoreLocal(self: *AsmGenerator, op: anytype) !void {
         const offset = (op.local + 1) * 8;
+        
+        // First, load the value into rax
+        try self.emitLoadValue(op.value);
+        
+        // Then store rax to local
         switch (self.format) {
             .att => try self.print("    movq %rax, -{d}(%rbp)\n", .{offset}),
             .intel => try self.print("    mov [rbp - {d}], rax\n", .{offset}),
         }
     }
     
+    fn emitLoadValue(self: *AsmGenerator, value: ir.Value) !void {
+        switch (value) {
+            .constant => |c| {
+                switch (self.format) {
+                    .att => {
+                        switch (c) {
+                            .int => |val| try self.print("    movq ${d}, %rax\n", .{val}),
+                            .uint => |val| try self.print("    movq ${d}, %rax\n", .{val}),
+                            .bool => |val| try self.print("    movq ${d}, %rax\n", .{@as(i64, if (val) 1 else 0)}),
+                            .string => try self.writeAll("    # TODO: Load string address\n"),
+                        }
+                    },
+                    .intel => {
+                        switch (c) {
+                            .int => |val| try self.print("    mov rax, {d}\n", .{val}),
+                            .uint => |val| try self.print("    mov rax, {d}\n", .{val}),
+                            .bool => |val| try self.print("    mov rax, {d}\n", .{@as(i64, if (val) 1 else 0)}),
+                            .string => try self.writeAll("    ; TODO: Load string address\n"),
+                        }
+                    },
+                }
+            },
+            .local => |local_idx| {
+                const local_offset = (local_idx + 1) * 8;
+                switch (self.format) {
+                    .att => try self.print("    movq -{d}(%rbp), %rax\n", .{local_offset}),
+                    .intel => try self.print("    mov rax, [rbp - {d}]\n", .{local_offset}),
+                }
+            },
+            .temporary => |temp_idx| {
+                // For now, assume temporaries are spilled to stack at a fixed location
+                // This is a simplification - a real compiler would do register allocation
+                const temp_offset = 1024 + (temp_idx * 8);
+                switch (self.format) {
+                    .att => try self.print("    movq -{d}(%rbp), %rax\n", .{temp_offset}),
+                    .intel => try self.print("    mov rax, [rbp - {d}]\n", .{temp_offset}),
+                }
+            },
+        }
+    }
+    
     fn emitBinaryOp(self: *AsmGenerator, op_name: []const u8, op: ir.BinaryOp) !void {
-        // Simplified: assume operands are in registers
-        // Real implementation would handle different value types
-        _ = op;
+        // Load left operand into rax
+        try self.emitLoadValue(op.left);
         
+        // Save left operand to a temporary location (push onto stack)
+        switch (self.format) {
+            .att => try self.writeAll("    pushq %rax\n"),
+            .intel => try self.writeAll("    push rax\n"),
+        }
+        
+        // Load right operand into rax
+        try self.emitLoadValue(op.right);
+        
+        // Move right operand to rbx
+        switch (self.format) {
+            .att => try self.writeAll("    movq %rax, %rbx\n"),
+            .intel => try self.writeAll("    mov rbx, rax\n"),
+        }
+        
+        // Pop left operand back into rax
+        switch (self.format) {
+            .att => try self.writeAll("    popq %rax\n"),
+            .intel => try self.writeAll("    pop rax\n"),
+        }
+        
+        // Perform operation
         switch (self.format) {
             .att => {
                 try self.print("    {s}q %rbx, %rax\n", .{op_name});
@@ -221,6 +340,124 @@ pub const AsmGenerator = struct {
             .intel => {
                 try self.print("    {s} rax, rbx\n", .{op_name});
             },
+        }
+        
+        // Store result to destination if it's a temporary
+        switch (op.dest) {
+            .temporary => |temp_idx| {
+                const temp_offset = 1024 + (temp_idx * 8);
+                switch (self.format) {
+                    .att => try self.print("    movq %rax, -{d}(%rbp)\n", .{temp_offset}),
+                    .intel => try self.print("    mov [rbp - {d}], rax\n", .{temp_offset}),
+                }
+            },
+            else => {},
+        }
+    }
+    
+    fn emitComparison(self: *AsmGenerator, cond_code: []const u8, op: ir.BinaryOp) !void {
+        // Load left operand into rax
+        try self.emitLoadValue(op.left);
+        
+        // Save left operand to a temporary location (push onto stack)
+        switch (self.format) {
+            .att => try self.writeAll("    pushq %rax\n"),
+            .intel => try self.writeAll("    push rax\n"),
+        }
+        
+        // Load right operand into rax
+        try self.emitLoadValue(op.right);
+        
+        // Move right operand to rbx
+        switch (self.format) {
+            .att => try self.writeAll("    movq %rax, %rbx\n"),
+            .intel => try self.writeAll("    mov rbx, rax\n"),
+        }
+        
+        // Pop left operand back into rax
+        switch (self.format) {
+            .att => try self.writeAll("    popq %rax\n"),
+            .intel => try self.writeAll("    pop rax\n"),
+        }
+        
+        // Compare
+        switch (self.format) {
+            .att => {
+                try self.writeAll("    cmpq %rbx, %rax\n");
+                // Set result based on comparison
+                try self.print("    set{s} %al\n", .{cond_code});
+                try self.writeAll("    movzbq %al, %rax\n"); // Zero-extend to 64-bit
+            },
+            .intel => {
+                try self.writeAll("    cmp rax, rbx\n");
+                try self.print("    set{s} al\n", .{cond_code});
+                try self.writeAll("    movzx rax, al\n");
+            },
+        }
+        
+        // Store result to destination if it's a temporary
+        switch (op.dest) {
+            .temporary => |temp_idx| {
+                const temp_offset = 1024 + (temp_idx * 8);
+                switch (self.format) {
+                    .att => try self.print("    movq %rax, -{d}(%rbp)\n", .{temp_offset}),
+                    .intel => try self.print("    mov [rbp - {d}], rax\n", .{temp_offset}),
+                }
+            },
+            else => {},
+        }
+    }
+    
+    fn emitCall(self: *AsmGenerator, op: anytype) !void {
+        // For x86-64 System V ABI (Linux):
+        // Arguments go in: rdi, rsi, rdx, rcx, r8, r9, then stack
+        // For simplicity, we'll use a basic calling convention:
+        // - Load all arguments onto the stack in reverse order
+        // - Call the function
+        // - Result is in rax
+        
+        const arg_regs_att = [_][]const u8{ "%rdi", "%rsi", "%rdx", "%rcx", "%r8", "%r9" };
+        const arg_regs_intel = [_][]const u8{ "rdi", "rsi", "rdx", "rcx", "r8", "r9" };
+        
+        // Load arguments into registers (up to 6 args)
+        for (op.args, 0..) |arg, i| {
+            if (i >= 6) break; // Only handle first 6 args for now
+            
+            // Load argument value into rax
+            try self.emitLoadValue(arg);
+            
+            // Move to appropriate register
+            switch (self.format) {
+                .att => try self.print("    movq %rax, {s}\n", .{arg_regs_att[i]}),
+                .intel => try self.print("    mov {s}, rax\n", .{arg_regs_intel[i]}),
+            }
+        }
+        
+        // Call the function
+        switch (self.format) {
+            .att => try self.print("    call {s}\n", .{op.function}),
+            .intel => try self.print("    call {s}\n", .{op.function}),
+        }
+        
+        // Store result if destination is specified
+        if (op.dest) |dest| {
+            switch (dest) {
+                .temporary => |temp_idx| {
+                    const temp_offset = 1024 + (temp_idx * 8);
+                    switch (self.format) {
+                        .att => try self.print("    movq %rax, -{d}(%rbp)\n", .{temp_offset}),
+                        .intel => try self.print("    mov [rbp - {d}], rax\n", .{temp_offset}),
+                    }
+                },
+                .local => |local_idx| {
+                    const local_offset = (local_idx + 1) * 8;
+                    switch (self.format) {
+                        .att => try self.print("    movq %rax, -{d}(%rbp)\n", .{local_offset}),
+                        .intel => try self.print("    mov [rbp - {d}], rax\n", .{local_offset}),
+                    }
+                },
+                else => {},
+            }
         }
     }
     
