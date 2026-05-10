@@ -72,19 +72,23 @@ pub const IRGenerator = struct {
     fn generateStatement(self: *IRGenerator, stmt: ast.Node) !void {
         switch (stmt) {
             .var_decl => |var_decl| try self.generateVarDecl(var_decl),
-            .assign => |assign| try self.generateAssign(assign),
+            .assignment => |assignment| try self.generateAssign(assignment),
             .if_stmt => |if_stmt| try self.generateIf(if_stmt),
             .repeat_stmt => |repeat| try self.generateRepeat(repeat),
-            .expr => |expr| {
-                // Standalone expression (e.g., function call for side effects)
-                _ = try self.generateExpression(expr.*);
+            .command_invocation => |cmd| {
+                // Standalone command invocation
+                try self.generateCommandInvocation(cmd);
+            },
+            .function_call => {
+                // Standalone function call (for side effects)
+                _ = try self.generateExpression(stmt);
             },
             else => {},
         }
     }
     
     /// Generate IR for variable declaration
-    fn generateVarDecl(self: *IRGenerator, var_decl: *ast.VarDeclNode) !void {
+    fn generateVarDecl(self: *IRGenerator, var_decl: *ast.VarDeclNode) error{OutOfMemory, UndefinedVariable}!void {
         const func = self.current_function.?;
         const block = self.current_block.?;
         
@@ -97,8 +101,8 @@ pub const IRGenerator = struct {
         try self.var_map.put(var_decl.name, local_index);
         
         // Generate initialization if present
-        if (var_decl.initial_value) |*init_expr| {
-            const init_value = try self.generateExpression(init_expr.*);
+        if (var_decl.initial_value) |init_expr| {
+            const init_value = try self.generateExpression(init_expr);
             try block.addInstruction(.{
                 .store_local = .{
                     .local = local_index,
@@ -109,14 +113,14 @@ pub const IRGenerator = struct {
     }
     
     /// Generate IR for assignment
-    fn generateAssign(self: *IRGenerator, assign: *ast.AssignNode) !void {
+    fn generateAssign(self: *IRGenerator, assignment: *ast.AssignmentNode) error{OutOfMemory, UndefinedVariable}!void {
         const block = self.current_block.?;
         
         // Look up variable
-        const local_index = self.var_map.get(assign.target) orelse return error.UndefinedVariable;
+        const local_index = self.var_map.get(assignment.target) orelse return error.UndefinedVariable;
         
         // Generate value expression
-        const value = try self.generateExpression(assign.value.*);
+        const value = try self.generateExpression(assignment.value);
         
         // Store to local
         try block.addInstruction(.{
@@ -127,13 +131,35 @@ pub const IRGenerator = struct {
         });
     }
     
+    /// Generate IR for command invocation
+    fn generateCommandInvocation(self: *IRGenerator, cmd: *ast.CommandInvocationNode) error{OutOfMemory, UndefinedVariable}!void {
+        const block = self.current_block.?;
+        
+        // Generate arguments
+        var args = try self.allocator.alloc(ir.Value, cmd.arguments.items.len);
+        for (cmd.arguments.items, 0..) |arg, i| {
+            args[i] = try self.generateExpression(arg);
+        }
+        
+        const dest_temp = self.nextTemp();
+        const dest = ir.Value{ .temporary = dest_temp };
+        
+        try block.addInstruction(.{
+            .call = .{
+                .dest = dest,
+                .function = cmd.command_name,
+                .args = args,
+            },
+        });
+    }
+    
     /// Generate IR for if statement
-    fn generateIf(self: *IRGenerator, if_stmt: *ast.IfStmtNode) !void {
+    fn generateIf(self: *IRGenerator, if_stmt: *ast.IfStmtNode) error{OutOfMemory, UndefinedVariable}!void {
         const func = self.current_function.?;
         const block = self.current_block.?;
         
         // Generate condition
-        const cond_value = try self.generateExpression(if_stmt.condition.*);
+        const cond_value = try self.generateExpression(if_stmt.condition);
         
         // Create labels
         const then_label = try self.makeLabel("then");
@@ -155,8 +181,8 @@ pub const IRGenerator = struct {
         // Generate then block
         var then_block = ir.BasicBlock.init(self.allocator, then_label);
         self.current_block = &then_block;
-        for (if_stmt.then_body.items) |*stmt| {
-            try self.generateStatement(stmt.*);
+        for (if_stmt.then_body.items) |stmt| {
+            try self.generateStatement(stmt);
         }
         try then_block.addInstruction(.{ .jump = .{ .target = endif_label } });
         try func.addBlock(then_block);
@@ -165,8 +191,8 @@ pub const IRGenerator = struct {
         if (if_stmt.else_body) |else_body| {
             var else_block = ir.BasicBlock.init(self.allocator, else_label);
             self.current_block = &else_block;
-            for (else_body.items) |*stmt| {
-                try self.generateStatement(stmt.*);
+            for (else_body.items) |stmt| {
+                try self.generateStatement(stmt);
             }
             try else_block.addInstruction(.{ .jump = .{ .target = endif_label } });
             try func.addBlock(else_block);
@@ -179,7 +205,7 @@ pub const IRGenerator = struct {
     }
     
     /// Generate IR for repeat statement
-    fn generateRepeat(self: *IRGenerator, repeat: *ast.RepeatStmtNode) !void {
+    fn generateRepeat(self: *IRGenerator, repeat: *ast.RepeatStmtNode) error{OutOfMemory, UndefinedVariable}!void {
         const func = self.current_function.?;
         
         // Create loop counter variable
@@ -198,8 +224,11 @@ pub const IRGenerator = struct {
             },
         });
         
-        // Generate iteration count
-        const count_value = try self.generateExpression(repeat.count.*);
+        // Generate iteration count (if specified)
+        const count_value = if (repeat.count) |count|
+            try self.generateExpression(count)
+        else
+            ir.Value{ .constant = .{ .uint = 0xFFFFFFFF } }; // Max iterations for infinite loop
         
         // Create labels
         const loop_label = try self.makeLabel("loop");
@@ -241,8 +270,8 @@ pub const IRGenerator = struct {
         // Loop body
         var body_block = ir.BasicBlock.init(self.allocator, body_label);
         self.current_block = &body_block;
-        for (repeat.body.items) |*stmt| {
-            try self.generateStatement(stmt.*);
+        for (repeat.body.items) |stmt| {
+            try self.generateStatement(stmt);
         }
         
         // Increment counter
@@ -283,13 +312,16 @@ pub const IRGenerator = struct {
         const block = self.current_block.?;
         
         switch (expr) {
-            .literal => |lit| {
-                return switch (lit.value) {
-                    .integer => |i| ir.Value{ .constant = .{ .int = i } },
-                    .boolean => |b| ir.Value{ .constant = .{ .bool = b } },
-                    .string => |s| ir.Value{ .constant = .{ .string = s } },
-                    .char => |c| ir.Value{ .constant = .{ .int = c } },
-                };
+            .int_literal => |lit| {
+                return ir.Value{ .constant = .{ .int = lit.value } };
+            },
+            
+            .char_literal => |lit| {
+                return ir.Value{ .constant = .{ .int = @intCast(lit.value) } };
+            },
+            
+            .string_literal => |lit| {
+                return ir.Value{ .constant = .{ .string = lit.value } };
             },
             
             .identifier => |ident| {
@@ -305,25 +337,25 @@ pub const IRGenerator = struct {
             },
             
             .binary_op => |bin_op| {
-                const left = try self.generateExpression(bin_op.left.*);
-                const right = try self.generateExpression(bin_op.right.*);
+                const left = try self.generateExpression(bin_op.left);
+                const right = try self.generateExpression(bin_op.right);
                 const dest_temp = self.nextTemp();
                 const dest = ir.Value{ .temporary = dest_temp };
                 
                 const instr = switch (bin_op.op) {
                     .add => ir.Instruction{ .add = .{ .dest = dest, .left = left, .right = right } },
-                    .subtract => ir.Instruction{ .sub = .{ .dest = dest, .left = left, .right = right } },
-                    .multiply => ir.Instruction{ .mul = .{ .dest = dest, .left = left, .right = right } },
-                    .divide => ir.Instruction{ .div = .{ .dest = dest, .left = left, .right = right } },
-                    .modulo => ir.Instruction{ .mod = .{ .dest = dest, .left = left, .right = right } },
-                    .equal => ir.Instruction{ .eq = .{ .dest = dest, .left = left, .right = right } },
-                    .not_equal => ir.Instruction{ .ne = .{ .dest = dest, .left = left, .right = right } },
-                    .less_than => ir.Instruction{ .lt = .{ .dest = dest, .left = left, .right = right } },
-                    .less_equal => ir.Instruction{ .le = .{ .dest = dest, .left = left, .right = right } },
-                    .greater_than => ir.Instruction{ .gt = .{ .dest = dest, .left = left, .right = right } },
-                    .greater_equal => ir.Instruction{ .ge = .{ .dest = dest, .left = left, .right = right } },
-                    .bool_and => ir.Instruction{ .bool_and = .{ .dest = dest, .left = left, .right = right } },
-                    .bool_or => ir.Instruction{ .bool_or = .{ .dest = dest, .left = left, .right = right } },
+                    .sub => ir.Instruction{ .sub = .{ .dest = dest, .left = left, .right = right } },
+                    .mul => ir.Instruction{ .mul = .{ .dest = dest, .left = left, .right = right } },
+                    .div => ir.Instruction{ .div = .{ .dest = dest, .left = left, .right = right } },
+                    .mod => ir.Instruction{ .mod = .{ .dest = dest, .left = left, .right = right } },
+                    .eq => ir.Instruction{ .eq = .{ .dest = dest, .left = left, .right = right } },
+                    .neq => ir.Instruction{ .ne = .{ .dest = dest, .left = left, .right = right } },
+                    .lt => ir.Instruction{ .lt = .{ .dest = dest, .left = left, .right = right } },
+                    .lte => ir.Instruction{ .le = .{ .dest = dest, .left = left, .right = right } },
+                    .gt => ir.Instruction{ .gt = .{ .dest = dest, .left = left, .right = right } },
+                    .gte => ir.Instruction{ .ge = .{ .dest = dest, .left = left, .right = right } },
+                    .logic_and => ir.Instruction{ .bool_and = .{ .dest = dest, .left = left, .right = right } },
+                    .logic_or => ir.Instruction{ .bool_or = .{ .dest = dest, .left = left, .right = right } },
                 };
                 
                 try block.addInstruction(instr);
@@ -331,13 +363,13 @@ pub const IRGenerator = struct {
             },
             
             .unary_op => |un_op| {
-                const operand = try self.generateExpression(un_op.operand.*);
+                const operand = try self.generateExpression(un_op.operand);
                 const dest_temp = self.nextTemp();
                 const dest = ir.Value{ .temporary = dest_temp };
                 
                 const instr = switch (un_op.op) {
                     .negate => ir.Instruction{ .neg = .{ .dest = dest, .operand = operand } },
-                    .bool_not => ir.Instruction{ .bool_not = .{ .dest = dest, .operand = operand } },
+                    .logic_not => ir.Instruction{ .bool_not = .{ .dest = dest, .operand = operand } },
                 };
                 
                 try block.addInstruction(instr);
@@ -347,8 +379,8 @@ pub const IRGenerator = struct {
             .function_call => |call| {
                 // Generate arguments
                 var args = try self.allocator.alloc(ir.Value, call.arguments.items.len);
-                for (call.arguments.items, 0..) |*arg, i| {
-                    args[i] = try self.generateExpression(arg.*);
+                for (call.arguments.items, 0..) |arg, i| {
+                    args[i] = try self.generateExpression(arg);
                 }
                 
                 const dest_temp = self.nextTemp();
@@ -357,7 +389,7 @@ pub const IRGenerator = struct {
                 try block.addInstruction(.{
                     .call = .{
                         .dest = dest,
-                        .function = call.name,
+                        .function = call.function_name,
                         .args = args,
                     },
                 });

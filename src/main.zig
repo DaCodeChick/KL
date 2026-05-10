@@ -8,6 +8,8 @@ pub const parser = @import("parser.zig");
 pub const sema = @import("sema.zig");
 pub const ir = @import("ir.zig");
 pub const irgen = @import("irgen.zig");
+pub const backend = @import("backend.zig");
+pub const codegen = @import("codegen.zig");
 
 pub fn main(init: std.process.Init) !void {
     // Create arena allocator for automatic memory cleanup
@@ -96,22 +98,89 @@ fn compileFile(allocator: std.mem.Allocator, io: std.Io, filename: []const u8) !
     
     std.debug.print("✓ Semantic analysis passed!\n", .{});
     
-    // IR generation (TODO: Fix AST node name mismatches)
-    // std.debug.print("Generating intermediate representation...\n", .{});
-    // var ir_generator = try irgen.IRGenerator.init(allocator);
+    // IR generation
+    std.debug.print("Generating intermediate representation...\n", .{});
+    var ir_generator = try irgen.IRGenerator.init(allocator);
     // Note: arena allocator will clean this up automatically
     
-    // try ir_generator.generateModule(module);
+    try ir_generator.generateModule(module);
     
-    // std.debug.print("✓ IR generation complete!\n\n", .{});
+    std.debug.print("✓ IR generation complete!\n\n", .{});
     
-    // Print IR for inspection
-    // std.debug.print("Generated IR:\n", .{});
-    // std.debug.print("=============\n", .{});
-    // try ir.printProgram(ir_generator.program, std.io.getStdErr().writer());
-    // std.debug.print("\n", .{});
+    // Print IR summary
+    std.debug.print("Generated IR:\n", .{});
+    std.debug.print("=============\n", .{});
+    std.debug.print("Functions: {d}\n", .{ir_generator.program.functions.items.len});
+    for (ir_generator.program.functions.items) |func| {
+        std.debug.print("  - {s} ({d} locals, {d} blocks)\n", .{
+            func.name,
+            func.locals.items.len,
+            func.basic_blocks.items.len,
+        });
+    }
+    std.debug.print("\n", .{});
     
-    std.debug.print("\nNext: Code generation (not yet implemented)\n", .{});
+    // Code generation
+    std.debug.print("Generating assembly code...\n", .{});
+    
+    // Determine output filename
+    const output_file = try std.mem.concat(allocator, u8, &.{
+        std.fs.path.stem(filename),
+        ".s",
+    });
+    
+    // Generate assembly
+    var asm_gen = codegen.AsmGenerator.init(
+        allocator,
+        .att,  // AT&T syntax for GCC/Clang
+        .x86_64_linux,
+    );
+    defer asm_gen.deinit();
+    
+    try asm_gen.generate(ir_generator.program);
+    
+    // Write assembly to file
+    const asm_file = try std.Io.Dir.createFile(
+        std.Io.Dir.cwd(),
+        io,
+        output_file,
+        .{},
+    );
+    defer asm_file.close(io);
+    
+    const asm_output = asm_gen.getOutput();
+    _ = try asm_file.writePositionalAll(io, asm_output, 0);
+    
+    std.debug.print("✓ Assembly code written to: {s}\n", .{output_file});
+    
+    // Assemble and link
+    std.debug.print("\nAssembling and linking...\n", .{});
+    
+    const exe_name = std.fs.path.stem(filename);
+    
+    // Use GCC to assemble and link
+    const result = try std.process.run(allocator, io, .{
+        .argv = &.{
+            "gcc",
+            "-no-pie",  // Disable position independent executable for simpler assembly
+            output_file,
+            "-o",
+            exe_name,
+        },
+    });
+    defer allocator.free(result.stdout);
+    defer allocator.free(result.stderr);
+    
+    if (result.term == .exited and result.term.exited == 0) {
+        std.debug.print("✓ Executable created: {s}\n", .{exe_name});
+        std.debug.print("\nCompilation successful!\n", .{});
+    } else {
+        std.debug.print("✗ Assembly/linking failed\n", .{});
+        if (result.stderr.len > 0) {
+            std.debug.print("Error output:\n{s}\n", .{result.stderr});
+        }
+        return error.AssemblyFailed;
+    }
 }
 
 fn runDemo(allocator: std.mem.Allocator) !void {
@@ -175,17 +244,27 @@ fn runDemo(allocator: std.mem.Allocator) !void {
     
     std.debug.print("✓ Semantic analysis passed!\n", .{});
     
-    // IR generation (TODO: Fix AST node name mismatches)
-    // std.debug.print("\nGenerating IR...\n", .{});
-    // var ir_generator = try irgen.IRGenerator.init(allocator);
+    // IR generation
+    std.debug.print("\nGenerating IR...\n", .{});
+    var ir_generator = try irgen.IRGenerator.init(allocator);
     // Note: arena allocator will clean this up automatically
     
-    // try ir_generator.generateModule(module);
+    try ir_generator.generateModule(module);
     
-    // std.debug.print("✓ IR generation complete!\n\n", .{});
+    std.debug.print("✓ IR generation complete!\n\n", .{});
     
-    // Print IR
-    // try ir.printProgram(ir_generator.program, std.io.getStdErr().writer());
+    // Print IR summary
+    std.debug.print("Generated IR:\n", .{});
+    std.debug.print("=============\n", .{});
+    std.debug.print("Functions: {d}\n", .{ir_generator.program.functions.items.len});
+    for (ir_generator.program.functions.items) |func| {
+        std.debug.print("  - {s} ({d} locals, {d} blocks)\n", .{
+            func.name,
+            func.locals.items.len,
+            func.basic_blocks.items.len,
+        });
+    }
+    std.debug.print("\n", .{});
 }
 
 test {
