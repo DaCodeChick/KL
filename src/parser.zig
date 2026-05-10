@@ -77,7 +77,7 @@ pub const Parser = struct {
         // Parse commands until EndModule
         while (self.current_token.type != .kw_emodule and 
                self.current_token.type != .eof) {
-            // Skip and collect pragmas before command
+            // Skip and collect pragmas before command/function
             var pragma: ?[]const u8 = null;
             if (self.current_token.type == .pragma) {
                 pragma = self.current_token.lexeme;
@@ -91,14 +91,21 @@ pub const Parser = struct {
                     try self.applyPragmaToCommand(cmd, pragma_text);
                 }
                 try module_node.commands.append(self.allocator, cmd);
+            } else if (self.current_token.type == .kw_function) {
+                const func = try self.parseFunction();
+                // If we had a pragma, parse it and set native hook
+                if (pragma) |pragma_text| {
+                    try self.applyPragmaToFunction(func, pragma_text);
+                }
+                try module_node.functions.append(self.allocator, func);
             } else if (self.current_token.type == .pragma) {
-                // Pragma without following command - just skip it
+                // Pragma without following command/function - just skip it
                 try self.advance();
             } else {
                 try self.error_reporter.report(
                     self.current_token.location,
                     error.InvalidSyntax,
-                    "Expected Command or EndModule, got {s}",
+                    "Expected Command, Function, or EndModule, got {s}",
                     .{ @tagName(self.current_token.type) }
                 );
                 return error.UnexpectedToken;
@@ -182,6 +189,59 @@ pub const Parser = struct {
         );
         
         return param_node;
+    }
+
+    /// Parse a type expression
+    fn parseType(self: *Parser) !types.KLType {
+        return switch (self.current_token.type) {
+            .kw_uint => blk: {
+                try self.advance();
+                // For now, default to uint32
+                break :blk types.KLType{ .uint32 = {} };
+            },
+            .kw_sint => blk: {
+                try self.advance();
+                // For now, default to sint32
+                break :blk types.KLType{ .sint32 = {} };
+            },
+            .kw_bool => blk: {
+                try self.advance();
+                break :blk types.KLType{ .bool_type = {} };
+            },
+            .kw_char => blk: {
+                try self.advance();
+                break :blk types.KLType{ .char = {} };
+            },
+            .identifier => blk: {
+                // Check for type names like "uint32", "text", etc.
+                const type_name = self.current_token.lexeme;
+                try self.advance();
+                
+                if (std.mem.eql(u8, type_name, "uint32")) {
+                    break :blk types.KLType{ .uint32 = {} };
+                } else if (std.mem.eql(u8, type_name, "uint8")) {
+                    break :blk types.KLType{ .uint8 = {} };
+                } else if (std.mem.eql(u8, type_name, "sint32")) {
+                    break :blk types.KLType{ .sint32 = {} };
+                } else if (std.mem.eql(u8, type_name, "sint8")) {
+                    break :blk types.KLType{ .sint8 = {} };
+                } else if (std.mem.eql(u8, type_name, "text")) {
+                    break :blk types.KLType{ .text = {} };
+                } else {
+                    // Unknown type, default to uint32 for now
+                    break :blk types.KLType{ .uint32 = {} };
+                }
+            },
+            else => {
+                try self.error_reporter.report(
+                    self.current_token.location,
+                    error.InvalidSyntax,
+                    "Expected type, got {s}",
+                    .{ @tagName(self.current_token.type) }
+                );
+                return error.UnexpectedToken;
+            },
+        };
     }
 
     /// Parse a statement (commands/control flow)
@@ -713,6 +773,137 @@ pub const Parser = struct {
     }
     
     /// Apply pragma annotation to a command
+    /// Parse a function implementation
+    fn parseFunction(self: *Parser) !*ast.FunctionImplNode {
+        try self.expect(.kw_function);
+        
+        const func_name = self.current_token.lexeme;
+        const func_loc = self.current_token.location;
+        try self.expect(.identifier);
+        
+        const func_node = try ast.FunctionImplNode.init(self.allocator, func_loc, func_name);
+        errdefer func_node.deinit(self.allocator);
+        
+        // Check for declaration-only syntax: Function Name[params...] Return expr
+        // vs full body syntax: Function Name ... EndFunction
+        const is_declaration_only = self.current_token.type == .lbracket;
+        
+        if (is_declaration_only) {
+            // Declaration-only syntax for native functions
+            try self.advance(); // consume '['
+            
+            // Parse parameters
+            while (self.current_token.type != .rbracket and 
+                   self.current_token.type != .eof) {
+                const param_name = self.current_token.lexeme;
+                const param_loc = self.current_token.location;
+                try self.expect(.identifier);
+                
+                // Check for variadic marker (...)
+                var is_variadic = false;
+                if (self.current_token.type == .ellipsis) {
+                    is_variadic = true;
+                    try self.advance();
+                }
+                
+                // For now, use a default type
+                const param_type = types.KLType{ .uint32 = {} };
+                
+                const param_node = try ast.ParamDeclNode.init(
+                    self.allocator,
+                    param_loc,
+                    param_name,
+                    param_type,
+                    null
+                );
+                param_node.is_variadic = is_variadic;
+                
+                try func_node.parameters.append(self.allocator, param_node);
+                
+                if (self.current_token.type == .comma) {
+                    try self.advance();
+                } else if (self.current_token.type != .rbracket) {
+                    try self.error_reporter.report(
+                        self.current_token.location,
+                        error.InvalidSyntax,
+                        "Expected ',' or ']' in parameter list",
+                        .{}
+                    );
+                    return error.UnexpectedToken;
+                }
+            }
+            
+            try self.expect(.rbracket);
+            
+            // Expect: Return <identifier>
+            try self.expect(.kw_return);
+            const return_identifier = self.current_token.lexeme;
+            const return_loc = self.current_token.location;
+            try self.expect(.identifier);
+            
+            // Create an identifier node for the return value
+            const id_node = try ast.IdentifierNode.init(self.allocator, return_loc, return_identifier);
+            func_node.return_expr = ast.Node{ .identifier = id_node };
+            
+            // Declaration-only: no EndFunction
+            return func_node;
+        } else {
+            // Full body syntax
+            // Parse parameters inside body using Parameter keyword
+            while (self.current_token.type == .kw_prm) {
+                try self.advance(); // consume 'Parameter'
+                
+                const param_name = self.current_token.lexeme;
+                const param_loc = self.current_token.location;
+                try self.expect(.identifier);
+                
+                // Check for variadic marker (...)
+                var is_variadic = false;
+                if (self.current_token.type == .ellipsis) {
+                    is_variadic = true;
+                    try self.advance();
+                }
+                
+                // Expect colon and type
+                try self.expect(.colon);
+                const param_type = try self.parseType();
+                
+                const param_node = try ast.ParamDeclNode.init(
+                    self.allocator,
+                    param_loc,
+                    param_name,
+                    param_type,
+                    null
+                );
+                param_node.is_variadic = is_variadic;
+                
+                try func_node.parameters.append(self.allocator, param_node);
+            }
+            
+            // Parse Return statement
+            if (self.current_token.type == .kw_return) {
+                try self.advance();
+                const return_expr = try self.parseExpression();
+                func_node.return_expr = return_expr;
+            }
+            
+            // Expect EndFunction
+            try self.expect(.kw_efunction);
+            
+            return func_node;
+        }
+    }
+
+    fn applyPragmaToFunction(self: *Parser, func: *ast.FunctionImplNode, pragma_text: []const u8) !void {
+        _ = self;
+        const trimmed = std.mem.trim(u8, pragma_text, " \t\n\r");
+        
+        if (std.mem.startsWith(u8, trimmed, "native ")) {
+            const hook_name = std.mem.trim(u8, trimmed["native ".len..], " \t\n\r");
+            func.native_hook = hook_name;
+        }
+    }
+
     fn applyPragmaToCommand(self: *Parser, cmd: *ast.CommandImplNode, pragma_text: []const u8) !void {
         _ = self; // Unused for now
         // Parse pragma text: expected format is "native <hook_name>"

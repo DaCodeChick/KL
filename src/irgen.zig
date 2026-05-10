@@ -36,6 +36,9 @@ pub const IRGenerator = struct {
         for (module.commands.items) |cmd| {
             try self.generateCommand(cmd);
         }
+        for (module.functions.items) |func| {
+            try self.generateFunction(func);
+        }
     }
     
     /// Generate IR for a command (function)
@@ -63,6 +66,54 @@ pub const IRGenerator = struct {
         const entry = &func.basic_blocks.items[0];
         if (entry.instructions.items.len == 0 or 
             entry.instructions.items[entry.instructions.items.len - 1] != .ret) {
+            try entry.addInstruction(.{ .ret = .{ .value = null } });
+        }
+        
+        try self.program.addFunction(func);
+        self.current_function = null;
+        self.current_block = null;
+    }
+    
+    /// Generate IR for a function implementation
+    fn generateFunction(self: *IRGenerator, func_node: *const ast.FunctionImplNode) !void {
+        // Skip native functions - they don't have IR bodies
+        if (func_node.native_hook != null) {
+            return;
+        }
+        
+        var func = ir.Function.init(self.allocator, func_node.name);
+        self.current_function = &func;
+        self.var_map.clearRetainingCapacity();
+        self.next_temp = 0;
+        self.next_label = 0;
+        
+        // Create and add entry block
+        const entry_block = ir.BasicBlock.init(self.allocator, "entry");
+        try func.addBlock(entry_block);
+        self.current_block = &func.basic_blocks.items[func.basic_blocks.items.len - 1];
+        
+        // Map parameters to locals
+        for (func_node.parameters.items, 0..) |param, i| {
+            const local_index: u32 = @intCast(func.locals.items.len);
+            try func.addLocal(.{
+                .name = param.name,
+                .ty = param.param_type,
+            });
+            try self.var_map.put(param.name, local_index);
+            
+            // For now, assume parameters are passed in order
+            // In a real implementation, we'd need to handle variadic parameters specially
+            _ = i;
+        }
+        
+        // Generate IR for return expression
+        if (func_node.return_expr) |return_expr| {
+            const return_value = try self.generateExpression(return_expr);
+            const entry = &func.basic_blocks.items[0];
+            try entry.addInstruction(.{ .ret = .{ .value = return_value } });
+        } else {
+            // No return expression - add void return
+            const entry = &func.basic_blocks.items[0];
             try entry.addInstruction(.{ .ret = .{ .value = null } });
         }
         

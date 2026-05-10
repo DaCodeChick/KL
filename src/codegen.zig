@@ -10,6 +10,7 @@ pub const AsmGenerator = struct {
     format: backend.Backend.AssemblyFormat,
     target: backend.Backend.Target,
     label_counter: u32 = 0,
+    current_function_name: ?[]const u8 = null, // For scoping block labels
     
     pub fn init(allocator: std.mem.Allocator, fmt: backend.Backend.AssemblyFormat, target: backend.Backend.Target) AsmGenerator {
         return .{
@@ -89,6 +90,9 @@ pub const AsmGenerator = struct {
     }
     
     fn generateFunction(self: *AsmGenerator, func: *const ir.Function) !void {
+        // Store current function name for label scoping
+        self.current_function_name = func.name;
+        
         // Emit function label
         switch (self.format) {
             .att => {
@@ -112,6 +116,8 @@ pub const AsmGenerator = struct {
         
         // Function epilogue
         try self.emitEpilogue();
+        
+        self.current_function_name = null;
     }
     
     fn emitPrologue(self: *AsmGenerator, func: *const ir.Function) !void {
@@ -184,8 +190,12 @@ pub const AsmGenerator = struct {
     }
     
     fn generateBasicBlock(self: *AsmGenerator, block: *const ir.BasicBlock) !void {
-        // Emit block label
-        try self.print("{s}:\n", .{block.label});
+        // Emit block label with function scope to avoid collisions
+        if (self.current_function_name) |func_name| {
+            try self.print(".L{s}_{s}:\n", .{func_name, block.label});
+        } else {
+            try self.print("{s}:\n", .{block.label});
+        }
         
         for (block.instructions.items) |instr| {
             try self.generateInstruction(instr);
@@ -561,25 +571,41 @@ pub const AsmGenerator = struct {
     }
     
     fn emitJump(self: *AsmGenerator, op: anytype) !void {
+        const scoped_label = try self.scopeLabel(op.target);
+        defer if (scoped_label.ptr != op.target.ptr) self.allocator.free(scoped_label);
+        
         switch (self.format) {
-            .att => try self.print("    jmp {s}\n", .{op.target}),
-            .intel => try self.print("    jmp {s}\n", .{op.target}),
+            .att => try self.print("    jmp {s}\n", .{scoped_label}),
+            .intel => try self.print("    jmp {s}\n", .{scoped_label}),
         }
     }
     
     fn emitBranch(self: *AsmGenerator, op: anytype) !void {
+        const true_label = try self.scopeLabel(op.true_target);
+        defer if (true_label.ptr != op.true_target.ptr) self.allocator.free(true_label);
+        const false_label = try self.scopeLabel(op.false_target);
+        defer if (false_label.ptr != op.false_target.ptr) self.allocator.free(false_label);
+        
         switch (self.format) {
             .att => {
                 try self.writeAll("    testq %rax, %rax\n");
-                try self.print("    jnz {s}\n", .{op.true_target});
-                try self.print("    jmp {s}\n", .{op.false_target});
+                try self.print("    jnz {s}\n", .{true_label});
+                try self.print("    jmp {s}\n", .{false_label});
             },
             .intel => {
                 try self.writeAll("    test rax, rax\n");
-                try self.print("    jnz {s}\n", .{op.true_target});
-                try self.print("    jmp {s}\n", .{op.false_target});
+                try self.print("    jnz {s}\n", .{true_label});
+                try self.print("    jmp {s}\n", .{false_label});
             },
         }
+    }
+    
+    /// Scope a label to the current function (e.g., "entry" -> ".LAdd_entry")
+    fn scopeLabel(self: *AsmGenerator, label: []const u8) ![]const u8 {
+        if (self.current_function_name) |func_name| {
+            return try std.fmt.allocPrint(self.allocator, ".L{s}_{s}", .{func_name, label});
+        }
+        return label;
     }
 };
 

@@ -17,6 +17,7 @@ pub const Symbol = struct {
 pub const SymbolKind = union(enum) {
     module: *ast.ModuleNode,
     command: *ast.CommandImplNode,
+    function: *ast.FunctionImplNode,
     variable: *ast.VarDeclNode,
     parameter: *ast.ParamDeclNode,
 };
@@ -135,14 +136,20 @@ pub const SemanticAnalyzer = struct {
         // Register module in global scope
         try self.declareSymbol(module.name, .{ .module = module }, module.location);
         
-        // First pass: register all commands
+        // First pass: register all commands and functions
         for (module.commands.items) |cmd| {
             try self.declareSymbol(cmd.name, .{ .command = cmd }, cmd.location);
         }
+        for (module.functions.items) |func| {
+            try self.declareSymbol(func.name, .{ .function = func }, func.location);
+        }
         
-        // Second pass: analyze command bodies
+        // Second pass: analyze command and function bodies
         for (module.commands.items) |cmd| {
             try self.analyzeCommand(cmd);
+        }
+        for (module.functions.items) |func| {
+            try self.analyzeFunction(func);
         }
     }
     
@@ -165,6 +172,33 @@ pub const SemanticAnalyzer = struct {
         // Analyze command body
         for (cmd.body.items) |stmt| {
             try self.analyzeStatement(stmt);
+        }
+    }
+    
+    /// Analyze a function implementation
+    fn analyzeFunction(self: *SemanticAnalyzer, func: *ast.FunctionImplNode) CompilerError!void {
+        // For native functions (with native_hook), skip body analysis
+        if (func.native_hook != null) {
+            return;
+        }
+        
+        // Create new scope for function body
+        const func_scope = try Scope.init(self.allocator, self.current_scope);
+        const prev_scope = self.current_scope;
+        self.current_scope = func_scope;
+        defer {
+            self.current_scope = prev_scope;
+            func_scope.deinit();
+        }
+        
+        // Register parameters in function scope
+        for (func.parameters.items) |param| {
+            try self.declareSymbol(param.name, .{ .parameter = param }, param.location);
+        }
+        
+        // Analyze return expression if present
+        if (func.return_expr) |expr| {
+            _ = try self.analyzeExpression(expr);
         }
     }
     

@@ -1,51 +1,87 @@
-{KL Standard Library - System Module}
-{This module provides core system operations}
-{Pragmas with @native mark native implementations}
+{═══════════════════════════════════════════════════════════════════════════════}
+{ KL Standard Library - System Module                                           }
+{═══════════════════════════════════════════════════════════════════════════════}
+{
+  This is the core standard library for KL. It provides:
+  - Arithmetic operator wrappers (Add, Sub, Mul, Div)
+  - Core intrinsic operations (Invoke)
+  
+  HOW TO ADD NATIVE INTRINSICS:
+  ==============================
+  To add a native intrinsic that's implemented in the compiler backend:
+  
+  1. Add a pragma comment above the Function/Command:
+     {@native name_of_native_hook}
+     
+  2. Use declaration syntax (no body, just signature):
+     {@native kl_invoke}
+     Function Invoke[funcRef, args...] Return callResult
+     
+  3. The compiler will recognize this pragma and call the native implementation.
+     
+  4. The native hook name (e.g., "kl_invoke") is then handled in the compiler's
+     code generation phase (src/codegen.zig) to emit the appropriate assembly.
+}
 
 Module System
 
-{@native kl_sys_exit}
-Command Exit
-    Parameter code: uint32
-    {Terminates the program with the given exit code}
-    {Native implementation provided by compiler backend}
-EndCommand
+{═══════════════════════════════════════════════════════════════════════════════}
+{ Arithmetic Functions - Variadic Operator Wrappers                             }
+{═══════════════════════════════════════════════════════════════════════════════}
 
-{@native kl_sys_print}
-Command Print
-    Parameter text: text
-    {Prints text to standard output without a newline}
-    {Native implementation provided by compiler backend}
-EndCommand
+{ Add - Variadic addition
+  Can be called with 1+ arguments:
+    Add[5] returns 5
+    Add[1, 2] returns 3
+    Add[1, 2, 3] returns 6
+}
+Function Add
+    Parameter values...: uint32
+    Return values
+EndFunction
 
-{@native kl_sys_println}
-Command PrintLn
-    Parameter text: text
-    {Prints text to standard output followed by a newline}
-    {Native implementation provided by compiler backend}
-EndCommand
+{ Subtract - Variadic subtraction (left-to-right)
+  Can be called with 1+ arguments:
+    Sub[10] returns 10
+    Sub[10, 3] returns 7
+    Sub[10, 3, 2] returns 5
+}
+Function Sub
+    Parameter values...: uint32
+    Return values
+EndFunction
 
-{@native kl_sys_read}
-Command Read
-    Parameter prompt: text
-    Returns result: text
-    {Reads a line of text from standard input}
-    {Native implementation provided by compiler backend}
-EndCommand
+{ Multiply - Variadic multiplication
+  Can be called with 1+ arguments:
+    Mul[5] returns 5
+    Mul[2, 3] returns 6
+    Mul[2, 3, 4] returns 24
+}
+Function Mul
+    Parameter values...: uint32
+    Return values
+EndFunction
 
-{@native kl_sys_allocate}
-Command Allocate
-    Parameter size: uint32
-    Returns pointer: uint32
-    {Allocates memory of the specified size in bytes}
-    {Native implementation provided by compiler backend}
-EndCommand
+{ Divide - Variadic division (left-to-right)
+  Can be called with 1+ arguments:
+    Div[100] returns 100
+    Div[100, 5] returns 20
+    Div[100, 5, 2] returns 10
+}
+Function Div
+    Parameter values...: uint32
+    Return values
+EndFunction
 
-{@native kl_sys_deallocate}
-Command Deallocate
-    Parameter pointer: uint32
-    {Frees previously allocated memory}
-    {Native implementation provided by compiler backend}
-EndCommand
+{═══════════════════════════════════════════════════════════════════════════════}
+{ Core Intrinsics                                                                }
+{═══════════════════════════════════════════════════════════════════════════════}
+
+{ Invoke - Call a function through a reference
+  This is a native intrinsic because it requires runtime dispatch.
+  Declaration-only syntax for native intrinsics.
+}
+{@native kl_invoke}
+Function Invoke[funcRef, args...] Return callResult
 
 EndModule

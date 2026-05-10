@@ -7,6 +7,7 @@ pub const Node = union(enum) {
     // Top-level declarations
     module: *ModuleNode,
     command_impl: *CommandImplNode,
+    function_impl: *FunctionImplNode,
     
     // Statements (commands)
     var_decl: *VarDeclNode,
@@ -35,6 +36,7 @@ pub const Node = union(enum) {
         switch (self) {
             .module => |n| n.deinit(allocator),
             .command_impl => |n| n.deinit(allocator),
+            .function_impl => |n| n.deinit(allocator),
             .var_decl => |n| n.deinit(allocator),
             .param_decl => |n| n.deinit(allocator),
             .assignment => |n| n.deinit(allocator),
@@ -62,6 +64,7 @@ pub const ModuleNode = struct {
     location: SourceLocation,
     name: []const u8,
     commands: std.ArrayList(*CommandImplNode),
+    functions: std.ArrayList(*FunctionImplNode),
     
     pub fn init(allocator: std.mem.Allocator, location: SourceLocation, name: []const u8) !*ModuleNode {
         const node = try allocator.create(ModuleNode);
@@ -69,6 +72,7 @@ pub const ModuleNode = struct {
             .location = location,
             .name = name,
             .commands = .{ .items = &.{}, .capacity = 0 },
+            .functions = .{ .items = &.{}, .capacity = 0 },
         };
         return node;
     }
@@ -78,6 +82,10 @@ pub const ModuleNode = struct {
             cmd.deinit(allocator);
         }
         self.commands.deinit(allocator);
+        for (self.functions.items) |func| {
+            func.deinit(allocator);
+        }
+        self.functions.deinit(allocator);
         allocator.destroy(self);
     }
 };
@@ -147,6 +155,49 @@ pub const CommandImplNode = struct {
     }
 };
 
+/// Function implementation (returns a value, unlike commands)
+pub const FunctionImplNode = struct {
+    location: SourceLocation,
+    name: []const u8,
+    parameters: std.ArrayList(*ParamDeclNode),
+    return_expr: ?Node, // For declaration-only native functions, this is null; otherwise contains Return expression
+    return_type: ?KLType, // For now, inferred from return_expr
+    options: FunctionOptions,
+    // Native hook: if present, this function has a native implementation
+    // The slice points directly into the source buffer (zero-allocation)
+    native_hook: ?[]const u8 = null,
+    
+    pub const FunctionOptions = struct {
+        unchecked: bool = false,
+        inline_hint: bool = false,
+    };
+    
+    pub fn init(allocator: std.mem.Allocator, location: SourceLocation, name: []const u8) !*FunctionImplNode {
+        const node = try allocator.create(FunctionImplNode);
+        node.* = .{
+            .location = location,
+            .name = name,
+            .parameters = .{ .items = &.{}, .capacity = 0 },
+            .return_expr = null,
+            .return_type = null,
+            .options = .{},
+            .native_hook = null,
+        };
+        return node;
+    }
+    
+    pub fn deinit(self: *FunctionImplNode, allocator: std.mem.Allocator) void {
+        for (self.parameters.items) |param| {
+            param.deinit(allocator);
+        }
+        self.parameters.deinit(allocator);
+        if (self.return_expr) |expr| {
+            expr.deinit(allocator);
+        }
+        allocator.destroy(self);
+    }
+};
+
 /// Variable declaration
 pub const VarDeclNode = struct {
     location: SourceLocation,
@@ -180,6 +231,7 @@ pub const ParamDeclNode = struct {
     param_type: KLType,
     initial_value: ?Node,
     direction: ParamDirection,
+    is_variadic: bool = false, // true if parameter has ... suffix
     
     pub const ParamDirection = enum {
         input,
@@ -195,6 +247,7 @@ pub const ParamDeclNode = struct {
             .param_type = param_type,
             .initial_value = initial_value,
             .direction = .input, // Default for MVP
+            .is_variadic = false,
         };
         return node;
     }

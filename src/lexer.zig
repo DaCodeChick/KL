@@ -27,6 +27,8 @@ pub const TokenType = enum {
     kw_cmd,
     kw_command,
     kw_ecmd,
+    kw_function,
+    kw_efunction,
     kw_var,
     kw_prm,
 
@@ -88,6 +90,7 @@ pub const TokenType = enum {
     semicolon,
     comma,
     dot,
+    ellipsis, // ... for variadic parameters
     colon,
     lparen,
     rparen,
@@ -210,7 +213,15 @@ pub const Lexer = struct {
         return switch (c) {
             ';' => self.makeTokenFrom(.semicolon, start, start_line, start_column),
             ',' => self.makeTokenFrom(.comma, start, start_line, start_column),
-            '.' => self.makeTokenFrom(.dot, start, start_line, start_column),
+            '.' => blk: {
+                // Check for ellipsis (...)
+                if (self.peek() == '.' and self.peekNext() == '.') {
+                    _ = self.advance();
+                    _ = self.advance();
+                    break :blk self.makeTokenFrom(.ellipsis, start, start_line, start_column);
+                }
+                break :blk self.makeTokenFrom(.dot, start, start_line, start_column);
+            },
             ':' => self.makeTokenFrom(.colon, start, start_line, start_column),
             '(' => self.makeTokenFrom(.lparen, start, start_line, start_column),
             ')' => self.makeTokenFrom(.rparen, start, start_line, start_column),
@@ -587,6 +598,11 @@ pub const Lexer = struct {
         return self.source[self.current];
     }
 
+    fn peekNext(self: *const Lexer) u8 {
+        if (self.current + 1 >= self.source.len) return 0;
+        return self.source[self.current + 1];
+    }
+
     fn match(self: *Lexer, expected: u8) bool {
         if (self.isAtEnd()) return false;
         if (self.source[self.current] != expected) return false;
@@ -651,6 +667,10 @@ fn getKeywordType(lexeme: []const u8) ?TokenType {
         .{ "ecmd", .kw_ecmd },
         .{ "EndCommand", .kw_ecmd },
         .{ "Command", .kw_command },
+        .{ "function", .kw_function },
+        .{ "Function", .kw_function },
+        .{ "efunction", .kw_efunction },
+        .{ "EndFunction", .kw_efunction },
         .{ "var", .kw_var },
         .{ "Variable", .kw_var },
         .{ "prm", .kw_prm },
