@@ -112,8 +112,9 @@ pub const CommandImplNode = struct {
     parameters: std.ArrayList(*ParamDeclNode),
     body: std.ArrayList(Node),
     options: CommandOptions,
-    is_intrinsic: bool = false,
-    intrinsic_id: IntrinsicId = .none,
+    // Native hook: if present, this command has a native implementation
+    // The slice points directly into the source buffer (zero-allocation)
+    native_hook: ?[]const u8 = null,
     
     pub const CommandOptions = struct {
         unchecked: bool = false,
@@ -128,28 +129,7 @@ pub const CommandImplNode = struct {
             .parameters = .{ .items = &.{}, .capacity = 0 },
             .body = .{ .items = &.{}, .capacity = 0 },
             .options = .{},
-            .is_intrinsic = false,
-            .intrinsic_id = .none,
-        };
-        return node;
-    }
-    
-    /// Create an intrinsic command (for ghost module)
-    pub fn initIntrinsic(
-        allocator: std.mem.Allocator,
-        location: SourceLocation,
-        name: []const u8,
-        intrinsic_id: IntrinsicId,
-    ) !*CommandImplNode {
-        const node = try allocator.create(CommandImplNode);
-        node.* = .{
-            .location = location,
-            .name = name,
-            .parameters = .{ .items = &.{}, .capacity = 0 },
-            .body = .{ .items = &.{}, .capacity = 0 },
-            .options = .{},
-            .is_intrinsic = true,
-            .intrinsic_id = intrinsic_id,
+            .native_hook = null,
         };
         return node;
     }

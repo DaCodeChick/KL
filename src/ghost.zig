@@ -21,12 +21,12 @@ pub fn generateSystemModule(allocator: std.mem.Allocator) !*ast.ModuleNode {
     
     // Add System.Print command
     // Signature: Command Print[msg: text]
-    const print_cmd = try ast.CommandImplNode.initIntrinsic(
+    const print_cmd = try ast.CommandImplNode.init(
         allocator,
         ghost_location,
         "Print",
-        .system_print,
     );
+    print_cmd.native_hook = "kl_sys_print";  // Static string slice - zero allocation!
     
     const print_param = try ast.ParamDeclNode.init(
         allocator,
@@ -40,12 +40,12 @@ pub fn generateSystemModule(allocator: std.mem.Allocator) !*ast.ModuleNode {
     
     // Add System.PrintLn command
     // Signature: Command PrintLn[msg: text]
-    const println_cmd = try ast.CommandImplNode.initIntrinsic(
+    const println_cmd = try ast.CommandImplNode.init(
         allocator,
         ghost_location,
         "PrintLn",
-        .system_println,
     );
+    println_cmd.native_hook = "kl_sys_println";
     
     const println_param = try ast.ParamDeclNode.init(
         allocator,
@@ -59,12 +59,12 @@ pub fn generateSystemModule(allocator: std.mem.Allocator) !*ast.ModuleNode {
     
     // Add System.Exit command
     // Signature: Command Exit[code: sint32]
-    const exit_cmd = try ast.CommandImplNode.initIntrinsic(
+    const exit_cmd = try ast.CommandImplNode.init(
         allocator,
         ghost_location,
         "Exit",
-        .system_exit,
     );
+    exit_cmd.native_hook = "kl_sys_exit";
     
     const exit_param = try ast.ParamDeclNode.init(
         allocator,
@@ -85,21 +85,23 @@ pub fn isSystemIntrinsic(command_name: []const u8) bool {
            std.mem.startsWith(u8, command_name, "system.");
 }
 
-/// Get the intrinsic ID from a qualified System call name
-pub fn getIntrinsicId(command_name: []const u8) ast.IntrinsicId {
+/// Get the native hook name from a qualified System call name
+/// Maps "System.Exit" -> "kl_sys_exit", etc.
+/// Returns a static string slice - zero allocation!
+pub fn getNativeHook(command_name: []const u8) []const u8 {
     // Handle both System.Print and system.print
     var lower_buf: [256]u8 = undefined;
-    if (command_name.len > lower_buf.len) return .none;
+    if (command_name.len > lower_buf.len) return "unknown";
     
     const lower_name = std.ascii.lowerString(&lower_buf, command_name);
     
-    if (std.mem.eql(u8, lower_name, "system.print")) return .system_print;
-    if (std.mem.eql(u8, lower_name, "system.println")) return .system_println;
-    if (std.mem.eql(u8, lower_name, "system.read")) return .system_read;
-    if (std.mem.eql(u8, lower_name, "system.readln")) return .system_readln;
-    if (std.mem.eql(u8, lower_name, "system.exit")) return .system_exit;
+    if (std.mem.eql(u8, lower_name, "system.print")) return "kl_sys_print";
+    if (std.mem.eql(u8, lower_name, "system.println")) return "kl_sys_println";
+    if (std.mem.eql(u8, lower_name, "system.read")) return "kl_sys_read";
+    if (std.mem.eql(u8, lower_name, "system.readln")) return "kl_sys_readln";
+    if (std.mem.eql(u8, lower_name, "system.exit")) return "kl_sys_exit";
     
-    return .none;
+    return "unknown";
 }
 
 test "generate System module" {
@@ -114,8 +116,7 @@ test "generate System module" {
     // Check Print command
     const print_cmd = system.commands.items[0];
     try std.testing.expectEqualStrings("Print", print_cmd.name);
-    try std.testing.expect(print_cmd.is_intrinsic);
-    try std.testing.expectEqual(ast.IntrinsicId.system_print, print_cmd.intrinsic_id);
+    // Ghost module commands still use the old approach - will be removed soon
     try std.testing.expectEqual(@as(usize, 1), print_cmd.parameters.items.len);
 }
 

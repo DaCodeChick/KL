@@ -1,31 +1,31 @@
 {KL Standard Library - System Module}
 {This module provides core system operations}
-{Pragmas beginning with @intrinsic mark native implementations}
+{Pragmas with @native mark native implementations}
 
 Module System
 
-{@intrinsic system_exit}
+{@native kl_sys_exit}
 Command Exit
     Parameter code: uint32
     {Terminates the program with the given exit code}
     {Native implementation provided by compiler backend}
 EndCommand
 
-{@intrinsic system_print}
+{@native kl_sys_print}
 Command Print
     Parameter text: text
     {Prints text to standard output without a newline}
     {Native implementation provided by compiler backend}
 EndCommand
 
-{@intrinsic system_println}
+{@native kl_sys_println}
 Command PrintLn
     Parameter text: text
     {Prints text to standard output followed by a newline}
     {Native implementation provided by compiler backend}
 EndCommand
 
-{@intrinsic system_read}
+{@native kl_sys_read}
 Command Read
     Parameter prompt: text
     Returns result: text
@@ -33,7 +33,7 @@ Command Read
     {Native implementation provided by compiler backend}
 EndCommand
 
-{@intrinsic system_allocate}
+{@native kl_sys_allocate}
 Command Allocate
     Parameter size: uint32
     Returns pointer: uint32
@@ -41,7 +41,7 @@ Command Allocate
     {Native implementation provided by compiler backend}
 EndCommand
 
-{@intrinsic system_deallocate}
+{@native kl_sys_deallocate}
 Command Deallocate
     Parameter pointer: uint32
     {Frees previously allocated memory}

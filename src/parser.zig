@@ -714,27 +714,20 @@ pub const Parser = struct {
     
     /// Apply pragma annotation to a command
     fn applyPragmaToCommand(self: *Parser, cmd: *ast.CommandImplNode, pragma_text: []const u8) !void {
-        // Parse pragma text: expected format is "intrinsic <intrinsic_name>"
-        // e.g., "intrinsic system_exit"
+        _ = self; // Unused for now
+        // Parse pragma text: expected format is "native <hook_name>"
+        // e.g., "native kl_sys_exit"
+        // The slice points directly into the source buffer - zero allocation!
         
         const trimmed = std.mem.trim(u8, pragma_text, " \t\n\r");
         
-        if (std.mem.startsWith(u8, trimmed, "intrinsic ")) {
-            const intrinsic_name = std.mem.trim(u8, trimmed["intrinsic ".len..], " \t\n\r");
+        if (std.mem.startsWith(u8, trimmed, "native ")) {
+            // Extract the hook name (everything after "native ")
+            const hook_name = std.mem.trim(u8, trimmed["native ".len..], " \t\n\r");
             
-            // Parse intrinsic name
-            const intrinsic_id = ast.IntrinsicId.fromString(intrinsic_name) orelse {
-                try self.error_reporter.report(
-                    cmd.location,
-                    error.InvalidSyntax,
-                    "Unknown intrinsic: {s}",
-                    .{intrinsic_name},
-                );
-                return error.InvalidSyntax;
-            };
-            
-            cmd.is_intrinsic = true;
-            cmd.intrinsic_id = intrinsic_id;
+            // Store the slice directly - it points into the source buffer
+            // No allocation needed!
+            cmd.native_hook = hook_name;
         }
     }
 };

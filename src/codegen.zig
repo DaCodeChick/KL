@@ -494,58 +494,52 @@ pub const AsmGenerator = struct {
     
     fn emitIntrinsic(self: *AsmGenerator, op: anytype) !void {
         // Emit code for System runtime intrinsics
-        switch (op.intrinsic_id) {
-            .system_print, .system_println => {
-                // For now, emit a comment
-                // In a real implementation, this would call libc printf or write syscall
-                const intrinsic_name = if (op.intrinsic_id == .system_print) "Print" else "PrintLn";
-                
+        // The native_hook string (e.g., "kl_sys_exit") determines the implementation
+        // This makes bootstrapping easy - future KL compiler just checks the same string!
+        
+        if (std.mem.eql(u8, op.native_hook, "kl_sys_print") or 
+            std.mem.eql(u8, op.native_hook, "kl_sys_println")) {
+            // For now, emit a comment
+            // In a real implementation, this would call libc printf or write syscall
+            
+            switch (self.format) {
+                .att => {
+                    try self.print("    # Intrinsic: {s}\n", .{op.native_hook});
+                    // TODO: Implement actual print functionality
+                    // For MVP, we'll skip this for now
+                    // A real implementation would:
+                    // 1. Load string pointer from args[0]
+                    // 2. Call libc printf or use write syscall
+                    // 3. For PrintLn, add a newline
+                },
+                .intel => {
+                    try self.print("    ; Intrinsic: {s}\n", .{op.native_hook});
+                },
+            }
+        } else if (std.mem.eql(u8, op.native_hook, "kl_sys_exit")) {
+            // Exit syscall: exit(code)
+            // Load exit code into rdi (first argument register)
+            if (op.args.len > 0) {
+                try self.emitLoadValue(op.args[0]);
                 switch (self.format) {
                     .att => {
-                        try self.print("    # Intrinsic: System.{s}\n", .{intrinsic_name});
-                        // TODO: Implement actual print functionality
-                        // For MVP, we'll skip this for now
-                        // A real implementation would:
-                        // 1. Load string pointer from args[0]
-                        // 2. Call libc printf or use write syscall
-                        // 3. For PrintLn, add a newline
+                        try self.writeAll("    movq %rax, %rdi\n");
+                        try self.writeAll("    movq $60, %rax  # sys_exit\n");
+                        try self.writeAll("    syscall\n");
                     },
                     .intel => {
-                        try self.print("    ; Intrinsic: System.{s}\n", .{intrinsic_name});
+                        try self.writeAll("    mov rdi, rax\n");
+                        try self.writeAll("    mov rax, 60  ; sys_exit\n");
+                        try self.writeAll("    syscall\n");
                     },
                 }
-            },
-            .system_exit => {
-                // Exit syscall: exit(code)
-                // Load exit code into rdi (first argument register)
-                if (op.args.len > 0) {
-                    try self.emitLoadValue(op.args[0]);
-                    switch (self.format) {
-                        .att => {
-                            try self.writeAll("    movq %rax, %rdi\n");
-                            try self.writeAll("    movq $60, %rax  # sys_exit\n");
-                            try self.writeAll("    syscall\n");
-                        },
-                        .intel => {
-                            try self.writeAll("    mov rdi, rax\n");
-                            try self.writeAll("    mov rax, 60  ; sys_exit\n");
-                            try self.writeAll("    syscall\n");
-                        },
-                    }
-                }
-            },
-            .none => {
-                switch (self.format) {
-                    .att => try self.writeAll("    # Unknown intrinsic\n"),
-                    .intel => try self.writeAll("    ; Unknown intrinsic\n"),
-                }
-            },
-            else => {
-                switch (self.format) {
-                    .att => try self.writeAll("    # TODO: Unimplemented intrinsic\n"),
-                    .intel => try self.writeAll("    ; TODO: Unimplemented intrinsic\n"),
-                }
-            },
+            }
+        } else {
+            // Unknown native hook
+            switch (self.format) {
+                .att => try self.print("    # Unknown native hook: {s}\n", .{op.native_hook}),
+                .intel => try self.print("    ; Unknown native hook: {s}\n", .{op.native_hook}),
+            }
         }
     }
     

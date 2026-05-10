@@ -138,9 +138,9 @@ pub const IRGenerator = struct {
     fn generateCommandInvocation(self: *IRGenerator, cmd: *ast.CommandInvocationNode) error{OutOfMemory, UndefinedVariable}!void {
         const block = self.current_block.?;
         
-        // Check if this is a System intrinsic
+        // Check if this is a System intrinsic (qualified name System.*)
         if (ghost.isSystemIntrinsic(cmd.command_name)) {
-            const intrinsic_id = ghost.getIntrinsicId(cmd.command_name);
+            const hook_name = ghost.getNativeHook(cmd.command_name);
             
             // Generate arguments
             var args = try self.allocator.alloc(ir.Value, cmd.arguments.items.len);
@@ -152,7 +152,7 @@ pub const IRGenerator = struct {
             try block.addInstruction(.{
                 .intrinsic = .{
                     .dest = null,
-                    .intrinsic_id = intrinsic_id,
+                    .native_hook = hook_name,
                     .args = args,
                 },
             });

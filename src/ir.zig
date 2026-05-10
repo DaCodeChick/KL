@@ -166,10 +166,12 @@ pub const Instruction = union(enum) {
         args: []Value,
     },
     
-    /// Intrinsic call (System runtime functions)
+    /// Intrinsic/native call (System runtime functions)
+    // Uses string-based native hooks for bootstrappability
+    // The hook name (e.g., "kl_sys_exit") maps to backend implementation
     intrinsic: struct {
         dest: ?Value,  // null for void intrinsics
-        intrinsic_id: ast.IntrinsicId,
+        native_hook: []const u8,  // Zero-allocation slice from source
         args: []Value,
     },
     
