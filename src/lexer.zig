@@ -605,6 +605,7 @@ fn getKeywordType(lexeme: []const u8) ?TokenType {
         .{ "EndCommand", .kw_ecmd },
         .{ "Command", .kw_command },
         .{ "var", .kw_var },
+        .{ "Var", .kw_var },
         .{ "Variable", .kw_variable },
         .{ "prm", .kw_prm },
         .{ "Parameter", .kw_prm },

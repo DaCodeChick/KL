@@ -699,11 +699,7 @@ test "parse simple addition with infix" {
     var parser = try Parser.init(allocator, &lex, &err_reporter);
     
     const expr = try parser.parseExpression();
-    defer {
-        if (expr == .binary_op) {
-            expr.binary_op.deinit(allocator);
-        }
-    }
+    defer expr.deinit(allocator);
     
     try testing.expect(expr == .binary_op);
     try testing.expectEqual(ast.BinaryOpNode.BinaryOp.add, expr.binary_op.op);
@@ -721,11 +717,7 @@ test "parse prefix function call Add[56, 89]" {
     var parser = try Parser.init(allocator, &lex, &err_reporter);
     
     const expr = try parser.parseExpression();
-    defer {
-        if (expr == .function_call) {
-            expr.function_call.deinit(allocator);
-        }
-    }
+    defer expr.deinit(allocator);
     
     try testing.expect(expr == .function_call);
     try testing.expectEqualStrings("Add", expr.function_call.function_name);
@@ -745,11 +737,7 @@ test "parse left-to-right evaluation" {
     var parser = try Parser.init(allocator, &lex, &err_reporter);
     
     const expr = try parser.parseExpression();
-    defer {
-        if (expr == .binary_op) {
-            expr.binary_op.deinit(allocator);
-        }
-    }
+    defer expr.deinit(allocator);
     
     // Should be: Mul[Add[2, 3], 4]
     try testing.expect(expr == .binary_op);

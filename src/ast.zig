@@ -29,6 +29,32 @@ pub const Node = union(enum) {
     char_literal: *CharLiteralNode,
     string_literal: *StringLiteralNode,
     identifier: *IdentifierNode,
+    
+    /// Recursively free a node and all its children
+    pub fn deinit(self: Node, allocator: std.mem.Allocator) void {
+        switch (self) {
+            .module => |n| n.deinit(allocator),
+            .command_impl => |n| n.deinit(allocator),
+            .var_decl => |n| n.deinit(allocator),
+            .param_decl => |n| n.deinit(allocator),
+            .assignment => |n| n.deinit(allocator),
+            .command_invocation => |n| n.deinit(allocator),
+            .if_stmt => |n| n.deinit(allocator),
+            .repeat_stmt => |n| n.deinit(allocator),
+            .break_stmt => |n| n.deinit(allocator),
+            .continue_stmt => |n| n.deinit(allocator),
+            .return_stmt => |n| n.deinit(allocator),
+            .goto_stmt => |n| n.deinit(allocator),
+            .location_stmt => |n| n.deinit(allocator),
+            .binary_op => |n| n.deinit(allocator),
+            .unary_op => |n| n.deinit(allocator),
+            .function_call => |n| n.deinit(allocator),
+            .int_literal => |n| n.deinit(allocator),
+            .char_literal => |n| n.deinit(allocator),
+            .string_literal => |n| n.deinit(allocator),
+            .identifier => |n| n.deinit(allocator),
+        }
+    }
 };
 
 /// Module declaration
@@ -86,7 +112,9 @@ pub const CommandImplNode = struct {
             param.deinit(allocator);
         }
         self.parameters.deinit(allocator);
-        // TODO: deinit body nodes
+        for (self.body.items) |stmt| {
+            stmt.deinit(allocator);
+        }
         self.body.deinit(allocator);
         allocator.destroy(self);
     }
@@ -111,6 +139,9 @@ pub const VarDeclNode = struct {
     }
     
     pub fn deinit(self: *VarDeclNode, allocator: std.mem.Allocator) void {
+        if (self.initial_value) |val| {
+            val.deinit(allocator);
+        }
         allocator.destroy(self);
     }
 };
@@ -176,6 +207,7 @@ pub const AssignmentNode = struct {
     }
     
     pub fn deinit(self: *AssignmentNode, allocator: std.mem.Allocator) void {
+        self.value.deinit(allocator);
         allocator.destroy(self);
     }
 };
@@ -197,6 +229,9 @@ pub const CommandInvocationNode = struct {
     }
     
     pub fn deinit(self: *CommandInvocationNode, allocator: std.mem.Allocator) void {
+        for (self.arguments.items) |arg| {
+            arg.deinit(allocator);
+        }
         self.arguments.deinit(allocator);
         allocator.destroy(self);
     }
@@ -228,9 +263,23 @@ pub const IfStmtNode = struct {
     }
     
     pub fn deinit(self: *IfStmtNode, allocator: std.mem.Allocator) void {
+        self.condition.deinit(allocator);
+        for (self.then_body.items) |stmt| {
+            stmt.deinit(allocator);
+        }
         self.then_body.deinit(allocator);
+        for (self.elif_clauses.items) |*elif| {
+            elif.condition.deinit(allocator);
+            for (elif.body.items) |stmt| {
+                stmt.deinit(allocator);
+            }
+            elif.body.deinit(allocator);
+        }
         self.elif_clauses.deinit(allocator);
         if (self.else_body) |*else_b| {
+            for (else_b.items) |stmt| {
+                stmt.deinit(allocator);
+            }
             else_b.deinit(allocator);
         }
         allocator.destroy(self);
@@ -254,6 +303,12 @@ pub const RepeatStmtNode = struct {
     }
     
     pub fn deinit(self: *RepeatStmtNode, allocator: std.mem.Allocator) void {
+        if (self.count) |cnt| {
+            cnt.deinit(allocator);
+        }
+        for (self.body.items) |stmt| {
+            stmt.deinit(allocator);
+        }
         self.body.deinit(allocator);
         allocator.destroy(self);
     }
@@ -310,6 +365,9 @@ pub const ReturnStmtNode = struct {
     }
     
     pub fn deinit(self: *ReturnStmtNode, allocator: std.mem.Allocator) void {
+        if (self.value) |val| {
+            val.deinit(allocator);
+        }
         allocator.destroy(self);
     }
 };
@@ -392,6 +450,8 @@ pub const BinaryOpNode = struct {
     }
     
     pub fn deinit(self: *BinaryOpNode, allocator: std.mem.Allocator) void {
+        self.left.deinit(allocator);
+        self.right.deinit(allocator);
         allocator.destroy(self);
     }
 };
@@ -418,6 +478,7 @@ pub const UnaryOpNode = struct {
     }
     
     pub fn deinit(self: *UnaryOpNode, allocator: std.mem.Allocator) void {
+        self.operand.deinit(allocator);
         allocator.destroy(self);
     }
 };
@@ -439,6 +500,9 @@ pub const FunctionCallNode = struct {
     }
     
     pub fn deinit(self: *FunctionCallNode, allocator: std.mem.Allocator) void {
+        for (self.arguments.items) |arg| {
+            arg.deinit(allocator);
+        }
         self.arguments.deinit(allocator);
         allocator.destroy(self);
     }
