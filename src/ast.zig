@@ -92,6 +92,17 @@ pub const IntrinsicId = enum {
     system_exit,
     system_allocate,
     system_deallocate,
+    
+    pub fn fromString(name: []const u8) ?IntrinsicId {
+        if (std.mem.eql(u8, name, "system_print")) return .system_print;
+        if (std.mem.eql(u8, name, "system_println")) return .system_println;
+        if (std.mem.eql(u8, name, "system_read")) return .system_read;
+        if (std.mem.eql(u8, name, "system_readln")) return .system_readln;
+        if (std.mem.eql(u8, name, "system_exit")) return .system_exit;
+        if (std.mem.eql(u8, name, "system_allocate")) return .system_allocate;
+        if (std.mem.eql(u8, name, "system_deallocate")) return .system_deallocate;
+        return null;
+    }
 };
 
 /// Command implementation

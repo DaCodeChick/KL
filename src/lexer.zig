@@ -97,6 +97,9 @@ pub const TokenType = enum {
     // Identifiers
     identifier,
 
+    // Pragmas
+    pragma,
+
     // Special
     eof,
 
@@ -170,6 +173,10 @@ pub const Lexer = struct {
 
         // Comments
         if (c == '{') {
+            // Check if this is a pragma comment: {@...}
+            if (self.peek() == '@') {
+                return self.scanPragma(start, start_line, start_column);
+            }
             try self.skipBlockComment();
             return self.nextToken();
         }
@@ -525,6 +532,47 @@ pub const Lexer = struct {
             try self.error_reporter.report(.{ .line = start_line, .column = start_column, .file = self.filename }, CompilerError.UnterminatedComment, "unterminated block comment", .{});
             return error.UnterminatedComment;
         }
+    }
+    
+    fn scanPragma(self: *Lexer, start: usize, start_line: usize, start_column: usize) !Token {
+        // We've seen '{@', now consume the '@'
+        _ = self.advance();
+        
+        // Scan until we find '}'
+        while (!self.isAtEnd() and self.peek() != '}') {
+            if (self.peek() == '\n') {
+                self.line += 1;
+                self.column = 1;
+            }
+            _ = self.advance();
+        }
+        
+        if (self.isAtEnd()) {
+            try self.error_reporter.report(
+                .{ .line = start_line, .column = start_column, .file = self.filename },
+                CompilerError.UnterminatedComment,
+                "unterminated pragma comment",
+                .{},
+            );
+            return error.UnterminatedComment;
+        }
+        
+        // Consume the closing '}'
+        _ = self.advance();
+        
+        // Extract pragma text (between {@  and })
+        // Skip the leading '{@' and trailing '}'
+        const pragma_text = std.mem.trim(u8, self.source[start + 2 .. self.current - 1], " \t\n\r");
+        
+        return Token{
+            .type = .pragma,
+            .lexeme = pragma_text,
+            .location = .{
+                .line = start_line,
+                .column = start_column,
+                .file = self.filename,
+            },
+        };
     }
 
     fn advance(self: *Lexer) u8 {

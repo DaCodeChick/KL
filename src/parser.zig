@@ -77,9 +77,23 @@ pub const Parser = struct {
         // Parse commands until EndModule
         while (self.current_token.type != .kw_emodule and 
                self.current_token.type != .eof) {
+            // Skip and collect pragmas before command
+            var pragma: ?[]const u8 = null;
+            if (self.current_token.type == .pragma) {
+                pragma = self.current_token.lexeme;
+                try self.advance();
+            }
+            
             if (self.current_token.type == .kw_command or self.current_token.type == .kw_cmd) {
                 const cmd = try self.parseCommand();
+                // If we had a pragma, parse it and set intrinsic flags
+                if (pragma) |pragma_text| {
+                    try self.applyPragmaToCommand(cmd, pragma_text);
+                }
                 try module_node.commands.append(self.allocator, cmd);
+            } else if (self.current_token.type == .pragma) {
+                // Pragma without following command - just skip it
+                try self.advance();
             } else {
                 try self.error_reporter.report(
                     self.current_token.location,
@@ -696,6 +710,32 @@ pub const Parser = struct {
             .function_call => types.KLType{ .sint32 = {} }, // Assume int for now
             else => types.KLType{ .sint32 = {} }, // Default
         };
+    }
+    
+    /// Apply pragma annotation to a command
+    fn applyPragmaToCommand(self: *Parser, cmd: *ast.CommandImplNode, pragma_text: []const u8) !void {
+        // Parse pragma text: expected format is "intrinsic <intrinsic_name>"
+        // e.g., "intrinsic system_exit"
+        
+        const trimmed = std.mem.trim(u8, pragma_text, " \t\n\r");
+        
+        if (std.mem.startsWith(u8, trimmed, "intrinsic ")) {
+            const intrinsic_name = std.mem.trim(u8, trimmed["intrinsic ".len..], " \t\n\r");
+            
+            // Parse intrinsic name
+            const intrinsic_id = ast.IntrinsicId.fromString(intrinsic_name) orelse {
+                try self.error_reporter.report(
+                    cmd.location,
+                    error.InvalidSyntax,
+                    "Unknown intrinsic: {s}",
+                    .{intrinsic_name},
+                );
+                return error.InvalidSyntax;
+            };
+            
+            cmd.is_intrinsic = true;
+            cmd.intrinsic_id = intrinsic_id;
+        }
     }
 };
 
