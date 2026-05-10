@@ -1,0 +1,11 @@
+{Test variadic arithmetic return values}
+
+Module TestVariadic
+
+Command TestAdd
+    { Test Sub with 3 arguments: Sub[100, 30, 20] = 50 }
+    var result = Sub[100, 30, 20];
+    System.Exit[result];
+EndCommand
+
+EndModule

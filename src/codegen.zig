@@ -210,6 +210,8 @@ pub const AsmGenerator = struct {
             .add => |op| try self.emitBinaryOp("add", op),
             .sub => |op| try self.emitBinaryOp("sub", op),
             .mul => |op| try self.emitBinaryOp("imul", op),
+            .div => |op| try self.emitDivision(op),
+            .mod => |op| try self.emitModulo(op),
             .eq => |op| try self.emitComparison("e", op),
             .ne => |op| try self.emitComparison("ne", op),
             .lt => |op| try self.emitComparison("l", op),
@@ -384,6 +386,110 @@ pub const AsmGenerator = struct {
         }
         
         // Store result to destination if it's a temporary
+        switch (op.dest) {
+            .temporary => |temp_idx| {
+                const temp_offset = 1024 + (temp_idx * 8);
+                switch (self.format) {
+                    .att => try self.print("    movq %rax, -{d}(%rbp)\n", .{temp_offset}),
+                    .intel => try self.print("    mov [rbp - {d}], rax\n", .{temp_offset}),
+                }
+            },
+            else => {},
+        }
+    }
+    
+    fn emitDivision(self: *AsmGenerator, op: ir.BinaryOp) !void {
+        // Load left operand (dividend) into rax
+        try self.emitLoadValue(op.left);
+        
+        // Save dividend to stack
+        switch (self.format) {
+            .att => try self.writeAll("    pushq %rax\n"),
+            .intel => try self.writeAll("    push rax\n"),
+        }
+        
+        // Load right operand (divisor) into rbx
+        try self.emitLoadValue(op.right);
+        switch (self.format) {
+            .att => try self.writeAll("    movq %rax, %rbx\n"),
+            .intel => try self.writeAll("    mov rbx, rax\n"),
+        }
+        
+        // Pop dividend back into rax
+        switch (self.format) {
+            .att => try self.writeAll("    popq %rax\n"),
+            .intel => try self.writeAll("    pop rax\n"),
+        }
+        
+        // Sign-extend rax to rdx:rax for signed division
+        switch (self.format) {
+            .att => try self.writeAll("    cqo\n"),
+            .intel => try self.writeAll("    cqo\n"),
+        }
+        
+        // Perform signed division: idiv rbx
+        // Quotient goes to rax, remainder to rdx
+        switch (self.format) {
+            .att => try self.writeAll("    idivq %rbx\n"),
+            .intel => try self.writeAll("    idiv rbx\n"),
+        }
+        
+        // Store quotient (result in rax) to destination if it's a temporary
+        switch (op.dest) {
+            .temporary => |temp_idx| {
+                const temp_offset = 1024 + (temp_idx * 8);
+                switch (self.format) {
+                    .att => try self.print("    movq %rax, -{d}(%rbp)\n", .{temp_offset}),
+                    .intel => try self.print("    mov [rbp - {d}], rax\n", .{temp_offset}),
+                }
+            },
+            else => {},
+        }
+    }
+    
+    fn emitModulo(self: *AsmGenerator, op: ir.BinaryOp) !void {
+        // Load left operand (dividend) into rax
+        try self.emitLoadValue(op.left);
+        
+        // Save dividend to stack
+        switch (self.format) {
+            .att => try self.writeAll("    pushq %rax\n"),
+            .intel => try self.writeAll("    push rax\n"),
+        }
+        
+        // Load right operand (divisor) into rbx
+        try self.emitLoadValue(op.right);
+        switch (self.format) {
+            .att => try self.writeAll("    movq %rax, %rbx\n"),
+            .intel => try self.writeAll("    mov rbx, rax\n"),
+        }
+        
+        // Pop dividend back into rax
+        switch (self.format) {
+            .att => try self.writeAll("    popq %rax\n"),
+            .intel => try self.writeAll("    pop rax\n"),
+        }
+        
+        // Sign-extend rax to rdx:rax for signed division
+        switch (self.format) {
+            .att => try self.writeAll("    cqo\n"),
+            .intel => try self.writeAll("    cqo\n"),
+        }
+        
+        // Perform signed division: idiv rbx
+        // Quotient goes to rax, remainder to rdx
+        switch (self.format) {
+            .att => try self.writeAll("    idivq %rbx\n"),
+            .intel => try self.writeAll("    idiv rbx\n"),
+        }
+        
+        // For modulo, we want the remainder which is in rdx
+        switch (self.format) {
+            .att => try self.writeAll("    movq %rdx, %rax\n"),
+            .intel => try self.writeAll("    mov rax, rdx\n"),
+        }
+        
+        // Store remainder (now in rax) to destination if it's a temporary
         switch (op.dest) {
             .temporary => |temp_idx| {
                 const temp_offset = 1024 + (temp_idx * 8);

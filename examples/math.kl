@@ -1,8 +1,8 @@
 Module MathDemo
 Command Calculate
-    var a = 10
-    var b = 20
-    var sum = Add[a, b]
-    var product = Mul[a, b]
+    var a = 10;
+    var b = 20;
+    var sum = Add[a, b];
+    var product = Mul[a, b];
 EndCommand
 EndModule

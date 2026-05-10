@@ -3,11 +3,11 @@
 Module Main
 
 Command Main
-	Variable counter = 0
+	Variable counter = 0;
 	
 	Repeat 5
-		counter = Add[counter, 1]
-	EndRepeat
+		counter = Add[counter, 1];
+	EndRepeat;
 	
 	{counter should be 5}
 EndCommand

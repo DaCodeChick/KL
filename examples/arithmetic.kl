@@ -3,9 +3,9 @@
 Module Main
 
 Command Main
-	Variable x = 10
-	Variable y = 20
-	Variable result = Add[x, y]
+	Variable x = 10;
+	Variable y = 20;
+	Variable result = Add[x, y];
 	
 	{Result should be 30}
 EndCommand

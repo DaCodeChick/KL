@@ -3,7 +3,7 @@
 Module Main
 
 Command Main
-	System.Exit[42]
+	System.Exit[42];
 EndCommand
 
 EndModule

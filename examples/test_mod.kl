@@ -1,0 +1,11 @@
+{Test modulo operation}
+
+Module TestMod
+
+Command TestMod
+    { Test Mod: 17 % 5 = 2 }
+    var result = Mod[17, 5];
+    System.Exit[result];
+EndCommand
+
+EndModule

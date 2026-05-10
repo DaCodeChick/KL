@@ -1,0 +1,21 @@
+{Comprehensive test of variadic arithmetic}
+
+Module TestVariadic
+
+Command TestAdd
+    { Test Add with 1 argument: Add[5] = 5 }
+    var a = Add[5];
+    
+    { Test Add with 2 arguments: Add[10, 20] = 30 }
+    var b = Add[10, 20];
+    
+    { Test Add with 3 arguments: Add[1, 2, 3] = 6 }
+    var c = Add[1, 2, 3];
+    
+    { Test Add with 4 arguments: Add[100, 200, 300, 400] = 1000 }
+    var d = Add[100, 200, 300, 400];
+    
+    System.Exit[0];
+EndCommand
+
+EndModule

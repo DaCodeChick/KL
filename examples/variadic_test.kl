@@ -1,0 +1,13 @@
+{Test variadic arithmetic functions}
+
+Module Main
+
+Command Main
+    var result1 = Add[5];
+    var result2 = Add[1, 2];
+    var result3 = Add[1, 2, 3];
+    var result4 = Mul[2, 3, 4];
+    System.Exit[result4];
+EndCommand
+
+EndModule

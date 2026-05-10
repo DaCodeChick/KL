@@ -453,52 +453,86 @@ pub const IRGenerator = struct {
             },
             
             .function_call => |call| {
-                // Check if this is a built-in operation
+                // Check if this is a built-in variadic operation
                 if (std.mem.eql(u8, call.function_name, "Add") or 
                     std.mem.eql(u8, call.function_name, "add")) {
-                    if (call.arguments.items.len != 2) return error.OutOfMemory; // Should be a proper error
-                    const left = try self.generateExpression(call.arguments.items[0]);
-                    const right = try self.generateExpression(call.arguments.items[1]);
-                    const dest_temp = self.nextTemp();
-                    const dest = ir.Value{ .temporary = dest_temp };
-                    try block.addInstruction(.{ .add = .{ .dest = dest, .left = left, .right = right } });
-                    return dest;
+                    if (call.arguments.items.len == 0) return error.OutOfMemory; // Need at least 1 arg
+                    
+                    // Single argument: just return it
+                    if (call.arguments.items.len == 1) {
+                        return try self.generateExpression(call.arguments.items[0]);
+                    }
+                    
+                    // Multiple arguments: chain additions left-to-right
+                    var accumulator = try self.generateExpression(call.arguments.items[0]);
+                    for (call.arguments.items[1..]) |arg| {
+                        const right = try self.generateExpression(arg);
+                        const dest_temp = self.nextTemp();
+                        const dest = ir.Value{ .temporary = dest_temp };
+                        try block.addInstruction(.{ .add = .{ .dest = dest, .left = accumulator, .right = right } });
+                        accumulator = dest;
+                    }
+                    return accumulator;
                 }
                 
                 if (std.mem.eql(u8, call.function_name, "Sub") or 
                     std.mem.eql(u8, call.function_name, "sub") or
                     std.mem.eql(u8, call.function_name, "Subtract")) {
-                    if (call.arguments.items.len != 2) return error.OutOfMemory;
-                    const left = try self.generateExpression(call.arguments.items[0]);
-                    const right = try self.generateExpression(call.arguments.items[1]);
-                    const dest_temp = self.nextTemp();
-                    const dest = ir.Value{ .temporary = dest_temp };
-                    try block.addInstruction(.{ .sub = .{ .dest = dest, .left = left, .right = right } });
-                    return dest;
+                    if (call.arguments.items.len == 0) return error.OutOfMemory;
+                    
+                    if (call.arguments.items.len == 1) {
+                        return try self.generateExpression(call.arguments.items[0]);
+                    }
+                    
+                    var accumulator = try self.generateExpression(call.arguments.items[0]);
+                    for (call.arguments.items[1..]) |arg| {
+                        const right = try self.generateExpression(arg);
+                        const dest_temp = self.nextTemp();
+                        const dest = ir.Value{ .temporary = dest_temp };
+                        try block.addInstruction(.{ .sub = .{ .dest = dest, .left = accumulator, .right = right } });
+                        accumulator = dest;
+                    }
+                    return accumulator;
                 }
                 
                 if (std.mem.eql(u8, call.function_name, "Mul") or 
                     std.mem.eql(u8, call.function_name, "mul") or
                     std.mem.eql(u8, call.function_name, "Multiply")) {
-                    if (call.arguments.items.len != 2) return error.OutOfMemory;
-                    const left = try self.generateExpression(call.arguments.items[0]);
-                    const right = try self.generateExpression(call.arguments.items[1]);
-                    const dest_temp = self.nextTemp();
-                    const dest = ir.Value{ .temporary = dest_temp };
-                    try block.addInstruction(.{ .mul = .{ .dest = dest, .left = left, .right = right } });
-                    return dest;
+                    if (call.arguments.items.len == 0) return error.OutOfMemory;
+                    
+                    if (call.arguments.items.len == 1) {
+                        return try self.generateExpression(call.arguments.items[0]);
+                    }
+                    
+                    var accumulator = try self.generateExpression(call.arguments.items[0]);
+                    for (call.arguments.items[1..]) |arg| {
+                        const right = try self.generateExpression(arg);
+                        const dest_temp = self.nextTemp();
+                        const dest = ir.Value{ .temporary = dest_temp };
+                        try block.addInstruction(.{ .mul = .{ .dest = dest, .left = accumulator, .right = right } });
+                        accumulator = dest;
+                    }
+                    return accumulator;
                 }
                 
                 if (std.mem.eql(u8, call.function_name, "Div") or 
                     std.mem.eql(u8, call.function_name, "div") or
                     std.mem.eql(u8, call.function_name, "Divide")) {
-                    if (call.arguments.items.len != 2) return error.OutOfMemory;
-                    const left = try self.generateExpression(call.arguments.items[0]);
-                    const right = try self.generateExpression(call.arguments.items[1]);
-                    const dest_temp = self.nextTemp();
-                    const dest = ir.Value{ .temporary = dest_temp };
-                    try block.addInstruction(.{ .div = .{ .dest = dest, .left = left, .right = right } });
-                    return dest;
+                    if (call.arguments.items.len == 0) return error.OutOfMemory;
+                    
+                    if (call.arguments.items.len == 1) {
+                        return try self.generateExpression(call.arguments.items[0]);
+                    }
+                    
+                    var accumulator = try self.generateExpression(call.arguments.items[0]);
+                    for (call.arguments.items[1..]) |arg| {
+                        const right = try self.generateExpression(arg);
+                        const dest_temp = self.nextTemp();
+                        const dest = ir.Value{ .temporary = dest_temp };
+                        try block.addInstruction(.{ .div = .{ .dest = dest, .left = accumulator, .right = right } });
+                        accumulator = dest;
+                    }
+                    return accumulator;
                 }
                 
                 if (std.mem.eql(u8, call.function_name, "Mod") or 

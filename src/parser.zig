@@ -161,8 +161,17 @@ pub const Parser = struct {
         // Parse command body until EndCommand
         while (self.current_token.type != .kw_ecmd and 
                self.current_token.type != .eof) {
+            // Skip extra semicolons (empty statements)
+            if (self.current_token.type == .semicolon) {
+                try self.advance();
+                continue;
+            }
+            
             const stmt = try self.parseStatement();
             try cmd_node.body.append(self.allocator, stmt);
+            
+            // Require semicolon after statement
+            try self.expect(.semicolon);
         }
         
         try self.expect(.kw_ecmd);
@@ -319,8 +328,15 @@ pub const Parser = struct {
                self.current_token.type != .kw_elseif and
                self.current_token.type != .kw_else and
                self.current_token.type != .eof) {
+            // Skip extra semicolons
+            if (self.current_token.type == .semicolon) {
+                try self.advance();
+                continue;
+            }
+            
             const stmt = try self.parseStatement();
             try if_node.then_body.append(self.allocator, stmt);
+            try self.expect(.semicolon);
         }
         
         // Parse elif clauses
@@ -333,8 +349,15 @@ pub const Parser = struct {
                    self.current_token.type != .kw_elseif and
                    self.current_token.type != .kw_else and
                    self.current_token.type != .eof) {
+                // Skip extra semicolons
+                if (self.current_token.type == .semicolon) {
+                    try self.advance();
+                    continue;
+                }
+                
                 const stmt = try self.parseStatement();
                 try elif_body.append(self.allocator, stmt);
+                try self.expect(.semicolon);
             }
             
             try if_node.elif_clauses.append(self.allocator, .{
@@ -350,8 +373,15 @@ pub const Parser = struct {
             
             while (self.current_token.type != .kw_endif and
                    self.current_token.type != .eof) {
+                // Skip extra semicolons
+                if (self.current_token.type == .semicolon) {
+                    try self.advance();
+                    continue;
+                }
+                
                 const stmt = try self.parseStatement();
                 try else_body.append(self.allocator, stmt);
+                try self.expect(.semicolon);
             }
             
             if_node.else_body = else_body;
@@ -380,8 +410,15 @@ pub const Parser = struct {
         // Parse body
         while (self.current_token.type != .kw_endrepeat and
                self.current_token.type != .eof) {
+            // Skip extra semicolons
+            if (self.current_token.type == .semicolon) {
+                try self.advance();
+                continue;
+            }
+            
             const stmt = try self.parseStatement();
             try repeat_node.body.append(self.allocator, stmt);
+            try self.expect(.semicolon);
         }
         
         try self.expect(.kw_endrepeat);
@@ -845,7 +882,8 @@ pub const Parser = struct {
             const id_node = try ast.IdentifierNode.init(self.allocator, return_loc, return_identifier);
             func_node.return_expr = ast.Node{ .identifier = id_node };
             
-            // Declaration-only: no EndFunction
+            // Declaration-only: expect semicolon, no EndFunction
+            try self.expect(.semicolon);
             return func_node;
         } else {
             // Full body syntax
@@ -878,6 +916,9 @@ pub const Parser = struct {
                 param_node.is_variadic = is_variadic;
                 
                 try func_node.parameters.append(self.allocator, param_node);
+                
+                // Require semicolon after Parameter
+                try self.expect(.semicolon);
             }
             
             // Parse Return statement
@@ -885,6 +926,9 @@ pub const Parser = struct {
                 try self.advance();
                 const return_expr = try self.parseExpression();
                 func_node.return_expr = return_expr;
+                
+                // Require semicolon after Return
+                try self.expect(.semicolon);
             }
             
             // Expect EndFunction

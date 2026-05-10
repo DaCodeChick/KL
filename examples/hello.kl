@@ -3,7 +3,7 @@
 Module Main
 
 Command Main
-	Variable msg = "Hello from KL!"
+	Variable msg = "Hello from KL!";
 EndCommand
 
 EndModule

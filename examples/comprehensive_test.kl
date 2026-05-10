@@ -1,0 +1,34 @@
+{Comprehensive variadic arithmetic demo}
+
+Module VariadicDemo
+
+Command Demo
+    { Addition with 1, 2, 3, and 4 arguments }
+    var a1 = Add[7];                    { = 7 }
+    var a2 = Add[10, 5];                { = 15 }
+    var a3 = Add[1, 2, 3];              { = 6 }
+    var a4 = Add[100, 200, 300, 400];   { = 1000 }
+    
+    { Subtraction with multiple arguments }
+    var s1 = Sub[100];                  { = 100 }
+    var s2 = Sub[100, 30];              { = 70 }
+    var s3 = Sub[100, 30, 20];          { = 50 }
+    
+    { Multiplication with multiple arguments }
+    var m1 = Mul[5];                    { = 5 }
+    var m2 = Mul[3, 4];                 { = 12 }
+    var m3 = Mul[2, 3, 4];              { = 24 }
+    
+    { Division with multiple arguments }
+    var d1 = Div[100];                  { = 100 }
+    var d2 = Div[100, 5];               { = 20 }
+    var d3 = Div[100, 5, 2];            { = 10 }
+    
+    { Modulo }
+    var mod = Mod[17, 5];               { = 2 }
+    
+    { Exit with the modulo result }
+    System.Exit[mod];
+EndCommand
+
+EndModule

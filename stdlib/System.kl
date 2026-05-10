@@ -15,7 +15,7 @@
      
   2. Use declaration syntax (no body, just signature):
      {@native kl_invoke}
-     Function Invoke[funcRef, args...] Return callResult
+     Function Invoke[funcRef, args...] Return callResult;
      
   3. The compiler will recognize this pragma and call the native implementation.
      
@@ -36,8 +36,8 @@ Module System
     Add[1, 2, 3] returns 6
 }
 Function Add
-    Parameter values...: uint32
-    Return values
+    Parameter values...: uint32;
+    Return values;
 EndFunction
 
 { Subtract - Variadic subtraction (left-to-right)
@@ -47,8 +47,8 @@ EndFunction
     Sub[10, 3, 2] returns 5
 }
 Function Sub
-    Parameter values...: uint32
-    Return values
+    Parameter values...: uint32;
+    Return values;
 EndFunction
 
 { Multiply - Variadic multiplication
@@ -58,8 +58,8 @@ EndFunction
     Mul[2, 3, 4] returns 24
 }
 Function Mul
-    Parameter values...: uint32
-    Return values
+    Parameter values...: uint32;
+    Return values;
 EndFunction
 
 { Divide - Variadic division (left-to-right)
@@ -69,8 +69,8 @@ EndFunction
     Div[100, 5, 2] returns 10
 }
 Function Div
-    Parameter values...: uint32
-    Return values
+    Parameter values...: uint32;
+    Return values;
 EndFunction
 
 {═══════════════════════════════════════════════════════════════════════════════}
@@ -82,6 +82,6 @@ EndFunction
   Declaration-only syntax for native intrinsics.
 }
 {@native kl_invoke}
-Function Invoke[funcRef, args...] Return callResult
+Function Invoke[funcRef, args...] Return callResult;
 
 EndModule

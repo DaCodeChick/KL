@@ -454,41 +454,48 @@ pub const SemanticAnalyzer = struct {
             std.mem.eql(u8, func_name, "Divide") or
             std.mem.eql(u8, func_name, "Modulo"))
         {
-            // Require 2 arguments
-            if (call.arguments.items.len != 2) {
+            // Variadic arithmetic: require at least 1 argument
+            if (call.arguments.items.len == 0) {
                 try self.err_reporter.report(
                     call.location,
                     CompilerError.InvalidSyntax,
-                    "Function '{s}' expects 2 arguments, got {d}",
-                    .{ func_name, call.arguments.items.len },
+                    "Function '{s}' requires at least 1 argument",
+                    .{ func_name },
                 );
                 return CompilerError.InvalidSyntax;
             }
             
-            const arg1_type = try self.analyzeExpression(call.arguments.items[0]);
-            const arg2_type = try self.analyzeExpression(call.arguments.items[1]);
-            
-            if (!arg1_type.isInteger() or !arg2_type.isInteger()) {
-                try self.err_reporter.report(
-                    call.location,
-                    CompilerError.TypeMismatch,
-                    "Arithmetic function requires integer arguments",
-                    .{},
-                );
-                return CompilerError.TypeMismatch;
+            // Check all arguments are integers and compatible types
+            var result_type: KLType = undefined;
+            for (call.arguments.items, 0..) |arg, i| {
+                const arg_type = try self.analyzeExpression(arg);
+                
+                if (!arg_type.isInteger()) {
+                    try self.err_reporter.report(
+                        call.location,
+                        CompilerError.TypeMismatch,
+                        "Arithmetic function requires integer arguments",
+                        .{},
+                    );
+                    return CompilerError.TypeMismatch;
+                }
+                
+                if (i == 0) {
+                    result_type = arg_type;
+                } else {
+                    if (!result_type.isCompatible(arg_type)) {
+                        try self.err_reporter.report(
+                            call.location,
+                            CompilerError.TypeMismatch,
+                            "Arithmetic function requires matching argument types",
+                            .{},
+                        );
+                        return CompilerError.TypeMismatch;
+                    }
+                }
             }
             
-            if (!arg1_type.isCompatible(arg2_type)) {
-                try self.err_reporter.report(
-                    call.location,
-                    CompilerError.TypeMismatch,
-                    "Arithmetic function requires matching argument types",
-                    .{},
-                );
-                return CompilerError.TypeMismatch;
-            }
-            
-            return arg1_type;
+            return result_type;
         }
         
         // Comparison functions

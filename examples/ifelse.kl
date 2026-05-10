@@ -3,15 +3,15 @@
 Module Main
 
 Command Main
-	Variable x = 15
+	Variable x = 15;
 	
 	If Equal[x, 10]
-		Variable msg1 = "x is 10"
+		Variable msg1 = "x is 10";
 	ElseIf Equal[x, 15]
-		Variable msg2 = "x is 15"
+		Variable msg2 = "x is 15";
 	Else
-		Variable msg3 = "x is something else"
-	EndIf
+		Variable msg3 = "x is something else";
+	EndIf;
 EndCommand
 
 EndModule
