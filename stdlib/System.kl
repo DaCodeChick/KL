@@ -74,20 +74,4 @@ Function Div[values...: uint32] Return uint32;
 }
 Function DivRem[a: uint32, b: uint32] Return uint32;
 
-{═══════════════════════════════════════════════════════════════════════════════}
-{ System I/O Commands                                                            }
-{═══════════════════════════════════════════════════════════════════════════════}
-
-{ Print - Output text without newline }
-{@native kl_sys_print}
-Command Print[text: text];
-
-{ PrintLine - Output text with newline }
-{@native kl_sys_println}
-Command PrintLine[text: text];
-
-{ Exit - Terminate program with exit code }
-{@native kl_sys_exit}
-Command Exit[code: sint32];
-
 EndModule;
