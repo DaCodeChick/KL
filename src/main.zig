@@ -13,6 +13,7 @@ pub fn main() !void {
     std.debug.print("KL Compiler - Phase 1 MVP\n", .{});
     std.debug.print("Lexer, Parser, and Semantic Analyzer complete!\n", .{});
     std.debug.print("Run 'zig build test' to see all tests\n", .{});
+    std.debug.print("\nRunning built-in demo...\n", .{});
     
     // Demo: parse a simple inline program
     const source =
@@ -24,14 +25,16 @@ pub fn main() !void {
         \\EndModule
     ;
     
-    std.debug.print("\nParsing demo program...\n", .{});
+    const filename = "<demo>";
+    
+    std.debug.print("Parsing...\n", .{});
     
     // Initialize error reporter
     var err_reporter = error_handling.ErrorReporter.init(allocator);
     defer err_reporter.deinit();
     
     // Lexical analysis
-    var lex = lexer.Lexer.init(source, "<demo>", allocator, &err_reporter);
+    var lex = lexer.Lexer.init(source, filename, allocator, &err_reporter);
     
     // Parse the module
     var parse = try parser.Parser.init(allocator, &lex, &err_reporter);

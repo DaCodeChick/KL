@@ -1,0 +1,8 @@
+Module MathDemo
+Command Calculate
+    Var a = 10
+    Var b = 20
+    Var sum = Add[a, b]
+    Var product = Mul[a, b]
+EndCommand
+EndModule
