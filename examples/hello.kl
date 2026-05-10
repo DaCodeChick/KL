@@ -1,9 +1,9 @@
 {Simple "Hello World" program for KL MVP Phase 1}
 
-Module Main
+Module Main;
 
-Command Main
-	Variable msg = "Hello from KL!";
-EndCommand
+Command Main;
+	var msg, text, "Hello from KL!";
+EndCommand;
 
-EndModule
+EndModule;

@@ -1,13 +1,14 @@
 {Test basic arithmetic and variables}
 
-Module Main
+Module Main;
 
-Command Main
-	Variable x = 10;
-	Variable y = 20;
-	Variable result = Add[x, y];
+Command Main;
+	var x, sint32, 10;
+	var y, sint32, 20;
+	var result, sint32;
+	set result, Add[x, y];
 	
 	{Result should be 30}
-EndCommand
+EndCommand;
 
-EndModule
+EndModule;

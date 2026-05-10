@@ -1,17 +1,17 @@
 {Test Add function}
 
-Module TestAdd
+Module TestAdd;
 
 {Simple non-variadic Add for testing}
-Function Add
+Function Add;
     Parameter a: uint32;
     Parameter b: uint32;
     Return a + b;
-EndFunction
+EndFunction;
 
-Command Main
+Command Main;
     {Call Add[5, 3] and discard result}
     Add[5, 3];
-EndCommand
+EndCommand;
 
-EndModule
+EndModule;

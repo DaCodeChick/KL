@@ -1,8 +1,12 @@
-Module MathDemo
-Command Calculate
-    var a = 10;
-    var b = 20;
-    var sum = Add[a, b];
-    var product = Mul[a, b];
-EndCommand
-EndModule
+Module MathDemo;
+
+Command Calculate;
+    var a, sint32, 10;
+    var b, sint32, 20;
+    var sum, sint32;
+    var product, sint32;
+    set sum, Add[a, b];
+    set product, Mul[a, b];
+EndCommand;
+
+EndModule;

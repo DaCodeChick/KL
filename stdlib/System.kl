@@ -23,7 +23,7 @@
      code generation phase (src/codegen.zig) to emit the appropriate assembly.
 }
 
-Module System
+Module System;
 
 {═══════════════════════════════════════════════════════════════════════════════}
 { Arithmetic Functions - Variadic Operator Wrappers                             }
@@ -35,10 +35,10 @@ Module System
     Add[1, 2] returns 3
     Add[1, 2, 3] returns 6
 }
-Function Add
+Function Add;
     Parameter values...: uint32;
     Return values;
-EndFunction
+EndFunction;
 
 { Subtract - Variadic subtraction (left-to-right)
   Can be called with 1+ arguments:
@@ -46,10 +46,10 @@ EndFunction
     Sub[10, 3] returns 7
     Sub[10, 3, 2] returns 5
 }
-Function Sub
+Function Sub;
     Parameter values...: uint32;
     Return values;
-EndFunction
+EndFunction;
 
 { Multiply - Variadic multiplication
   Can be called with 1+ arguments:
@@ -57,10 +57,10 @@ EndFunction
     Mul[2, 3] returns 6
     Mul[2, 3, 4] returns 24
 }
-Function Mul
+Function Mul;
     Parameter values...: uint32;
     Return values;
-EndFunction
+EndFunction;
 
 { Divide - Variadic division (left-to-right)
   Can be called with 1+ arguments:
@@ -68,10 +68,10 @@ EndFunction
     Div[100, 5] returns 20
     Div[100, 5, 2] returns 10
 }
-Function Div
+Function Div;
     Parameter values...: uint32;
     Return values;
-EndFunction
+EndFunction;
 
 {═══════════════════════════════════════════════════════════════════════════════}
 { Core Intrinsics                                                                }
@@ -84,4 +84,4 @@ EndFunction
 {@native kl_invoke}
 Function Invoke[funcRef, args...] Return callResult;
 
-EndModule
+EndModule;

@@ -1,15 +1,15 @@
 {Test repeat loops}
 
-Module Main
+Module Main;
 
-Command Main
-	Variable counter = 0;
+Command Main;
+	var counter, sint32, 0;
 	
-	Repeat 5
-		counter = Add[counter, 1];
+	Repeat 5;
+		set counter, Add[counter, 1];
 	EndRepeat;
 	
 	{counter should be 5}
-EndCommand
+EndCommand;
 
-EndModule
+EndModule;

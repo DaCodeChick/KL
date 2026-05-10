@@ -1,17 +1,17 @@
 {Test if/else control flow}
 
-Module Main
+Module Main;
 
-Command Main
-	Variable x = 15;
+Command Main;
+	var x, sint32, 15;
 	
-	If Equal[x, 10]
-		Variable msg1 = "x is 10";
-	ElseIf Equal[x, 15]
-		Variable msg2 = "x is 15";
-	Else
-		Variable msg3 = "x is something else";
+	If Equal[x, 10];
+		var msg1, text, "x is 10";
+	ElseIf Equal[x, 15];
+		var msg2, text, "x is 15";
+	Else;
+		var msg3, text, "x is something else";
 	EndIf;
-EndCommand
+EndCommand;
 
-EndModule
+EndModule;

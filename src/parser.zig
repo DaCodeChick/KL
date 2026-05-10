@@ -71,6 +71,9 @@ pub const Parser = struct {
         const module_loc = self.current_token.location;
         try self.expect(.identifier);
         
+        // Module declaration requires semicolon
+        try self.expect(.semicolon);
+        
         const module_node = try ast.ModuleNode.init(self.allocator, module_loc, module_name);
         errdefer module_node.deinit(self.allocator);
         
@@ -113,6 +116,9 @@ pub const Parser = struct {
         }
         
         try self.expect(.kw_emodule);
+        
+        // EndModule requires semicolon
+        try self.expect(.semicolon);
         
         return module_node;
     }
@@ -158,6 +164,9 @@ pub const Parser = struct {
             try self.expect(.rbracket);
         }
         
+        // Command declaration requires semicolon
+        try self.expect(.semicolon);
+        
         // Parse command body until EndCommand
         while (self.current_token.type != .kw_ecmd and 
                self.current_token.type != .eof) {
@@ -175,6 +184,9 @@ pub const Parser = struct {
         }
         
         try self.expect(.kw_ecmd);
+        
+        // EndCommand requires semicolon
+        try self.expect(.semicolon);
         
         return cmd_node;
     }
@@ -257,6 +269,7 @@ pub const Parser = struct {
     fn parseStatement(self: *Parser) ParseError!ast.Node {
         return switch (self.current_token.type) {
             .kw_var => self.parseVarDecl(),
+            .kw_set => self.parseSetStatement(),
             .kw_if => self.parseIfStatement(),
             .kw_repeat => self.parseRepeatStatement(),
             .kw_break => self.parseBreakStatement(),
@@ -277,7 +290,7 @@ pub const Parser = struct {
         };
     }
 
-    /// Parse variable declaration
+    /// Parse variable declaration: var name, type; or var name, type, value;
     fn parseVarDecl(self: *Parser) !ast.Node {
         // Accept both "Var" and "Variable"
         if (self.current_token.type == .kw_var) {
@@ -286,21 +299,23 @@ pub const Parser = struct {
             return error.UnexpectedToken;
         }
         
+        // Parse variable name
         const var_name = self.current_token.lexeme;
         const var_loc = self.current_token.location;
         try self.expect(.identifier);
         
+        // Expect comma
+        try self.expect(.comma);
+        
+        // Parse type
+        const var_type = try self.parseType();
+        
+        // Check for optional initial value after comma
         var initial_value: ?ast.Node = null;
-        if (self.current_token.type == .op_assign) {
-            try self.advance();
+        if (self.current_token.type == .comma) {
+            try self.advance(); // consume comma
             initial_value = try self.parseExpression();
         }
-        
-        // Infer type from initial value, or default to sint32
-        const var_type = if (initial_value) |val|
-            self.inferType(val)
-        else
-            types.KLType{ .sint32 = {} };
         
         const var_node = try ast.VarDeclNode.init(
             self.allocator,
@@ -313,12 +328,41 @@ pub const Parser = struct {
         return ast.Node{ .var_decl = var_node };
     }
 
+    /// Parse set statement: set varname, value;
+    fn parseSetStatement(self: *Parser) !ast.Node {
+        const set_loc = self.current_token.location;
+        try self.expect(.kw_set);
+        
+        // Parse variable name
+        const var_name = self.current_token.lexeme;
+        try self.expect(.identifier);
+        
+        // Expect comma
+        try self.expect(.comma);
+        
+        // Parse value expression
+        const value = try self.parseExpression();
+        
+        const assign_node = try ast.AssignmentNode.init(
+            self.allocator,
+            set_loc,
+            var_name,
+            value,
+            .simple
+        );
+        
+        return ast.Node{ .assignment = assign_node };
+    }
+
     /// Parse if statement
     fn parseIfStatement(self: *Parser) !ast.Node {
         const if_loc = self.current_token.location;
         try self.expect(.kw_if);
         
         const condition = try self.parseExpression();
+        
+        // If condition requires semicolon
+        try self.expect(.semicolon);
         
         const if_node = try ast.IfStmtNode.init(self.allocator, if_loc, condition);
         errdefer if_node.deinit(self.allocator);
@@ -343,6 +387,9 @@ pub const Parser = struct {
         while (self.current_token.type == .kw_elseif) {
             try self.advance();
             const elif_condition = try self.parseExpression();
+            
+            // ElseIf condition requires semicolon
+            try self.expect(.semicolon);
             
             var elif_body: std.ArrayList(ast.Node) = .{ .items = &.{}, .capacity = 0 };
             while (self.current_token.type != .kw_endif and
@@ -369,6 +416,10 @@ pub const Parser = struct {
         // Parse else clause
         if (self.current_token.type == .kw_else) {
             try self.advance();
+            
+            // Else requires semicolon
+            try self.expect(.semicolon);
+            
             var else_body: std.ArrayList(ast.Node) = .{ .items = &.{}, .capacity = 0 };
             
             while (self.current_token.type != .kw_endif and
@@ -399,10 +450,13 @@ pub const Parser = struct {
         
         // Check if there's a count expression
         var count: ?ast.Node = null;
-        if (self.current_token.type != .kw_endrepeat) {
+        if (self.current_token.type != .semicolon and self.current_token.type != .kw_endrepeat) {
             // Try to parse expression - if it fails, assume infinite repeat
             count = self.parseExpression() catch null;
         }
+        
+        // Repeat declaration requires semicolon
+        try self.expect(.semicolon);
         
         const repeat_node = try ast.RepeatStmtNode.init(self.allocator, repeat_loc, count);
         errdefer repeat_node.deinit(self.allocator);
@@ -887,6 +941,10 @@ pub const Parser = struct {
             return func_node;
         } else {
             // Full body syntax
+            
+            // Function declaration requires semicolon
+            try self.expect(.semicolon);
+            
             // Parse parameters inside body using Parameter keyword
             while (self.current_token.type == .kw_prm) {
                 try self.advance(); // consume 'Parameter'
@@ -933,6 +991,9 @@ pub const Parser = struct {
             
             // Expect EndFunction
             try self.expect(.kw_efunction);
+            
+            // EndFunction requires semicolon
+            try self.expect(.semicolon);
             
             return func_node;
         }
