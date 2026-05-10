@@ -623,18 +623,10 @@ fn getKeywordType(lexeme: []const u8) ?TokenType {
         .{ "Inline", .kw_inline },
 
         // Types
-        .{ "TUInt8", .kw_tuint8 },
-        .{ "TSInt8", .kw_tsint8 },
-        .{ "TUInt32", .kw_tuint32 },
-        .{ "TUInt", .kw_tuint },
-        .{ "TSInt32", .kw_tsint32 },
-        .{ "TSInt", .kw_tsint },
-        .{ "TBool", .kw_tbool },
         .{ "uint", .kw_uint },
         .{ "sint", .kw_sint },
         .{ "bool", .kw_bool },
         .{ "char", .kw_char },
-        .{ "TText", .kw_ttext },
         .{ "Ref", .kw_ref },
         .{ "Out", .kw_out },
         .{ "InOut", .kw_inout },
