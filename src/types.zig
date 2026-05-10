@@ -8,6 +8,10 @@ pub const KLType = union(enum) {
     uint32,
     sint32,
     bool_type,
+    
+    // Character and text types
+    char,
+    text,
 
     // Future: uint16, sint16, uint64, sint64, float types, reference types
 
@@ -21,28 +25,31 @@ pub const KLType = union(enum) {
             .uint32 => "uint32",
             .sint32 => "sint32",
             .bool_type => "bool",
+            .char => "char",
+            .text => "text",
         };
         try writer.writeAll(name);
     }
 
     pub fn sizeBytes(self: KLType) usize {
         return switch (self) {
-            .uint8, .sint8, .bool_type => 1,
+            .uint8, .sint8, .bool_type, .char => 1,
             .uint32, .sint32 => 4,
+            .text => 0, // Text is a reference type, size varies
         };
     }
 
     pub fn isSigned(self: KLType) bool {
         return switch (self) {
             .sint8, .sint32 => true,
-            .uint8, .uint32, .bool_type => false,
+            .uint8, .uint32, .bool_type, .char, .text => false,
         };
     }
 
     pub fn isInteger(self: KLType) bool {
         return switch (self) {
             .uint8, .sint8, .uint32, .sint32 => true,
-            .bool_type => false,
+            .bool_type, .char, .text => false,
         };
     }
 
@@ -64,6 +71,8 @@ pub fn parseTypeName(name: []const u8) ?KLType {
     if (std.mem.eql(u8, name, "uint32") or std.mem.eql(u8, name, "uint")) return .uint32;
     if (std.mem.eql(u8, name, "sint32") or std.mem.eql(u8, name, "sint")) return .sint32;
     if (std.mem.eql(u8, name, "bool")) return .bool_type;
+    if (std.mem.eql(u8, name, "char")) return .char;
+    if (std.mem.eql(u8, name, "text")) return .text;
 
     return null;
 }
