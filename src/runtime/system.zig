@@ -5,10 +5,16 @@ const SourceLocation = @import("../error.zig").SourceLocation;
 const intrinsics = @import("../intrinsics.zig");
 
 /// System Module Runtime Support
-/// Provides built-in System module commands that map to native implementations.
+/// 
+/// The System module is special - it's automatically imported and available globally.
+/// Functions like Add, Sub, Mul can be called without the System. prefix.
+/// 
+/// Currently, System functions are implemented as compiler intrinsics in sema.zig
+/// and irgen.zig. The stdlib/System.kl file documents the API, but the actual
+/// implementation is hardcoded in the compiler for Phase 1.
 
 /// Native hook mapping table for System module
-/// Currently empty - System module uses stdlib/System.kl for now
+/// Currently empty - System intrinsics are hardcoded in the compiler
 pub const system_hooks = [_]intrinsics.HookMapping{};
 
 /// Generate the System module AST with native intrinsics
