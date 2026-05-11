@@ -515,12 +515,8 @@ pub const SemanticAnalyzer = struct {
             return .{ .uint32 = {} };
         }
         
-        // Arithmetic functions
-        if (std.mem.eql(u8, func_name, "Add") or
-            std.mem.eql(u8, func_name, "Sub") or
-            std.mem.eql(u8, func_name, "Mul") or
-            std.mem.eql(u8, func_name, "Div") or
-            std.mem.eql(u8, func_name, "DivRem"))
+        // System compiler intrinsics (arithmetic, variadic helpers)
+        if (system.isCompilerIntrinsic(func_name))
         {
             // Variadic arithmetic: require at least 1 argument
             if (call.arguments.items.len == 0) {

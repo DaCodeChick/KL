@@ -526,7 +526,8 @@ pub const IRGenerator = struct {
                     return dest;
                 }
                 
-                // Check if this is a built-in variadic operation
+                // System compiler intrinsics - expanded inline to IR
+                if (system.isCompilerIntrinsic(call.function_name)) {
                 if (std.mem.eql(u8, call.function_name, "Add")) {
                     if (call.arguments.items.len == 0) return error.OutOfMemory; // Need at least 1 arg
                     
@@ -609,6 +610,7 @@ pub const IRGenerator = struct {
                     const dest = ir.Value{ .temporary = dest_temp };
                     try block.addInstruction(.{ .mod = .{ .dest = dest, .left = left, .right = right } });
                     return dest;
+                }
                 }
                 
                 // Comparison built-ins

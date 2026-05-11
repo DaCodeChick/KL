@@ -9,13 +9,32 @@ const intrinsics = @import("../intrinsics.zig");
 /// The System module is special - it's automatically imported and available globally.
 /// Functions like Add, Sub, Mul can be called without the System. prefix.
 /// 
-/// Currently, System functions are implemented as compiler intrinsics in sema.zig
-/// and irgen.zig. The stdlib/System.kl file documents the API, but the actual
-/// implementation is hardcoded in the compiler for Phase 1.
+/// System intrinsics come in two flavors:
+/// 1. Compiler intrinsics (Add, Sub, Mul, Div, DivRem, Count, Get) - expanded inline to IR
+/// 2. Native hooks (future: Exit, Print, etc.) - call external C functions
+
+/// List of System compiler intrinsics (expanded inline, not native calls)
+pub const compiler_intrinsics = [_][]const u8{
+    "Add",
+    "Sub", 
+    "Mul",
+    "Div",
+    "DivRem",
+    "Count",  // Variadic parameter intrinsics
+    "Get",
+};
 
 /// Native hook mapping table for System module
-/// Currently empty - System intrinsics are hardcoded in the compiler
+/// These call external C functions via native hooks
 pub const system_hooks = [_]intrinsics.HookMapping{};
+
+/// Check if a function is a System compiler intrinsic
+pub fn isCompilerIntrinsic(func_name: []const u8) bool {
+    for (compiler_intrinsics) |name| {
+        if (std.mem.eql(u8, func_name, name)) return true;
+    }
+    return false;
+}
 
 /// Generate the System module AST with native intrinsics
 /// Currently returns an empty module - System is loaded from stdlib/System.kl
@@ -51,4 +70,16 @@ test "intrinsic detection" {
     try std.testing.expect(isSystemIntrinsic("system.add"));
     try std.testing.expect(!isSystemIntrinsic("MyModule.Foo"));
     try std.testing.expect(!isSystemIntrinsic("Exit"));
+}
+
+test "compiler intrinsic detection" {
+    try std.testing.expect(isCompilerIntrinsic("Add"));
+    try std.testing.expect(isCompilerIntrinsic("Sub"));
+    try std.testing.expect(isCompilerIntrinsic("Mul"));
+    try std.testing.expect(isCompilerIntrinsic("Div"));
+    try std.testing.expect(isCompilerIntrinsic("DivRem"));
+    try std.testing.expect(isCompilerIntrinsic("Count"));
+    try std.testing.expect(isCompilerIntrinsic("Get"));
+    try std.testing.expect(!isCompilerIntrinsic("Exit"));
+    try std.testing.expect(!isCompilerIntrinsic("Print"));
 }
