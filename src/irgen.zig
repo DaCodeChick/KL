@@ -416,6 +416,10 @@ pub const IRGenerator = struct {
                 return ir.Value{ .constant = .{ .string = lit.value } };
             },
             
+            .bool_literal => |lit| {
+                return ir.Value{ .constant = .{ .int = if (lit.value) 1 else 0 } };
+            },
+            
             .identifier => |ident| {
                 const local_index = self.var_map.get(ident.name) orelse return error.UndefinedVariable;
                 const temp = self.nextTemp();

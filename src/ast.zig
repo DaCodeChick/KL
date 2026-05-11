@@ -29,6 +29,7 @@ pub const Node = union(enum) {
     int_literal: *IntLiteralNode,
     char_literal: *CharLiteralNode,
     string_literal: *StringLiteralNode,
+    bool_literal: *BoolLiteralNode,
     identifier: *IdentifierNode,
     
     /// Recursively free a node and all its children
@@ -54,6 +55,7 @@ pub const Node = union(enum) {
             .int_literal => |n| n.deinit(allocator),
             .char_literal => |n| n.deinit(allocator),
             .string_literal => |n| n.deinit(allocator),
+            .bool_literal => |n| n.deinit(allocator),
             .identifier => |n| n.deinit(allocator),
         }
     }
@@ -642,6 +644,25 @@ pub const StringLiteralNode = struct {
     }
     
     pub fn deinit(self: *StringLiteralNode, allocator: std.mem.Allocator) void {
+        allocator.destroy(self);
+    }
+};
+
+/// Boolean literal
+pub const BoolLiteralNode = struct {
+    location: SourceLocation,
+    value: bool,
+    
+    pub fn init(allocator: std.mem.Allocator, location: SourceLocation, value: bool) !*BoolLiteralNode {
+        const node = try allocator.create(BoolLiteralNode);
+        node.* = .{
+            .location = location,
+            .value = value,
+        };
+        return node;
+    }
+    
+    pub fn deinit(self: *BoolLiteralNode, allocator: std.mem.Allocator) void {
         allocator.destroy(self);
     }
 };

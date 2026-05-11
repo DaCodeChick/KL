@@ -364,6 +364,7 @@ pub const SemanticAnalyzer = struct {
             .int_literal => .sint32, // Default to sint32
             .char_literal => .char,
             .string_literal => .text,
+            .bool_literal => .bool_type,
             .identifier => |id| try self.analyzeIdentifier(id),
             .binary_op => |bin| try self.analyzeBinaryOp(bin),
             .function_call => |call| try self.analyzeFunctionCall(call),

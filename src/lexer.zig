@@ -8,7 +8,8 @@ pub const TokenType = enum {
     int_literal, // Integer literal, e.g. 123, 0x4D2, 0b1010
     string_literal, // String literal, e.g. "hello world"
     char_literal, // Character literal, e.g. 'a', 'z', '<deg>'
-    bool_literal, // Boolean literal, true or false
+    true_literal, // True literal, true or True
+    false_literal, // False literal, false or False
     null_literal, // Null literal, null or Null
 
     // Keywords - control flow
@@ -671,6 +672,14 @@ pub const Lexer = struct {
 
 fn getKeywordType(lexeme: []const u8) ?TokenType {
     const map = std.StaticStringMap(TokenType).initComptime(.{
+        // Literals
+        .{ "true", .true_literal },
+        .{ "True", .true_literal },
+        .{ "false", .false_literal },
+        .{ "False", .false_literal },
+        .{ "null", .null_literal },
+        .{ "Null", .null_literal },
+
         // Control flow
         .{ "if", .kw_if },
         .{ "If", .kw_if },

@@ -667,6 +667,7 @@ pub const Parser = struct {
             .int_literal => try self.parseIntLiteral(),
             .char_literal => try self.parseCharLiteral(),
             .string_literal => try self.parseStringLiteral(),
+            .true_literal, .false_literal => try self.parseBoolLiteral(),
             .identifier => try self.parseIdentifierOrFunctionCall(),
             .op_minus => try self.parseUnaryMinus(),
             .op_not => try self.parseUnaryNot(),
@@ -715,6 +716,16 @@ pub const Parser = struct {
         
         const lit_node = try ast.StringLiteralNode.init(self.allocator, loc, value);
         return ast.Node{ .string_literal = lit_node };
+    }
+
+    /// Parse boolean literal
+    fn parseBoolLiteral(self: *Parser) !ast.Node {
+        const value = (self.current_token.type == .true_literal);
+        const loc = self.current_token.location;
+        try self.advance();
+        
+        const lit_node = try ast.BoolLiteralNode.init(self.allocator, loc, value);
+        return ast.Node{ .bool_literal = lit_node };
     }
 
     /// Parse identifier or function call (prefix notation)
