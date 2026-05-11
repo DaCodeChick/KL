@@ -3,7 +3,8 @@ const ast = @import("ast.zig");
 const ir = @import("ir.zig");
 const types = @import("types.zig");
 const sema = @import("sema.zig");
-const ghost = @import("ghost.zig");
+const intrinsics = @import("intrinsics.zig");
+const system = @import("runtime/system.zig");
 
 /// IR Generator - converts analyzed AST to IR
 pub const IRGenerator = struct {
@@ -206,8 +207,8 @@ pub const IRGenerator = struct {
         const block = self.current_block.?;
         
         // Check if this is a System intrinsic (qualified name System.*)
-        if (ghost.isSystemIntrinsic(cmd.command_name)) {
-            const hook_name = ghost.getNativeHook(cmd.command_name);
+        if (system.isSystemIntrinsic(cmd.command_name)) {
+            const hook_name = intrinsics.getNativeHook(cmd.command_name, &system.system_hooks);
             
             // Generate arguments
             var args = try self.allocator.alloc(ir.Value, cmd.arguments.items.len);

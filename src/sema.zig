@@ -4,7 +4,7 @@ const KLType = @import("types.zig").KLType;
 const ErrorReporter = @import("error.zig").ErrorReporter;
 const SourceLocation = @import("error.zig").SourceLocation;
 const CompilerError = @import("error.zig").CompilerError;
-const ghost = @import("ghost.zig");
+const system = @import("runtime/system.zig");
 
 /// Symbol in the symbol table
 pub const Symbol = struct {
@@ -110,9 +110,9 @@ pub const SemanticAnalyzer = struct {
         self.allocator.destroy(self);
     }
     
-    /// Load the System ghost module into the global scope
+    /// Load the System module into the global scope
     fn loadSystemModule(self: *SemanticAnalyzer) !void {
-        self.system_module = try ghost.generateSystemModule(self.allocator);
+        self.system_module = try system.generateSystemModule(self.allocator);
         const sys_mod = self.system_module.?;
         
         // Register System module
