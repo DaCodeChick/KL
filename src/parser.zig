@@ -87,7 +87,7 @@ pub const Parser = struct {
                 try self.advance();
             }
             
-            if (self.current_token.type == .kw_command or self.current_token.type == .kw_cmd) {
+            if (self.current_token.type == .kw_cmd) {
                 const cmd = try self.parseCommand();
                 // If we had a pragma, parse it and set intrinsic flags
                 if (pragma) |pragma_text| {
@@ -125,8 +125,8 @@ pub const Parser = struct {
 
     /// Parse a command implementation
     fn parseCommand(self: *Parser) !*ast.CommandImplNode {
-        // Accept either "Command" or "Cmd"
-        if (self.current_token.type == .kw_command or self.current_token.type == .kw_cmd) {
+        // Accept "Command" or "Cmd"
+        if (self.current_token.type == .kw_cmd) {
             try self.advance();
         } else {
             return error.UnexpectedToken;
@@ -292,11 +292,9 @@ pub const Parser = struct {
             .kw_set => self.parseSetStatement(),
             .kw_if => self.parseIfStatement(),
             .kw_repeat => self.parseRepeatStatement(),
-            .kw_break => self.parseBreakStatement(),
-            .kw_continue => self.parseContinueStatement(),
             .kw_return => self.parseReturnStatement(),
             .kw_goto => self.parseGotoStatement(),
-            .kw_loc, .kw_location => self.parseLocationStatement(),
+            .kw_loc => self.parseLocationStatement(),
             .identifier => self.parseIdentifierStatement(),
             else => {
                 try self.error_reporter.report(
@@ -470,7 +468,7 @@ pub const Parser = struct {
         
         // Check if there's a count expression
         var count: ?ast.Node = null;
-        if (self.current_token.type != .semicolon and self.current_token.type != .kw_endrepeat) {
+        if (self.current_token.type != .semicolon and self.current_token.type != .kw_erepeat) {
             // Try to parse expression - if it fails, assume infinite repeat
             count = self.parseExpression() catch null;
         }
@@ -482,7 +480,7 @@ pub const Parser = struct {
         errdefer repeat_node.deinit(self.allocator);
         
         // Parse body
-        while (self.current_token.type != .kw_endrepeat and
+        while (self.current_token.type != .kw_erepeat and
                self.current_token.type != .eof) {
             // Skip extra semicolons
             if (self.current_token.type == .semicolon) {
@@ -495,31 +493,32 @@ pub const Parser = struct {
             try self.expect(.semicolon);
         }
         
-        try self.expect(.kw_endrepeat);
+        try self.expect(.kw_erepeat);
         
         return ast.Node{ .repeat_stmt = repeat_node };
     }
 
-    /// Parse break statement
-    fn parseBreakStatement(self: *Parser) !ast.Node {
-        const break_loc = self.current_token.location;
-        try self.expect(.kw_break);
-        
-        // TODO: Parse optional level count
-        const break_node = try ast.BreakStmtNode.init(self.allocator, break_loc, 1);
-        
-        return ast.Node{ .break_stmt = break_node };
-    }
+    // Note: Break and Continue statements removed - tokens don't exist in new TokenType
+    // /// Parse break statement
+    // fn parseBreakStatement(self: *Parser) !ast.Node {
+    //     const break_loc = self.current_token.location;
+    //     try self.expect(.kw_break);
+    //     
+    //     // TODO: Parse optional level count
+    //     const break_node = try ast.BreakStmtNode.init(self.allocator, break_loc, 1);
+    //     
+    //     return ast.Node{ .break_stmt = break_node };
+    // }
 
-    /// Parse continue statement
-    fn parseContinueStatement(self: *Parser) !ast.Node {
-        const continue_loc = self.current_token.location;
-        try self.expect(.kw_continue);
-        
-        const continue_node = try ast.ContinueStmtNode.init(self.allocator, continue_loc);
-        
-        return ast.Node{ .continue_stmt = continue_node };
-    }
+    // /// Parse continue statement
+    // fn parseContinueStatement(self: *Parser) !ast.Node {
+    //     const continue_loc = self.current_token.location;
+    //     try self.expect(.kw_continue);
+    //     
+    //     const continue_node = try ast.ContinueStmtNode.init(self.allocator, continue_loc);
+    //     
+    //     return ast.Node{ .continue_stmt = continue_node };
+    // }
 
     /// Parse return statement
     fn parseReturnStatement(self: *Parser) !ast.Node {
@@ -555,8 +554,8 @@ pub const Parser = struct {
     /// Parse location statement (label)
     fn parseLocationStatement(self: *Parser) !ast.Node {
         const loc_loc = self.current_token.location;
-        // Accept both "Loc" and "Location"
-        if (self.current_token.type == .kw_loc or self.current_token.type == .kw_location) {
+        // Accept "Location" or "Loc"
+        if (self.current_token.type == .kw_loc) {
             try self.advance();
         } else {
             return error.UnexpectedToken;
@@ -599,48 +598,7 @@ pub const Parser = struct {
             try self.advance();
         }
         
-        // Check for assignment operators
-        if (self.current_token.type == .op_assign) {
-            try self.advance();
-            const value = try self.parseExpression();
-            
-            const assign_node = try ast.AssignmentNode.init(
-                self.allocator,
-                id_loc,
-                id_name,
-                value,
-                .simple
-            );
-            
-            return ast.Node{ .assignment = assign_node };
-        }
-        
-        // Check for compound assignment
-        const assign_op: ?ast.AssignmentNode.AssignOp = switch (self.current_token.type) {
-            .op_plus_assign => .add,
-            .op_minus_assign => .sub,
-            .op_mult_assign => .mul,
-            .op_div_assign => .div,
-            .op_mod_assign => .mod,
-            else => null,
-        };
-        
-        if (assign_op) |op| {
-            try self.advance();
-            const value = try self.parseExpression();
-            
-            const assign_node = try ast.AssignmentNode.init(
-                self.allocator,
-                id_loc,
-                id_name,
-                value,
-                op
-            );
-            
-            return ast.Node{ .assignment = assign_node };
-        }
-        
-        // Otherwise it's a command invocation
+        // It's a command invocation (no assignment operators in KL - use Set command)
         const cmd_node = try ast.CommandInvocationNode.init(self.allocator, id_loc, id_name);
         errdefer cmd_node.deinit(self.allocator);
         

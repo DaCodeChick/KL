@@ -5,97 +5,154 @@ const CompilerError = @import("error.zig").CompilerError;
 
 pub const TokenType = enum {
     // Literals
-    int_literal,
-    string_literal,
-    char_literal,
+    int_literal, // Integer literal, e.g. 123, 0x4D2, 0b1010
+    string_literal, // String literal, e.g. "hello world"
+    char_literal, // Character literal, e.g. 'a', 'z', '<deg>'
+    bool_literal, // Boolean literal, true or false
+    null_literal, // Null literal, null or Null
 
     // Keywords - control flow
-    kw_if,
-    kw_ifnot,
-    kw_elseif,
-    kw_else,
-    kw_endif,
-    kw_repeat,
-    kw_endrepeat,
-    kw_break,
-    kw_continue,
-    kw_return,
+    kw_if, // If keyword for conditional statements
+    kw_ifnot, // IfNot keyword for negated conditionals
+    kw_elseif, // ElseIf keyword for else-if branches
+    kw_else, // Else keyword for else branches
+    kw_endif, // EndIf keyword for ending if statements
+    kw_repeat, // Repeat keyword for loops
+    kw_erepeat, // EndRepeat keyword for ending loops
+    kw_switch, // Switch keyword for switch statements
+    kw_case, // Case keyword for switch cases
+    kw_default, // Default keyword for default case in switch and translate statements
+    kw_eswitch, // EndSwitch keyword for ending switch statements
+    kw_translate, // Translate keyword for translation blocks
+    kw_aso, // Associate keyword for associating values in translation blocks
+    kw_etranslate, // EndTranslate keyword for ending translation blocks
+    kw_return, // Return keyword for returning from functions
 
     // Keywords - declarations
-    kw_module,
-    kw_emodule,
-    kw_cmd,
-    kw_command,
-    kw_ecmd,
-    kw_function,
-    kw_efunction,
-    kw_var,
-    kw_prm,
+    kw_module, // Module keyword for module declarations
+    kw_emodule, // EndModule keyword for ending module declarations
+    kw_cmd, // Command keyword for command declarations
+    kw_ecmd, // EndCommand keyword for ending command declarations
+    kw_function, // Function keyword for function declarations
+    kw_efunction, // EndFunction keyword for ending function declarations
+    kw_tuple, // Tuple keyword for tuple type declarations
+    kw_etuple, // EndTuple keyword for ending tuple type declarations
+    kw_record, // Record keyword for record type declarations
+    kw_erecord, // EndRecord keyword for ending record type declarations
+    kw_enum, // Enum keyword for enum type declarations
+    kw_eenum, // EndEnum keyword for ending enum type declarations
+    kw_var, // Variable keyword for variable declarations
+    kw_prm, // Parameter keyword for parameter declarations
+    kw_atr, // Attribute keyword for attribute declarations
 
     // Keywords - commands
-    kw_set,
-    kw_increment,
-    kw_decrement,
-    kw_incr,
-    kw_decr,
-
-    // Keywords - options
-    kw_unchecked,
-    kw_inline,
+    kw_set, // Set keyword for assignment command
+    kw_incr, // Incr keyword for increment command
+    kw_decr, // Decr keyword for decrement command
+    kw_invoke, // Invoke keyword for invoking commands or functions
 
     // Type keywords
-    kw_uint,
-    kw_sint,
-    kw_bool,
-    kw_char, // character type
-    kw_ref, // Ref keyword
-    kw_out, // Out keyword
-    kw_inout, // InOut keyword
-    kw_readonly, // ReadOnly keyword
-    kw_goto,
-    kw_loc,
-    kw_location,
+    kw_uint, // uint keyword for unsigned integer types
+    kw_uint16, // uint16 keyword for 16-bit unsigned integer type
+    kw_sint, // sint keyword for signed integer types
+    kw_bool, // bool keyword for boolean types
+    kw_char, // char keyword for character types
+    kw_nullable, // Nullable keyword for nullable value types
+    kw_unnullable, // Unnullable keyword for non-nullable value types
+    kw_ptr, // Ptr keyword for pointer types
+    kw_ref, // Ref keyword for reference types
+    kw_refn, // RefN keyword for nullable references
+    kw_signed, // Signed keyword for signed integer types
+    kw_unsigned, // Unsigned keyword for unsigned integer types
+
+    // storage modifiers
+    kw_out, // Out keyword for output parameters
+    kw_inout, // InOut keyword for parameters that are both input and output
+    kw_readonly, // ReadOnly keyword for read-only parameters
+    kw_modifyonly, // ModifyOnly keyword for write-only parameters
+    kw_constantsize, // ConstantSize keyword for fixed-size arrays
+    kw_preallocated, // Preallocated keyword for preallocated arrays
+    kw_appended, // Appended keyword for dynamically appended arrays
+    kw_unchangingsize, // UnchangingSize keyword for arrays that can be resized but not reallocated
+    kw_consolidated, // Consolidated keyword for consolidated arrays
+    kw_be, // BigEndian keyword for big-endian data types
+    kw_le, // LittleEndian keyword for little-endian data types
+    kw_aligned, // Aligned keyword for specifying alignment of types or variables
+    kw_unaligned, // Unaligned keyword for specifying unaligned types or variables
+
+    kw_goto, // goto keyword for goto statements
+    kw_loc, // loc keyword for source code labels
 
     // Operators - arithmetic
-    op_plus,
-    op_minus,
-    op_mult,
-    op_div,
-    op_mod,
+    op_plus, // Add operator +
+    op_minus, // Sub operator -
+    op_mult, // Mul operator *
+    op_div, // Div operator /
+    op_mod, // DivRem operator %
+    op_pow, // Pow/Power operator **
 
     // Operators - comparison
-    op_eq,
-    op_neq,
-    op_lt,
-    op_gt,
-    op_lte,
-    op_gte,
+    op_eq, // Equal/EQ operator ==
+    op_neq, // NotEqual/NEQ operator !=
+    op_lt, // Less/LT operator <
+    op_gt, // Greater/GT operator >
+    op_lte, // LessEqual/LTE operator <=
+    op_gte, // GreaterEqual/GTE operator >=
+
+    // Commands and Operators - pointer
+    kw_mkp, // MakePtr keyword for creating pointers to values
+    kw_sett, // SetTarget keyword for setting the target of a pointer
+    kw_setp, // SetPtr keyword for setting a pointer to point to another pointer (pointer assignment)
+    kw_setpnull, // SetPtrNull keyword for setting a pointer to null
+    kw_targetof, // TargetOf keyword for dereferencing pointers
+    kw_gettarget, // GetTarget keyword for getting the target of a pointer without dereferencing
+    kw_gettargetsize, // GetTargetSize keyword for getting the size of the target of a pointer
+    kw_mvpf, // MovePtrFwd keyword for moving pointers forward by a certain number of bytes
+    kw_mvpb, // MovePtrBack keyword for moving pointers backward by a certain number of bytes
+    kw_incp, // IncrPtr keyword for incrementing pointers by a certain number of bytes
+    kw_decp, // DecrPtr keyword for decrementing pointers by a certain number of bytes
+    kw_equaltarget, // EqualTarget keyword for checking if two pointers point to the same target
+    kw_equalptr, // EqualPtr keyword for checking if two pointers are equal (point to the same target and have the same offset)
+    kw_isnullptr, // IsNullPtr keyword for checking if a pointer is null
+    kw_ptrtouint, // PtrToUInt keyword for converting pointers to unsigned integers
+    kw_uinttoptr, // UIntToPtr keyword for converting unsigned integers to pointers
+    kw_load, // Load keyword for loading a value from a pointer
+    kw_store, // Store keyword for storing a value to a pointer
+    op_same, // Same operator ==#
+    op_notsame, // NotSame operator !=#
+    op_lessptr, // LessPtr operator <#
+    op_greaterptr, // GreaterPtr operator >#
+    op_lesseqptr, // LessEqualPtr operator <=#
+    op_greatereqptr, // GreaterEqualPtr operator >=#
 
     // Operators - logical
-    op_and,
-    op_or,
-    op_not,
+    op_and, // And operator &&
+    op_or, // Or operator ||
+    op_not, // Not operator !
+    op_notand, // NotAnd operator !&&
+    op_notor, // NotOr operator !||
+    op_min, // Minimum operator <?
+    op_max, // Maximum operator >?
 
-    // Operators - assignment
-    op_assign,
-    op_plus_assign,
-    op_minus_assign,
-    op_mult_assign,
-    op_div_assign,
-    op_mod_assign,
-    op_incr,
-    op_decr,
+    // Operators - bitwise
+    op_bitor, // BitOr operator |
+    op_bitxor, // BitXor operator ^
+    op_bitand, // BitAnd operator &
+    op_bitclear, // BitClear operator &~ (AND NOT)
+    op_bitshiftup, // BitShiftUp operator <<
+    op_bitshiftdown, // BitShiftDown operator >>
 
     // Punctuation
-    semicolon,
-    comma,
-    dot,
+    semicolon, // ;
+    comma, // ,
+    dot, // .
+    range, // .. for ranges
     ellipsis, // ... for variadic parameters
-    colon,
-    lparen,
-    rparen,
-    lbracket,
-    rbracket,
+    colon, // :
+    lparen, // (
+    rparen, // )
+    lbracket, // [
+    rbracket, // ]
 
     // Identifiers
     identifier,
@@ -228,50 +285,31 @@ pub const Lexer = struct {
             '[' => self.makeTokenFrom(.lbracket, start, start_line, start_column),
             ']' => self.makeTokenFrom(.rbracket, start, start_line, start_column),
 
-            '+' => blk: {
-                if (self.match('+')) {
-                    break :blk self.makeTokenFrom(.op_incr, start, start_line, start_column);
-                } else if (self.match('=')) {
-                    break :blk self.makeTokenFrom(.op_plus_assign, start, start_line, start_column);
-                }
-                break :blk self.makeTokenFrom(.op_plus, start, start_line, start_column);
-            },
+            '+' => self.makeTokenFrom(.op_plus, start, start_line, start_column),
 
-            '-' => blk: {
-                if (self.match('-')) {
-                    break :blk self.makeTokenFrom(.op_decr, start, start_line, start_column);
-                } else if (self.match('=')) {
-                    break :blk self.makeTokenFrom(.op_minus_assign, start, start_line, start_column);
-                }
-                break :blk self.makeTokenFrom(.op_minus, start, start_line, start_column);
-            },
+            '-' => self.makeTokenFrom(.op_minus, start, start_line, start_column),
 
             '*' => blk: {
-                if (self.match('=')) {
-                    break :blk self.makeTokenFrom(.op_mult_assign, start, start_line, start_column);
+                if (self.match('*')) {
+                    break :blk self.makeTokenFrom(.op_pow, start, start_line, start_column);
                 }
                 break :blk self.makeTokenFrom(.op_mult, start, start_line, start_column);
             },
 
-            '/' => blk: {
-                if (self.match('=')) {
-                    break :blk self.makeTokenFrom(.op_div_assign, start, start_line, start_column);
-                }
-                break :blk self.makeTokenFrom(.op_div, start, start_line, start_column);
-            },
+            '/' => self.makeTokenFrom(.op_div, start, start_line, start_column),
 
-            '%' => blk: {
-                if (self.match('=')) {
-                    break :blk self.makeTokenFrom(.op_mod_assign, start, start_line, start_column);
-                }
-                break :blk self.makeTokenFrom(.op_mod, start, start_line, start_column);
-            },
+            '%' => self.makeTokenFrom(.op_mod, start, start_line, start_column),
 
             '=' => blk: {
                 if (self.match('=')) {
+                    if (self.match('#')) {
+                        break :blk self.makeTokenFrom(.op_same, start, start_line, start_column);
+                    }
                     break :blk self.makeTokenFrom(.op_eq, start, start_line, start_column);
                 }
-                break :blk self.makeTokenFrom(.op_assign, start, start_line, start_column);
+                // Single '=' is not a valid token in KL
+                try self.error_reporter.report(.{ .line = start_line, .column = start_column, .file = self.filename }, CompilerError.InvalidCharacter, "unexpected character '=' (did you mean '==' for comparison?)", .{});
+                return error.InvalidCharacter;
             },
 
             '!' => blk: {
@@ -544,11 +582,11 @@ pub const Lexer = struct {
             return error.UnterminatedComment;
         }
     }
-    
+
     fn scanPragma(self: *Lexer, start: usize, start_line: usize, start_column: usize) !Token {
         // We've seen '{@', now consume the '@'
         _ = self.advance();
-        
+
         // Scan until we find '}'
         while (!self.isAtEnd() and self.peek() != '}') {
             if (self.peek() == '\n') {
@@ -557,7 +595,7 @@ pub const Lexer = struct {
             }
             _ = self.advance();
         }
-        
+
         if (self.isAtEnd()) {
             try self.error_reporter.report(
                 .{ .line = start_line, .column = start_column, .file = self.filename },
@@ -567,14 +605,14 @@ pub const Lexer = struct {
             );
             return error.UnterminatedComment;
         }
-        
+
         // Consume the closing '}'
         _ = self.advance();
-        
+
         // Extract pragma text (between {@  and })
         // Skip the leading '{@' and trailing '}'
         const pragma_text = std.mem.trim(u8, self.source[start + 2 .. self.current - 1], " \t\n\r");
-        
+
         return Token{
             .type = .pragma,
             .lexeme = pragma_text,
@@ -638,25 +676,32 @@ fn getKeywordType(lexeme: []const u8) ?TokenType {
         .{ "If", .kw_if },
         .{ "ifnot", .kw_ifnot },
         .{ "IfNot", .kw_ifnot },
-        .{ "elseif", .kw_elseif },
         .{ "ElseIf", .kw_elseif },
         .{ "elif", .kw_elseif },
         .{ "else", .kw_else },
         .{ "Else", .kw_else },
-        .{ "endif", .kw_endif },
         .{ "EndIf", .kw_endif },
         .{ "eif", .kw_endif },
         .{ "repeat", .kw_repeat },
         .{ "Repeat", .kw_repeat },
-        .{ "endrepeat", .kw_endrepeat },
-        .{ "EndRepeat", .kw_endrepeat },
-        .{ "erepeat", .kw_endrepeat },
-        .{ "break", .kw_break },
-        .{ "Break", .kw_break },
-        .{ "continue", .kw_continue },
-        .{ "Continue", .kw_continue },
+        .{ "EndRepeat", .kw_erepeat },
+        .{ "erepeat", .kw_erepeat },
         .{ "return", .kw_return },
         .{ "Return", .kw_return },
+        .{ "switch", .kw_switch },
+        .{ "Switch", .kw_switch },
+        .{ "case", .kw_case },
+        .{ "Case", .kw_case },
+        .{ "default", .kw_default },
+        .{ "Default", .kw_default },
+        .{ "EndSwitch", .kw_eswitch },
+        .{ "eswitch", .kw_eswitch },
+        .{ "translate", .kw_translate },
+        .{ "Translate", .kw_translate },
+        .{ "Associate", .kw_aso },
+        .{ "aso", .kw_aso },
+        .{ "EndTranslate", .kw_etranslate },
+        .{ "etranslate", .kw_etranslate },
 
         // Declarations
         .{ "module", .kw_module },
@@ -664,46 +709,66 @@ fn getKeywordType(lexeme: []const u8) ?TokenType {
         .{ "emodule", .kw_emodule },
         .{ "EndModule", .kw_emodule },
         .{ "cmd", .kw_cmd },
+        .{ "Command", .kw_cmd },
         .{ "ecmd", .kw_ecmd },
         .{ "EndCommand", .kw_ecmd },
-        .{ "Command", .kw_command },
-        .{ "function", .kw_function },
+        //.{ "function", .kw_function },
         .{ "Function", .kw_function },
-        .{ "efunction", .kw_efunction },
+        //.{ "efunction", .kw_efunction },
         .{ "EndFunction", .kw_efunction },
+        .{ "tuple", .kw_tuple },
+        .{ "Tuple", .kw_tuple },
+        .{ "etuple", .kw_etuple },
+        .{ "EndTuple", .kw_etuple },
+        .{ "record", .kw_record },
+        .{ "Record", .kw_record },
+        .{ "erecord", .kw_erecord },
+        .{ "EndRecord", .kw_erecord },
+        .{ "enum", .kw_enum },
+        .{ "Enum", .kw_enum },
+        .{ "eenum", .kw_eenum },
+        .{ "EndEnum", .kw_eenum },
         .{ "var", .kw_var },
         .{ "Variable", .kw_var },
         .{ "prm", .kw_prm },
         .{ "Parameter", .kw_prm },
+        .{ "atr", .kw_atr },
+        .{ "Attribute", .kw_atr },
 
         // Commands
         .{ "set", .kw_set },
         .{ "Set", .kw_set },
-        .{ "increment", .kw_increment },
-        .{ "Increment", .kw_increment },
         .{ "incr", .kw_incr },
-        .{ "decrement", .kw_decrement },
-        .{ "Decrement", .kw_decrement },
+        .{ "Incr", .kw_incr },
         .{ "decr", .kw_decr },
-
-        // Options
-        .{ "Unchecked", .kw_unchecked },
-        .{ "Inline", .kw_inline },
+        .{ "Decr", .kw_decr },
+        .{ "Invoke", .kw_invoke },
 
         // Types
         .{ "uint", .kw_uint },
+        .{ "uint16", .kw_uint16 },
         .{ "sint", .kw_sint },
         .{ "bool", .kw_bool },
         .{ "char", .kw_char },
+        .{ "Nullable", .kw_nullable },
+        .{ "Unnullable", .kw_unnullable },
+        .{ "Ptr", .kw_ptr },
         .{ "Ref", .kw_ref },
+        .{ "RefN", .kw_refn },
+        .{ "Signed", .kw_signed },
+        .{ "Unsigned", .kw_unsigned },
+
+        // Storage modifiers
         .{ "Out", .kw_out },
         .{ "InOut", .kw_inout },
         .{ "ReadOnly", .kw_readonly },
+        .{ "ModifyOnly", .kw_modifyonly },
+
+        // Control
         .{ "goto", .kw_goto },
-        .{ "GoTo", .kw_goto },
         .{ "Goto", .kw_goto },
         .{ "loc", .kw_loc },
-        .{ "Location", .kw_location },
+        .{ "Location", .kw_loc },
     });
 
     return map.get(lexeme);
