@@ -8,11 +8,11 @@ const intrinsics = @import("../intrinsics.zig");
 /// Provides built-in System module commands that map to native implementations.
 
 /// Native hook mapping table for System module
-pub const system_hooks = [_]intrinsics.HookMapping{
-    .{ .qualified_name = "system.exit", .native_hook = "kl_sys_exit" },
-};
+/// Currently empty - System module uses stdlib/System.kl for now
+pub const system_hooks = [_]intrinsics.HookMapping{};
 
 /// Generate the System module AST with native intrinsics
+/// Currently returns an empty module - System is loaded from stdlib/System.kl
 pub fn generateSystemModule(allocator: std.mem.Allocator) !*ast.ModuleNode {
     const builtin_location = SourceLocation{
         .line = 0,
@@ -21,26 +21,6 @@ pub fn generateSystemModule(allocator: std.mem.Allocator) !*ast.ModuleNode {
     };
     
     const system_module = try ast.ModuleNode.init(allocator, builtin_location, "System");
-    
-    // Add System.Exit command
-    // Signature: Command Exit[code: sint32]
-    const exit_cmd = try ast.CommandImplNode.init(
-        allocator,
-        builtin_location,
-        "Exit",
-    );
-    exit_cmd.native_hook = "kl_sys_exit";
-    
-    const exit_param = try ast.ParamDeclNode.init(
-        allocator,
-        builtin_location,
-        "code",
-        types.KLType{ .sint32 = {} },
-        null,
-    );
-    try exit_cmd.parameters.append(allocator, exit_param);
-    try system_module.commands.append(allocator, exit_cmd);
-    
     return system_module;
 }
 
@@ -56,13 +36,13 @@ test "generate System module" {
     defer system.deinit(allocator);
     
     try std.testing.expectEqualStrings("System", system.name);
-    try std.testing.expect(system.commands.items.len == 1);
-    try std.testing.expectEqualStrings("Exit", system.commands.items[0].name);
+    try std.testing.expect(system.commands.items.len == 0);
+    try std.testing.expect(system.functions.items.len == 0);
 }
 
 test "intrinsic detection" {
     try std.testing.expect(isSystemIntrinsic("System.Exit"));
-    try std.testing.expect(isSystemIntrinsic("system.exit"));
+    try std.testing.expect(isSystemIntrinsic("system.add"));
     try std.testing.expect(!isSystemIntrinsic("MyModule.Foo"));
     try std.testing.expect(!isSystemIntrinsic("Exit"));
 }

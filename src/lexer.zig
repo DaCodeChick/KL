@@ -924,5 +924,5 @@ test "lexer - keyword synonyms" {
     try testing.expectEqual(TokenType.kw_ecmd, tokens.items[0].type);
     try testing.expectEqual(TokenType.kw_emodule, tokens.items[1].type);
     try testing.expectEqual(TokenType.kw_endif, tokens.items[2].type);
-    try testing.expectEqual(TokenType.kw_endrepeat, tokens.items[3].type);
+    try testing.expectEqual(TokenType.kw_erepeat, tokens.items[3].type);
 }
