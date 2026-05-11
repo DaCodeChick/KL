@@ -633,54 +633,70 @@ pub const AsmGenerator = struct {
                 },
             }
         } else if (std.mem.eql(u8, op.native_hook, "kl_sys_add")) {
-            // Add variadic intrinsic: add all arguments together
-            // Arguments are passed in registers/stack, result goes to dest
-            if (op.args.len == 0) {
-                // No arguments: return 0
-                switch (self.format) {
-                    .att => try self.writeAll("    movq $0, %rax\n"),
-                    .intel => try self.writeAll("    mov rax, 0\n"),
-                }
-                if (op.dest) |dest| {
-                    try self.emitStoreValue(dest);
-                }
-            } else if (op.args.len == 1) {
-                // Single argument: just move it to dest
-                try self.emitLoadValue(op.args[0]);
-                if (op.dest) |dest| {
-                    try self.emitStoreValue(dest);
-                }
-            } else {
-                // Multiple arguments: accumulate additions
-                try self.emitLoadValue(op.args[0]);
-                for (op.args[1..]) |arg| {
-                    // Load next arg into a register
-                    switch (self.format) {
-                        .att => {
-                            try self.writeAll("    pushq %rax\n");
-                        },
-                        .intel => {
-                            try self.writeAll("    push rax\n");
-                        },
+            // Call runtime library function kl_sys_add(args_ptr: [*]const i32, count: usize)
+            // System V AMD64 ABI: rdi = first arg (pointer), rsi = second arg (count), rax = return
+            
+            switch (self.format) {
+                .att => {
+                    // Push arguments onto stack in reverse order to build array
+                    if (op.args.len > 0) {
+                        // Allocate stack space for argument array (4 bytes per i32)
+                        const stack_space = op.args.len * 4;
+                        try self.print("    subq ${d}, %rsp    # Allocate space for {d} args\n", .{stack_space, op.args.len});
+                        
+                        // Store each argument into the array
+                        for (op.args, 0..) |arg, i| {
+                            try self.emitLoadValue(arg);
+                            const offset = i * 4;
+                            try self.print("    movl %eax, {d}(%rsp)    # Store arg {d}\n", .{offset, i});
+                        }
+                        
+                        // Set up call: rdi = array pointer, rsi = count
+                        try self.writeAll("    movq %rsp, %rdi         # rdi = args pointer\n");
+                        try self.print("    movq ${d}, %rsi         # rsi = count\n", .{op.args.len});
+                        try self.writeAll("    call kl_sys_add\n");
+                        
+                        // Clean up stack
+                        try self.print("    addq ${d}, %rsp    # Deallocate arg space\n", .{stack_space});
+                    } else {
+                        // Zero arguments: pass NULL and 0
+                        try self.writeAll("    xorq %rdi, %rdi         # rdi = NULL\n");
+                        try self.writeAll("    xorq %rsi, %rsi         # rsi = 0\n");
+                        try self.writeAll("    call kl_sys_add\n");
                     }
-                    try self.emitLoadValue(arg);
-                    switch (self.format) {
-                        .att => {
-                            try self.writeAll("    movq %rax, %rbx\n");
-                            try self.writeAll("    popq %rax\n");
-                            try self.writeAll("    addq %rbx, %rax\n");
-                        },
-                        .intel => {
-                            try self.writeAll("    mov rbx, rax\n");
-                            try self.writeAll("    pop rax\n");
-                            try self.writeAll("    add rax, rbx\n");
-                        },
+                    
+                    // Result is in rax, store to destination
+                    if (op.dest) |dest| {
+                        try self.emitStoreValue(dest);
                     }
-                }
-                // Store result to dest
-                if (op.dest) |dest| {
-                    try self.emitStoreValue(dest);
-                }
+                },
+                .intel => {
+                    // Intel syntax version
+                    if (op.args.len > 0) {
+                        const stack_space = op.args.len * 4;
+                        try self.print("    sub rsp, {d}    ; Allocate space for {d} args\n", .{stack_space, op.args.len});
+                        
+                        for (op.args, 0..) |arg, i| {
+                            try self.emitLoadValue(arg);
+                            const offset = i * 4;
+                            try self.print("    mov [rsp + {d}], eax    ; Store arg {d}\n", .{offset, i});
+                        }
+                        
+                        try self.writeAll("    mov rdi, rsp         ; rdi = args pointer\n");
+                        try self.print("    mov rsi, {d}         ; rsi = count\n", .{op.args.len});
+                        try self.writeAll("    call kl_sys_add\n");
+                        
+                        try self.print("    add rsp, {d}    ; Deallocate arg space\n", .{stack_space});
+                    } else {
+                        try self.writeAll("    xor rdi, rdi         ; rdi = NULL\n");
+                        try self.writeAll("    xor rsi, rsi         ; rsi = 0\n");
+                        try self.writeAll("    call kl_sys_add\n");
+                    }
+                    
+                    if (op.dest) |dest| {
+                        try self.emitStoreValue(dest);
+                    }
+                },
             }
         } else {
             // Unknown native hook

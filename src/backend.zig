@@ -239,6 +239,10 @@ pub const Backend = struct {
                 }
                 try cmd.append(self.allocator, "-o");
                 try cmd.append(self.allocator, exe_file);
+                // Link against KL runtime library
+                try cmd.append(self.allocator, "-L");
+                try cmd.append(self.allocator, "zig-out/lib");
+                try cmd.append(self.allocator, "-lklruntime");
             },
             .clang => {
                 try cmd.append(self.allocator, "clang");
@@ -247,6 +251,10 @@ pub const Backend = struct {
                 }
                 try cmd.append(self.allocator, "-o");
                 try cmd.append(self.allocator, exe_file);
+                // Link against KL runtime library
+                try cmd.append(self.allocator, "-L");
+                try cmd.append(self.allocator, "zig-out/lib");
+                try cmd.append(self.allocator, "-lklruntime");
             },
             .nasm, .fasm => {
                 // Use system linker

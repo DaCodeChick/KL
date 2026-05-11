@@ -4,15 +4,33 @@ pub fn build(b: *std.Build) void {
     const target = b.standardTargetOptions(.{});
     const optimize = b.standardOptimizeOption(.{});
 
+    // KL Runtime Library
+    // This contains native hook implementations that generated code will link against
+    const runtime_module = b.createModule(.{
+        .root_source_file = b.path("src/runtime/runtime.zig"),
+        .target = target,
+        .optimize = optimize,
+    });
+    
+    const runtime_lib = b.addLibrary(.{
+        .name = "klruntime",
+        .root_module = runtime_module,
+        .linkage = .static,
+    });
+    
+    b.installArtifact(runtime_lib);
+
     // Main executable
+    const exe_module = b.createModule(.{
+        .root_source_file = b.path("src/main.zig"),
+        .target = target,
+        .optimize = optimize,
+        .link_libc = true,
+    });
+    
     const exe = b.addExecutable(.{
         .name = "klc",
-        .root_module = b.createModule(.{
-            .root_source_file = b.path("src/main.zig"),
-            .target = target,
-            .optimize = optimize,
-            .link_libc = true,
-        }),
+        .root_module = exe_module,
     });
 
     b.installArtifact(exe);
@@ -29,13 +47,15 @@ pub fn build(b: *std.Build) void {
     run_step.dependOn(&run_cmd.step);
 
     // Unit tests
+    const test_module = b.createModule(.{
+        .root_source_file = b.path("src/main.zig"),
+        .target = target,
+        .optimize = optimize,
+        .link_libc = true,
+    });
+    
     const tests = b.addTest(.{
-        .root_module = b.createModule(.{
-            .root_source_file = b.path("src/main.zig"),
-            .target = target,
-            .optimize = optimize,
-            .link_libc = true,
-        }),
+        .root_module = test_module,
     });
 
     const run_tests = b.addRunArtifact(tests);

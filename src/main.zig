@@ -158,7 +158,8 @@ fn compileFile(allocator: std.mem.Allocator, io: std.Io, filename: []const u8) !
     
     const exe_name = std.fs.path.stem(filename);
     
-    // Use GCC to assemble and link
+    // Use GCC to assemble and link with runtime library
+    // Runtime library location is relative to where klc was built
     const result = try std.process.run(allocator, io, .{
         .argv = &.{
             "gcc",
@@ -166,6 +167,10 @@ fn compileFile(allocator: std.mem.Allocator, io: std.Io, filename: []const u8) !
             output_file,
             "-o",
             exe_name,
+            // Link against KL runtime library
+            // The library path assumes we're running from the project root
+            // In production, this should be an installed path
+            "zig-out/lib/libklruntime.a",
         },
     });
     defer allocator.free(result.stdout);
