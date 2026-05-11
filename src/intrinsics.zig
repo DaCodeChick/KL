@@ -62,13 +62,11 @@ test "isIntrinsic detection" {
 test "getNativeHook lookup" {
     const test_hooks = [_]HookMapping{
         .{ .qualified_name = "system.print", .native_hook = "kl_sys_print" },
-        .{ .qualified_name = "system.exit", .native_hook = "kl_sys_exit" },
         .{ .qualified_name = "mcli.argcount", .native_hook = "kl_mcli_argcount" },
     };
     
     try std.testing.expectEqualStrings("kl_sys_print", getNativeHook("system.print", &test_hooks));
     try std.testing.expectEqualStrings("kl_sys_print", getNativeHook("System.Print", &test_hooks));
-    try std.testing.expectEqualStrings("kl_sys_exit", getNativeHook("SYSTEM.EXIT", &test_hooks));
     try std.testing.expectEqualStrings("kl_mcli_argcount", getNativeHook("MCLI.ArgCount", &test_hooks));
     try std.testing.expectEqualStrings("unknown", getNativeHook("system.unknown", &test_hooks));
     try std.testing.expectEqualStrings("unknown", getNativeHook("Print", &test_hooks));

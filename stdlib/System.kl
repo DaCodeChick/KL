@@ -26,50 +26,46 @@
 Module System;
 
 {═══════════════════════════════════════════════════════════════════════════════}
-{ Arithmetic Functions - Currently Compiler-Intrinsic                            }
-{═════════════════════════════════════════════════════════════════════════════════}
-{
-  These arithmetic functions are currently handled by the compiler via hardcoded
-  expansion in src/irgen.zig. In the future, they will be true stdlib functions
-  using Count/Get intrinsics for variadic parameter access.
-  
-  For now, these are just forward declarations to document the API.
-}
+{ Arithmetic Functions                                                           }
+{═══════════════════════════════════════════════════════════════════════════════}
 
-{ Add - Variadic addition
-  Can be called with 1+ arguments:
+{ Add - Variadic addition (native hook)
+  Implemented as a native hook kl_sys_add to support variadic number parameters.
+  Can be called with 0+ arguments:
+    Add[] returns 0
     Add[5] returns 5
     Add[1, 2] returns 3
     Add[1, 2, 3] returns 6
 }
-Function Add[values...: uint32] Return uint32;
+{@native kl_sys_add}
+Function Add[values...: number] Return number;
 
-{ Subtract - Variadic subtraction (left-to-right)
-  Can be called with 1+ arguments:
+{ Subtract - Variadic subtraction (compiler intrinsic, left-to-right)
+  Expanded inline by compiler. Can be called with 1+ arguments:
     Sub[10] returns 10
     Sub[10, 3] returns 7
     Sub[10, 3, 2] returns 5
 }
 Function Sub[values...: uint32] Return uint32;
 
-{ Multiply - Variadic multiplication
-  Can be called with 1+ arguments:
+{ Multiply - Variadic multiplication (compiler intrinsic)
+  Expanded inline by compiler. Can be called with 1+ arguments:
     Mul[5] returns 5
     Mul[2, 3] returns 6
     Mul[2, 3, 4] returns 24
 }
 Function Mul[values...: uint32] Return uint32;
 
-{ Divide - Variadic division (left-to-right)
-  Can be called with 1+ arguments:
+{ Divide - Variadic division (compiler intrinsic, left-to-right)
+  Expanded inline by compiler. Can be called with 1+ arguments:
     Div[100] returns 100
     Div[100, 2] returns 50
     Div[100, 2, 5] returns 10
 }
 Function Div[values...: uint32] Return uint32;
 
-{ DivRem - Returns remainder of division
-  Takes exactly 2 arguments:
+{ DivRem - Returns remainder of division (compiler intrinsic)
+  Expanded inline by compiler. Takes exactly 2 arguments:
     DivRem[10, 3] returns 1
 }
 Function DivRem[a: uint32, b: uint32] Return uint32;

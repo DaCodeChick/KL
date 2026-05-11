@@ -7,7 +7,7 @@ Command Main
     var result2 = Add[1, 2];
     var result3 = Add[1, 2, 3];
     var result4 = Mul[2, 3, 4];
-    System.Exit[result4];
+    { result4 is returned in rax }
 EndCommand
 
 EndModule

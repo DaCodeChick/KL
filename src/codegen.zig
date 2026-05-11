@@ -632,22 +632,54 @@ pub const AsmGenerator = struct {
                     try self.print("    ; Intrinsic: {s}\n", .{op.native_hook});
                 },
             }
-        } else if (std.mem.eql(u8, op.native_hook, "kl_sys_exit")) {
-            // Exit syscall: exit(code)
-            // Load exit code into rdi (first argument register)
-            if (op.args.len > 0) {
-                try self.emitLoadValue(op.args[0]);
+        } else if (std.mem.eql(u8, op.native_hook, "kl_sys_add")) {
+            // Add variadic intrinsic: add all arguments together
+            // Arguments are passed in registers/stack, result goes to dest
+            if (op.args.len == 0) {
+                // No arguments: return 0
                 switch (self.format) {
-                    .att => {
-                        try self.writeAll("    movq %rax, %rdi\n");
-                        try self.writeAll("    movq $60, %rax  # sys_exit\n");
-                        try self.writeAll("    syscall\n");
-                    },
-                    .intel => {
-                        try self.writeAll("    mov rdi, rax\n");
-                        try self.writeAll("    mov rax, 60  ; sys_exit\n");
-                        try self.writeAll("    syscall\n");
-                    },
+                    .att => try self.writeAll("    movq $0, %rax\n"),
+                    .intel => try self.writeAll("    mov rax, 0\n"),
+                }
+                if (op.dest) |dest| {
+                    try self.emitStoreValue(dest);
+                }
+            } else if (op.args.len == 1) {
+                // Single argument: just move it to dest
+                try self.emitLoadValue(op.args[0]);
+                if (op.dest) |dest| {
+                    try self.emitStoreValue(dest);
+                }
+            } else {
+                // Multiple arguments: accumulate additions
+                try self.emitLoadValue(op.args[0]);
+                for (op.args[1..]) |arg| {
+                    // Load next arg into a register
+                    switch (self.format) {
+                        .att => {
+                            try self.writeAll("    pushq %rax\n");
+                        },
+                        .intel => {
+                            try self.writeAll("    push rax\n");
+                        },
+                    }
+                    try self.emitLoadValue(arg);
+                    switch (self.format) {
+                        .att => {
+                            try self.writeAll("    movq %rax, %rbx\n");
+                            try self.writeAll("    popq %rax\n");
+                            try self.writeAll("    addq %rbx, %rax\n");
+                        },
+                        .intel => {
+                            try self.writeAll("    mov rbx, rax\n");
+                            try self.writeAll("    pop rax\n");
+                            try self.writeAll("    add rax, rbx\n");
+                        },
+                    }
+                }
+                // Store result to dest
+                if (op.dest) |dest| {
+                    try self.emitStoreValue(dest);
                 }
             }
         } else {

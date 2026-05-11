@@ -27,8 +27,7 @@ Command Main;
     { DivRem }
     var divrem, sint32, DivRem[17, 5];         { = 2 }
     
-    { Exit with the divrem result }
-    System.Exit[divrem];
+    { divrem is returned in rax }
 EndCommand;
 
 EndModule;

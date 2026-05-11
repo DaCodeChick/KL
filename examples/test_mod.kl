@@ -5,7 +5,7 @@ Module TestMod;
 Command Main;
     { Test DivRem: 17 % 5 = 2 }
     var result, sint32, DivRem[17, 5];
-    System.Exit[result];
+    { Result returned in rax }
 EndCommand;
 
 EndModule;

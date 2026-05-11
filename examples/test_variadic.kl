@@ -15,7 +15,7 @@ Command TestAdd
     { Test Add with 4 arguments: Add[100, 200, 300, 400] = 1000 }
     var d = Add[100, 200, 300, 400];
     
-    System.Exit[0];
+    { d is returned in rax }
 EndCommand
 
 EndModule

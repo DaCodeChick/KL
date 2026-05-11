@@ -5,6 +5,7 @@ const ErrorReporter = @import("error.zig").ErrorReporter;
 const SourceLocation = @import("error.zig").SourceLocation;
 const CompilerError = @import("error.zig").CompilerError;
 const system = @import("runtime/system.zig");
+const intrinsics = @import("intrinsics.zig");
 
 /// Symbol in the symbol table
 pub const Symbol = struct {
@@ -560,6 +561,59 @@ pub const SemanticAnalyzer = struct {
             }
             
             return result_type;
+        }
+        
+        // System native hooks (e.g., Add)
+        const qualified_name = if (std.mem.indexOf(u8, func_name, ".") != null)
+            func_name
+        else blk: {
+            const qname = std.fmt.allocPrint(self.allocator, "System.{s}", .{func_name}) catch func_name;
+            break :blk qname;
+        };
+        
+        if (system.isSystemIntrinsic(func_name) or system.isSystemIntrinsic(qualified_name)) {
+            const hook_name = intrinsics.getNativeHook(qualified_name, &system.system_hooks);
+            
+            if (!std.mem.eql(u8, hook_name, "unknown")) {
+                // Found a native hook - validate it
+                // For now, assume variadic number parameters
+                if (call.arguments.items.len == 0) {
+                    // Add[] with no args is valid, returns 0
+                    return .{ .uint32 = {} };
+                }
+                
+                // Check all arguments are integers and compatible types
+                var result_type: KLType = undefined;
+                for (call.arguments.items, 0..) |arg, i| {
+                    const arg_type = try self.analyzeExpression(arg);
+                    
+                    if (!arg_type.isInteger() and !arg_type.isNumber()) {
+                        try self.err_reporter.report(
+                            call.location,
+                            CompilerError.TypeMismatch,
+                            "Arithmetic function requires number arguments",
+                            .{},
+                        );
+                        return CompilerError.TypeMismatch;
+                    }
+                    
+                    if (i == 0) {
+                        result_type = arg_type;
+                    } else {
+                        if (!result_type.isCompatible(arg_type)) {
+                            try self.err_reporter.report(
+                                call.location,
+                                CompilerError.TypeMismatch,
+                                "Arithmetic function requires matching argument types",
+                                .{},
+                            );
+                            return CompilerError.TypeMismatch;
+                        }
+                    }
+                }
+                
+                return result_type;
+            }
         }
         
         // Comparison functions

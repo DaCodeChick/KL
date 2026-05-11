@@ -16,6 +16,6 @@ pub fn isMCLIIntrinsic(command_name: []const u8) bool {
 test "intrinsic detection" {
     try std.testing.expect(isMCLIIntrinsic("MCLI.ArgCount"));
     try std.testing.expect(isMCLIIntrinsic("mcli.getarg"));
-    try std.testing.expect(!isMCLIIntrinsic("System.Exit"));
+    try std.testing.expect(!isMCLIIntrinsic("System.Add"));
     try std.testing.expect(!isMCLIIntrinsic("ArgCount"));
 }

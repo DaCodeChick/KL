@@ -528,26 +528,6 @@ pub const IRGenerator = struct {
                 
                 // System compiler intrinsics - expanded inline to IR
                 if (system.isCompilerIntrinsic(call.function_name)) {
-                if (std.mem.eql(u8, call.function_name, "Add")) {
-                    if (call.arguments.items.len == 0) return error.OutOfMemory; // Need at least 1 arg
-                    
-                    // Single argument: just return it
-                    if (call.arguments.items.len == 1) {
-                        return try self.generateExpression(call.arguments.items[0]);
-                    }
-                    
-                    // Multiple arguments: chain additions left-to-right
-                    var accumulator = try self.generateExpression(call.arguments.items[0]);
-                    for (call.arguments.items[1..]) |arg| {
-                        const right = try self.generateExpression(arg);
-                        const dest_temp = self.nextTemp();
-                        const dest = ir.Value{ .temporary = dest_temp };
-                        try block.addInstruction(.{ .add = .{ .dest = dest, .left = accumulator, .right = right } });
-                        accumulator = dest;
-                    }
-                    return accumulator;
-                }
-                
                 if (std.mem.eql(u8, call.function_name, "Sub")) {
                     if (call.arguments.items.len == 0) return error.OutOfMemory;
                     
@@ -681,6 +661,39 @@ pub const IRGenerator = struct {
                     const dest = ir.Value{ .temporary = dest_temp };
                     try block.addInstruction(.{ .ge = .{ .dest = dest, .left = left, .right = right } });
                     return dest;
+                }
+                
+                // Check for System native hooks (e.g., Add)
+                if (system.isSystemIntrinsic(call.function_name) or 
+                    system.isSystemIntrinsic(try std.fmt.allocPrint(self.allocator, "System.{s}", .{call.function_name}))) {
+                    const qualified_name = if (std.mem.indexOf(u8, call.function_name, ".") != null) 
+                        call.function_name 
+                    else 
+                        try std.fmt.allocPrint(self.allocator, "System.{s}", .{call.function_name});
+                    
+                    const hook_name = intrinsics.getNativeHook(qualified_name, &system.system_hooks);
+                    
+                    // If we found a native hook, use it
+                    if (!std.mem.eql(u8, hook_name, "unknown")) {
+                        // Generate arguments
+                        var args = try self.allocator.alloc(ir.Value, call.arguments.items.len);
+                        for (call.arguments.items, 0..) |arg, i| {
+                            args[i] = try self.generateExpression(arg);
+                        }
+                        
+                        const dest_temp = self.nextTemp();
+                        const dest = ir.Value{ .temporary = dest_temp };
+                        
+                        try block.addInstruction(.{
+                            .intrinsic = .{
+                                .dest = dest,
+                                .native_hook = hook_name,
+                                .args = args,
+                            },
+                        });
+                        
+                        return dest;
+                    }
                 }
                 
                 // Generate arguments for regular function calls

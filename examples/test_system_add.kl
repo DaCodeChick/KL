@@ -1,0 +1,18 @@
+{Test System.Add native hook with variadic arguments}
+
+Module TestSystemAdd;
+
+Command Main;
+    { Test Add with 1 argument: Add[5] = 5 }
+    var a, sint32, Add[5];
+    
+    { Test Add with 2 arguments: Add[10, 20] = 30 }
+    var b, sint32, Add[10, 20];
+    
+    { Test Add with 3 arguments: Add[1, 2, 3] = 6 }
+    var c, sint32, Add[1, 2, 3];
+    
+    { c is returned in rax = 6 }
+EndCommand;
+
+EndModule;

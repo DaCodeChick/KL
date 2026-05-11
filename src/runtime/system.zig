@@ -14,8 +14,8 @@ const intrinsics = @import("../intrinsics.zig");
 /// 2. Native hooks (future: Exit, Print, etc.) - call external C functions
 
 /// List of System compiler intrinsics (expanded inline, not native calls)
+/// Note: Add was converted to a native hook to support variadic number parameters
 pub const compiler_intrinsics = [_][]const u8{
-    "Add",
     "Sub", 
     "Mul",
     "Div",
@@ -26,7 +26,9 @@ pub const compiler_intrinsics = [_][]const u8{
 
 /// Native hook mapping table for System module
 /// These call external C functions via native hooks
-pub const system_hooks = [_]intrinsics.HookMapping{};
+pub const system_hooks = [_]intrinsics.HookMapping{
+    .{ .qualified_name = "system.add", .native_hook = "kl_sys_add" },
+};
 
 /// Check if a function is a System compiler intrinsic
 pub fn isCompilerIntrinsic(func_name: []const u8) bool {
@@ -66,14 +68,14 @@ test "generate System module" {
 }
 
 test "intrinsic detection" {
-    try std.testing.expect(isSystemIntrinsic("System.Exit"));
+    try std.testing.expect(isSystemIntrinsic("System.Add"));
     try std.testing.expect(isSystemIntrinsic("system.add"));
     try std.testing.expect(!isSystemIntrinsic("MyModule.Foo"));
-    try std.testing.expect(!isSystemIntrinsic("Exit"));
+    try std.testing.expect(!isSystemIntrinsic("Add"));
 }
 
 test "compiler intrinsic detection" {
-    try std.testing.expect(isCompilerIntrinsic("Add"));
+    try std.testing.expect(!isCompilerIntrinsic("Add"));  // Now a native hook
     try std.testing.expect(isCompilerIntrinsic("Sub"));
     try std.testing.expect(isCompilerIntrinsic("Mul"));
     try std.testing.expect(isCompilerIntrinsic("Div"));
