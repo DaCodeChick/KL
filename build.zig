@@ -7,7 +7,7 @@ pub fn build(b: *std.Build) void {
     // KL Runtime Library
     // This contains native hook implementations that generated code will link against
     const runtime_module = b.createModule(.{
-        .root_source_file = b.path("src/runtime/runtime.zig"),
+        .root_source_file = b.path("src/runtime_lib.zig"),
         .target = target,
         .optimize = optimize,
     });

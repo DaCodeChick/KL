@@ -999,26 +999,68 @@ pub const Parser = struct {
         const trimmed = std.mem.trim(u8, pragma_text, " \t\n\r");
         
         if (std.mem.startsWith(u8, trimmed, "native ")) {
-            const hook_name = std.mem.trim(u8, trimmed["native ".len..], " \t\n\r");
-            func.native_hook = hook_name;
+            const rest = std.mem.trim(u8, trimmed["native ".len..], " \t\n\r");
+            
+            // Check if we have a generic parameter: @native["T"]
+            if (std.mem.startsWith(u8, rest, "[")) {
+                // Find the closing bracket
+                if (std.mem.indexOf(u8, rest, "]")) |close_idx| {
+                    // Extract the content between brackets (e.g., "\"T\"")
+                    const param_str = std.mem.trim(u8, rest[1..close_idx], " \t\n\r");
+                    
+                    // Remove quotes from the parameter
+                    if (std.mem.startsWith(u8, param_str, "\"") and std.mem.endsWith(u8, param_str, "\"")) {
+                        func.generic_param = param_str[1..param_str.len - 1];
+                    }
+                    
+                    // Extract hook name after the brackets (if any)
+                    const hook_name = std.mem.trim(u8, rest[close_idx + 1..], " \t\n\r");
+                    func.native_hook = if (hook_name.len > 0) hook_name else null;
+                } else {
+                    // Malformed, just take whole thing as hook name
+                    func.native_hook = rest;
+                }
+            } else {
+                // No generic parameter, just hook name
+                func.native_hook = rest;
+            }
         }
     }
 
     fn applyPragmaToCommand(self: *Parser, cmd: *ast.CommandImplNode, pragma_text: []const u8) !void {
-        _ = self; // Unused for now
-        // Parse pragma text: expected format is "native <hook_name>"
-        // e.g., "native kl_sys_exit"
+        _ = self;
+        // Parse pragma text: expected format is "native <hook_name>" or "native["T"] <hook_name>"
+        // e.g., "native kl_sys_exit" or "native["T"]"
         // The slice points directly into the source buffer - zero allocation!
         
         const trimmed = std.mem.trim(u8, pragma_text, " \t\n\r");
         
         if (std.mem.startsWith(u8, trimmed, "native ")) {
-            // Extract the hook name (everything after "native ")
-            const hook_name = std.mem.trim(u8, trimmed["native ".len..], " \t\n\r");
+            const rest = std.mem.trim(u8, trimmed["native ".len..], " \t\n\r");
             
-            // Store the slice directly - it points into the source buffer
-            // No allocation needed!
-            cmd.native_hook = hook_name;
+            // Check if we have a generic parameter: @native["T"]
+            if (std.mem.startsWith(u8, rest, "[")) {
+                // Find the closing bracket
+                if (std.mem.indexOf(u8, rest, "]")) |close_idx| {
+                    // Extract the content between brackets (e.g., "\"T\"")
+                    const param_str = std.mem.trim(u8, rest[1..close_idx], " \t\n\r");
+                    
+                    // Remove quotes from the parameter
+                    if (std.mem.startsWith(u8, param_str, "\"") and std.mem.endsWith(u8, param_str, "\"")) {
+                        cmd.generic_param = param_str[1..param_str.len - 1];
+                    }
+                    
+                    // Extract hook name after the brackets (if any)
+                    const hook_name = std.mem.trim(u8, rest[close_idx + 1..], " \t\n\r");
+                    cmd.native_hook = if (hook_name.len > 0) hook_name else null;
+                } else {
+                    // Malformed, just take whole thing as hook name
+                    cmd.native_hook = rest;
+                }
+            } else {
+                // No generic parameter, just hook name
+                cmd.native_hook = rest;
+            }
         }
     }
 };

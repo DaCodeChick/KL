@@ -13,13 +13,21 @@
   1. Add a pragma comment above the Function/Command:
      {@native name_of_native_hook}
      
-  2. Use declaration syntax (no body, just signature):
+  2. For generic native functions, specify type parameters:
+     {@native["T"]}
+     Function Add[values...: T] Return T;
+     
+     The compiler will resolve T to the actual type at compile-time and
+     route to the correct type-specific native hook (e.g., kl_sys_add_i32,
+     kl_sys_add_u32, kl_sys_add_f64).
+      
+  3. Use declaration syntax (no body, just signature):
      {@native kl_invoke}
      Function Invoke[funcRef, args...] Return callResult;
-     
-  3. The compiler will recognize this pragma and call the native implementation.
-     
-  4. The native hook name (e.g., "kl_invoke") is then handled in the compiler's
+      
+  4. The compiler will recognize this pragma and call the native implementation.
+      
+  5. The native hook name (e.g., "kl_invoke") is then handled in the compiler's
      code generation phase (src/codegen.zig) to emit the appropriate assembly.
 }
 
@@ -29,45 +37,64 @@ Module System;
 { Arithmetic Functions                                                           }
 {═══════════════════════════════════════════════════════════════════════════════}
 
-{ Add - Variadic addition (native hook)
-  Implemented as a native hook kl_sys_add to support variadic number parameters.
+{ Add - Variadic addition (generic native hook)
+  Generic over numeric type T. The compiler routes to the appropriate type-specific
+  native hook based on the argument types:
+    Add[1, 2, 3] -> kl_sys_add_i32 (sint32)
+    Add[1u, 2u] -> kl_sys_add_u32 (uint32)
   Can be called with 0+ arguments:
     Add[] returns 0
     Add[5] returns 5
     Add[1, 2] returns 3
     Add[1, 2, 3] returns 6
 }
-{@native kl_sys_add}
-Function Add[values...: number] Return number;
+{@native["T"]}
+Function Add[values...: T] Return T;
 
-{ Subtract - Variadic subtraction (compiler intrinsic, left-to-right)
-  Expanded inline by compiler. Can be called with 1+ arguments:
+{ Subtract - Variadic subtraction (generic native hook, left-to-right)
+  Generic over numeric type T. The compiler routes to the appropriate type-specific
+  native hook based on the argument types.
+  Can be called with 0+ arguments:
+    Sub[] returns 0
     Sub[10] returns 10
     Sub[10, 3] returns 7
     Sub[10, 3, 2] returns 5
 }
-Function Sub[values...: uint32] Return uint32;
+{@native["T"]}
+Function Sub[values...: T] Return T;
 
-{ Multiply - Variadic multiplication (compiler intrinsic)
-  Expanded inline by compiler. Can be called with 1+ arguments:
+{ Multiply - Variadic multiplication (generic native hook)
+  Generic over numeric type T. The compiler routes to the appropriate type-specific
+  native hook based on the argument types.
+  Can be called with 0+ arguments:
+    Mul[] returns 1 (multiplicative identity)
     Mul[5] returns 5
     Mul[2, 3] returns 6
     Mul[2, 3, 4] returns 24
 }
-Function Mul[values...: uint32] Return uint32;
+{@native["T"]}
+Function Mul[values...: T] Return T;
 
-{ Divide - Variadic division (compiler intrinsic, left-to-right)
-  Expanded inline by compiler. Can be called with 1+ arguments:
+{ Divide - Variadic division (generic native hook, left-to-right)
+  Generic over numeric type T. The compiler routes to the appropriate type-specific
+  native hook based on the argument types.
+  Can be called with 0+ arguments:
+    Div[] returns 1
     Div[100] returns 100
     Div[100, 2] returns 50
     Div[100, 2, 5] returns 10
 }
-Function Div[values...: uint32] Return uint32;
+{@native["T"]}
+Function Div[values...: T] Return T;
 
-{ DivRem - Returns remainder of division (compiler intrinsic)
-  Expanded inline by compiler. Takes exactly 2 arguments:
+{ DivRem - Returns remainder of division (generic native hook)
+  Generic over numeric type T. The compiler routes to the appropriate type-specific
+  native hook based on the argument types.
+  Takes exactly 2 arguments:
     DivRem[10, 3] returns 1
+    DivRem[17, 5] returns 2
 }
-Function DivRem[a: uint32, b: uint32] Return uint32;
+{@native["T"]}
+Function DivRem[a: T, b: T] Return T;
 
 EndModule;

@@ -208,13 +208,38 @@ pub const IRGenerator = struct {
         
         // Check if this is a System intrinsic (qualified name System.*)
         if (system.isSystemIntrinsic(cmd.command_name)) {
-            const hook_name = intrinsics.getNativeHook(cmd.command_name, &system.system_hooks);
+            // Extract operation name (e.g., "add" from "System.Add" or "system.add")
+            const operation_name_capitalized = if (std.mem.indexOf(u8, cmd.command_name, ".")) |dot_pos|
+                cmd.command_name[dot_pos + 1..]
+            else
+                cmd.command_name;
             
-            // Generate arguments
+            // Convert to lowercase for hook lookup
+            const operation_name = try std.ascii.allocLowerString(self.allocator, operation_name_capitalized);
+            defer self.allocator.free(operation_name);
+            
+            // Generate arguments first to determine types
             var args = try self.allocator.alloc(ir.Value, cmd.arguments.items.len);
             for (cmd.arguments.items, 0..) |arg, i| {
                 args[i] = try self.generateExpression(arg);
             }
+            
+            // Get type from first argument if available, otherwise default to sint32
+            const arg_type = if (args.len > 0) args[0].ty else types.KLType.sint32;
+            
+            // Map KL type to Zig type name for hook lookup
+            const type_name = switch (arg_type) {
+                .sint8 => "i8",
+                .sint32 => "i32",
+                .uint8 => "u8",
+                .uint32 => "u32",
+                .number, .any => "i32",  // Default to i32 for generic number types
+                else => "i32",  // Fallback for other types
+            };
+            
+            // Get type-specific hook name
+            const hook_name = system.getNativeHookForType(operation_name, type_name) orelse
+                intrinsics.getNativeHook(cmd.command_name, &system.system_hooks);
             
             // Most System intrinsics don't return values
             try block.addInstruction(.{
@@ -234,8 +259,8 @@ pub const IRGenerator = struct {
             args[i] = try self.generateExpression(arg);
         }
         
-        const dest_temp = self.nextTemp();
-        const dest = ir.Value{ .temporary = dest_temp };
+        // Commands return 'any' type until we have proper function signatures
+        const dest = self.makeTemporary(.any);
         
         try block.addInstruction(.{
             .call = .{
@@ -313,7 +338,7 @@ pub const IRGenerator = struct {
         try block.addInstruction(.{
             .store_local = .{
                 .local = counter_index,
-                .value = .{ .constant = .{ .uint = 0 } },
+                .value = makeConstant(.{ .uint = 0 }),
             },
         });
         
@@ -321,7 +346,7 @@ pub const IRGenerator = struct {
         const count_value = if (repeat.count) |count|
             try self.generateExpression(count)
         else
-            ir.Value{ .constant = .{ .uint = 0xFFFFFFFF } }; // Max iterations for infinite loop
+            makeConstant(.{ .uint = 0xFFFFFFFF }); // Max iterations for infinite loop
         
         // Create labels
         const loop_label = try self.makeLabel("loop");
@@ -333,26 +358,26 @@ pub const IRGenerator = struct {
         
         // Loop check block
         var loop_block = ir.BasicBlock.init(self.allocator, loop_label);
-        const counter_temp = self.nextTemp();
+        const counter_temp_val = self.makeTemporary(.uint32);
         try loop_block.addInstruction(.{
             .load_local = .{
-                .dest = .{ .temporary = counter_temp },
+                .dest = counter_temp_val,
                 .local = counter_index,
             },
         });
         
-        const cond_temp = self.nextTemp();
+        const cond_temp = self.makeTemporary(.bool_type);
         try loop_block.addInstruction(.{
             .lt = .{
-                .dest = .{ .temporary = cond_temp },
-                .left = .{ .temporary = counter_temp },
+                .dest = cond_temp,
+                .left = counter_temp_val,
                 .right = count_value,
             },
         });
         
         try loop_block.addInstruction(.{
             .branch = .{
-                .condition = .{ .temporary = cond_temp },
+                .condition = cond_temp,
                 .true_target = body_label,
                 .false_target = end_label,
             },
@@ -367,27 +392,27 @@ pub const IRGenerator = struct {
         }
         
         // Increment counter
-        const counter_temp2 = self.nextTemp();
+        const counter_temp2 = self.makeTemporary(.uint32);
         try body_block.addInstruction(.{
             .load_local = .{
-                .dest = .{ .temporary = counter_temp2 },
+                .dest = counter_temp2,
                 .local = counter_index,
             },
         });
         
-        const inc_temp = self.nextTemp();
+        const inc_temp = self.makeTemporary(.uint32);
         try body_block.addInstruction(.{
             .add = .{
-                .dest = .{ .temporary = inc_temp },
-                .left = .{ .temporary = counter_temp2 },
-                .right = .{ .constant = .{ .uint = 1 } },
+                .dest = inc_temp,
+                .left = counter_temp2,
+                .right = makeConstant(.{ .uint = 1 }),
             },
         });
         
         try body_block.addInstruction(.{
             .store_local = .{
                 .local = counter_index,
-                .value = .{ .temporary = inc_temp },
+                .value = inc_temp,
             },
         });
         
@@ -406,38 +431,50 @@ pub const IRGenerator = struct {
         
         switch (expr) {
             .int_literal => |lit| {
-                return ir.Value{ .constant = .{ .int = lit.value } };
+                return makeConstant(.{ .int = lit.value });
             },
             
             .char_literal => |lit| {
-                return ir.Value{ .constant = .{ .int = @intCast(lit.value) } };
+                return .{
+                    .kind = .{ .constant = .{ .int = @intCast(lit.value) } },
+                    .ty = .char,
+                };
             },
             
             .string_literal => |lit| {
-                return ir.Value{ .constant = .{ .string = lit.value } };
+                return makeConstant(.{ .string = lit.value });
             },
             
             .bool_literal => |lit| {
-                return ir.Value{ .constant = .{ .int = if (lit.value) 1 else 0 } };
+                return makeConstant(.{ .bool = lit.value });
             },
             
             .identifier => |ident| {
                 const local_index = self.var_map.get(ident.name) orelse return error.UndefinedVariable;
-                const temp = self.nextTemp();
+                const local_type = self.getLocalType(local_index);
+                const dest = self.makeTemporary(local_type);
                 try block.addInstruction(.{
                     .load_local = .{
-                        .dest = .{ .temporary = temp },
+                        .dest = dest,
                         .local = local_index,
                     },
                 });
-                return ir.Value{ .temporary = temp };
+                return dest;
             },
             
             .binary_op => |bin_op| {
                 const left = try self.generateExpression(bin_op.left);
                 const right = try self.generateExpression(bin_op.right);
-                const dest_temp = self.nextTemp();
-                const dest = ir.Value{ .temporary = dest_temp };
+                
+                // Result type depends on operation:
+                // - Arithmetic ops inherit type from operands (use left's type)
+                // - Comparison ops return bool
+                const result_type = switch (bin_op.op) {
+                    .eq, .neq, .lt, .lte, .gt, .gte, .logic_and, .logic_or => types.KLType.bool_type,
+                    else => left.ty,
+                };
+                
+                const dest = self.makeTemporary(result_type);
                 
                 const instr = switch (bin_op.op) {
                     .add => ir.Instruction{ .add = .{ .dest = dest, .left = left, .right = right } },
@@ -461,8 +498,8 @@ pub const IRGenerator = struct {
             
             .unary_op => |un_op| {
                 const operand = try self.generateExpression(un_op.operand);
-                const dest_temp = self.nextTemp();
-                const dest = ir.Value{ .temporary = dest_temp };
+                // Unary operations preserve the operand type
+                const dest = self.makeTemporary(operand.ty);
                 
                 const instr = switch (un_op.op) {
                     .negate => ir.Instruction{ .neg = .{ .dest = dest, .operand = operand } },
@@ -483,8 +520,7 @@ pub const IRGenerator = struct {
                     const param_arg = call.arguments.items[0];
                     const param_value = try self.generateExpression(param_arg);
                     
-                    const dest_temp = self.nextTemp();
-                    const dest = ir.Value{ .temporary = dest_temp };
+                    const dest = self.makeTemporary(.uint32);  // Count returns uint32
                     
                     var args = try self.allocator.alloc(ir.Value, 1);
                     args[0] = param_value;
@@ -508,8 +544,9 @@ pub const IRGenerator = struct {
                     const param_value = try self.generateExpression(call.arguments.items[0]);
                     const index_value = try self.generateExpression(call.arguments.items[1]);
                     
-                    const dest_temp = self.nextTemp();
-                    const dest = ir.Value{ .temporary = dest_temp };
+                    // Get returns the type of the variadic parameter elements
+                    // For now, assume it returns 'any' since we don't track element types yet
+                    const dest = self.makeTemporary(.any);
                     
                     var args = try self.allocator.alloc(ir.Value, 2);
                     args[0] = param_value;
@@ -538,8 +575,7 @@ pub const IRGenerator = struct {
                     var accumulator = try self.generateExpression(call.arguments.items[0]);
                     for (call.arguments.items[1..]) |arg| {
                         const right = try self.generateExpression(arg);
-                        const dest_temp = self.nextTemp();
-                        const dest = ir.Value{ .temporary = dest_temp };
+                        const dest = self.makeTemporary(accumulator.ty);
                         try block.addInstruction(.{ .sub = .{ .dest = dest, .left = accumulator, .right = right } });
                         accumulator = dest;
                     }
@@ -556,8 +592,7 @@ pub const IRGenerator = struct {
                     var accumulator = try self.generateExpression(call.arguments.items[0]);
                     for (call.arguments.items[1..]) |arg| {
                         const right = try self.generateExpression(arg);
-                        const dest_temp = self.nextTemp();
-                        const dest = ir.Value{ .temporary = dest_temp };
+                        const dest = self.makeTemporary(accumulator.ty);
                         try block.addInstruction(.{ .mul = .{ .dest = dest, .left = accumulator, .right = right } });
                         accumulator = dest;
                     }
@@ -574,8 +609,7 @@ pub const IRGenerator = struct {
                     var accumulator = try self.generateExpression(call.arguments.items[0]);
                     for (call.arguments.items[1..]) |arg| {
                         const right = try self.generateExpression(arg);
-                        const dest_temp = self.nextTemp();
-                        const dest = ir.Value{ .temporary = dest_temp };
+                        const dest = self.makeTemporary(accumulator.ty);
                         try block.addInstruction(.{ .div = .{ .dest = dest, .left = accumulator, .right = right } });
                         accumulator = dest;
                     }
@@ -586,8 +620,7 @@ pub const IRGenerator = struct {
                     if (call.arguments.items.len != 2) return error.OutOfMemory;
                     const left = try self.generateExpression(call.arguments.items[0]);
                     const right = try self.generateExpression(call.arguments.items[1]);
-                    const dest_temp = self.nextTemp();
-                    const dest = ir.Value{ .temporary = dest_temp };
+                    const dest = self.makeTemporary(left.ty);
                     try block.addInstruction(.{ .mod = .{ .dest = dest, .left = left, .right = right } });
                     return dest;
                 }
@@ -600,8 +633,7 @@ pub const IRGenerator = struct {
                     if (call.arguments.items.len != 2) return error.OutOfMemory;
                     const left = try self.generateExpression(call.arguments.items[0]);
                     const right = try self.generateExpression(call.arguments.items[1]);
-                    const dest_temp = self.nextTemp();
-                    const dest = ir.Value{ .temporary = dest_temp };
+                    const dest = self.makeTemporary(.bool_type);
                     try block.addInstruction(.{ .eq = .{ .dest = dest, .left = left, .right = right } });
                     return dest;
                 }
@@ -611,8 +643,7 @@ pub const IRGenerator = struct {
                     if (call.arguments.items.len != 2) return error.OutOfMemory;
                     const left = try self.generateExpression(call.arguments.items[0]);
                     const right = try self.generateExpression(call.arguments.items[1]);
-                    const dest_temp = self.nextTemp();
-                    const dest = ir.Value{ .temporary = dest_temp };
+                    const dest = self.makeTemporary(.bool_type);
                     try block.addInstruction(.{ .ne = .{ .dest = dest, .left = left, .right = right } });
                     return dest;
                 }
@@ -623,8 +654,7 @@ pub const IRGenerator = struct {
                     if (call.arguments.items.len != 2) return error.OutOfMemory;
                     const left = try self.generateExpression(call.arguments.items[0]);
                     const right = try self.generateExpression(call.arguments.items[1]);
-                    const dest_temp = self.nextTemp();
-                    const dest = ir.Value{ .temporary = dest_temp };
+                    const dest = self.makeTemporary(.bool_type);
                     try block.addInstruction(.{ .lt = .{ .dest = dest, .left = left, .right = right } });
                     return dest;
                 }
@@ -635,8 +665,7 @@ pub const IRGenerator = struct {
                     if (call.arguments.items.len != 2) return error.OutOfMemory;
                     const left = try self.generateExpression(call.arguments.items[0]);
                     const right = try self.generateExpression(call.arguments.items[1]);
-                    const dest_temp = self.nextTemp();
-                    const dest = ir.Value{ .temporary = dest_temp };
+                    const dest = self.makeTemporary(.bool_type);
                     try block.addInstruction(.{ .gt = .{ .dest = dest, .left = left, .right = right } });
                     return dest;
                 }
@@ -646,8 +675,7 @@ pub const IRGenerator = struct {
                     if (call.arguments.items.len != 2) return error.OutOfMemory;
                     const left = try self.generateExpression(call.arguments.items[0]);
                     const right = try self.generateExpression(call.arguments.items[1]);
-                    const dest_temp = self.nextTemp();
-                    const dest = ir.Value{ .temporary = dest_temp };
+                    const dest = self.makeTemporary(.bool_type);
                     try block.addInstruction(.{ .le = .{ .dest = dest, .left = left, .right = right } });
                     return dest;
                 }
@@ -657,8 +685,7 @@ pub const IRGenerator = struct {
                     if (call.arguments.items.len != 2) return error.OutOfMemory;
                     const left = try self.generateExpression(call.arguments.items[0]);
                     const right = try self.generateExpression(call.arguments.items[1]);
-                    const dest_temp = self.nextTemp();
-                    const dest = ir.Value{ .temporary = dest_temp };
+                    const dest = self.makeTemporary(.bool_type);
                     try block.addInstruction(.{ .ge = .{ .dest = dest, .left = left, .right = right } });
                     return dest;
                 }
@@ -671,18 +698,43 @@ pub const IRGenerator = struct {
                     else 
                         try std.fmt.allocPrint(self.allocator, "System.{s}", .{call.function_name});
                     
-                    const hook_name = intrinsics.getNativeHook(qualified_name, &system.system_hooks);
+                    // Extract operation name (e.g., "add" from "System.Add" or "system.add")
+                    const operation_name_capitalized = if (std.mem.indexOf(u8, qualified_name, ".")) |dot_pos|
+                        qualified_name[dot_pos + 1..]
+                    else
+                        qualified_name;
+                    
+                    // Convert to lowercase for hook lookup
+                    const operation_name = try std.ascii.allocLowerString(self.allocator, operation_name_capitalized);
+                    defer self.allocator.free(operation_name);
+                    
+                    // Generate arguments first to determine types
+                    var args = try self.allocator.alloc(ir.Value, call.arguments.items.len);
+                    for (call.arguments.items, 0..) |arg, i| {
+                        args[i] = try self.generateExpression(arg);
+                    }
+                    
+                    // Get type from first argument if available, otherwise default to sint32
+                    const arg_type = if (args.len > 0) args[0].ty else types.KLType.sint32;
+                    
+                    // Map KL type to Zig type name for hook lookup
+                    const type_name = switch (arg_type) {
+                        .sint8 => "i8",
+                        .sint32 => "i32",
+                        .uint8 => "u8",
+                        .uint32 => "u32",
+                        .number, .any => "i32",  // Default to i32 for generic number types
+                        else => "i32",  // Fallback for other types
+                    };
+                    
+                    // Get type-specific hook name
+                    const hook_name = system.getNativeHookForType(operation_name, type_name) orelse
+                        intrinsics.getNativeHook(qualified_name, &system.system_hooks);
                     
                     // If we found a native hook, use it
                     if (!std.mem.eql(u8, hook_name, "unknown")) {
-                        // Generate arguments
-                        var args = try self.allocator.alloc(ir.Value, call.arguments.items.len);
-                        for (call.arguments.items, 0..) |arg, i| {
-                            args[i] = try self.generateExpression(arg);
-                        }
-                        
-                        const dest_temp = self.nextTemp();
-                        const dest = ir.Value{ .temporary = dest_temp };
+                        // Result type is same as argument type for arithmetic operations
+                        const dest = self.makeTemporary(arg_type);
                         
                         try block.addInstruction(.{
                             .intrinsic = .{
@@ -702,8 +754,8 @@ pub const IRGenerator = struct {
                     args[i] = try self.generateExpression(arg);
                 }
                 
-                const dest_temp = self.nextTemp();
-                const dest = ir.Value{ .temporary = dest_temp };
+                // Regular function calls return 'any' type until we have proper function signatures
+                const dest = self.makeTemporary(.any);
                 
                 try block.addInstruction(.{
                     .call = .{
@@ -716,7 +768,7 @@ pub const IRGenerator = struct {
                 return dest;
             },
             
-            else => return ir.Value{ .constant = .{ .int = 0 } },
+            else => return makeConstant(.{ .int = 0 }),
         }
     }
     
@@ -730,6 +782,36 @@ pub const IRGenerator = struct {
         const label = try std.fmt.allocPrint(self.allocator, "{s}_{d}", .{prefix, self.next_label});
         self.next_label += 1;
         return label;
+    }
+    
+    /// Helper to create a typed constant value
+    fn makeConstant(constant: ir.Constant) ir.Value {
+        return .{
+            .kind = .{ .constant = constant },
+            .ty = constant.getDefaultType(),
+        };
+    }
+    
+    /// Helper to create a typed temporary value
+    fn makeTemporary(self: *IRGenerator, ty: types.KLType) ir.Value {
+        return .{
+            .kind = .{ .temporary = self.nextTemp() },
+            .ty = ty,
+        };
+    }
+    
+    /// Helper to create a typed local value
+    fn makeLocal(local_index: u32, ty: types.KLType) ir.Value {
+        return .{
+            .kind = .{ .local = local_index },
+            .ty = ty,
+        };
+    }
+    
+    /// Get the type of a local variable by index
+    fn getLocalType(self: *IRGenerator, local_index: u32) types.KLType {
+        const func = self.current_function.?;
+        return func.locals.items[local_index].ty;
     }
 };
 

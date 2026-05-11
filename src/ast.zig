@@ -125,6 +125,9 @@ pub const CommandImplNode = struct {
     // Native hook: if present, this command has a native implementation
     // The slice points directly into the source buffer (zero-allocation)
     native_hook: ?[]const u8 = null,
+    // Generic type parameter for native hooks (e.g., "T" for @native["T"])
+    // For now, only single generic parameter is supported
+    generic_param: ?[]const u8 = null,
     
     pub const CommandOptions = struct {
         unchecked: bool = false,
@@ -140,6 +143,7 @@ pub const CommandImplNode = struct {
             .body = .{ .items = &.{}, .capacity = 0 },
             .options = .{},
             .native_hook = null,
+            .generic_param = null,
         };
         return node;
     }
@@ -168,6 +172,9 @@ pub const FunctionImplNode = struct {
     // Native hook: if present, this function has a native implementation
     // The slice points directly into the source buffer (zero-allocation)
     native_hook: ?[]const u8 = null,
+    // Generic type parameter for native hooks (e.g., "T" for @native["T"])
+    // For now, only single generic parameter is supported
+    generic_param: ?[]const u8 = null,
     
     pub const FunctionOptions = struct {
         unchecked: bool = false,
@@ -184,6 +191,7 @@ pub const FunctionImplNode = struct {
             .return_type = null,
             .options = .{},
             .native_hook = null,
+            .generic_param = null,
         };
         return node;
     }

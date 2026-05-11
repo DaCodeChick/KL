@@ -284,7 +284,7 @@ pub const AsmGenerator = struct {
     }
     
     fn emitLoadValue(self: *AsmGenerator, value: ir.Value) !void {
-        switch (value) {
+        switch (value.kind) {
             .constant => |c| {
                 switch (self.format) {
                     .att => {
@@ -325,7 +325,7 @@ pub const AsmGenerator = struct {
     }
     
     fn emitStoreValue(self: *AsmGenerator, value: ir.Value) !void {
-        switch (value) {
+        switch (value.kind) {
             .constant => {
                 // Can't store to a constant
                 switch (self.format) {
@@ -386,7 +386,7 @@ pub const AsmGenerator = struct {
         }
         
         // Store result to destination if it's a temporary
-        switch (op.dest) {
+        switch (op.dest.kind) {
             .temporary => |temp_idx| {
                 const temp_offset = 1024 + (temp_idx * 8);
                 switch (self.format) {
@@ -435,7 +435,7 @@ pub const AsmGenerator = struct {
         }
         
         // Store quotient (result in rax) to destination if it's a temporary
-        switch (op.dest) {
+        switch (op.dest.kind) {
             .temporary => |temp_idx| {
                 const temp_offset = 1024 + (temp_idx * 8);
                 switch (self.format) {
@@ -490,7 +490,7 @@ pub const AsmGenerator = struct {
         }
         
         // Store remainder (now in rax) to destination if it's a temporary
-        switch (op.dest) {
+        switch (op.dest.kind) {
             .temporary => |temp_idx| {
                 const temp_offset = 1024 + (temp_idx * 8);
                 switch (self.format) {
@@ -543,7 +543,7 @@ pub const AsmGenerator = struct {
         }
         
         // Store result to destination if it's a temporary
-        switch (op.dest) {
+        switch (op.dest.kind) {
             .temporary => |temp_idx| {
                 const temp_offset = 1024 + (temp_idx * 8);
                 switch (self.format) {
@@ -588,7 +588,7 @@ pub const AsmGenerator = struct {
         
         // Store result if destination is specified
         if (op.dest) |dest| {
-            switch (dest) {
+            switch (dest.kind) {
                 .temporary => |temp_idx| {
                     const temp_offset = 1024 + (temp_idx * 8);
                     switch (self.format) {

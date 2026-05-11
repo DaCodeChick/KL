@@ -93,17 +93,32 @@ pub const Local = struct {
     stack_offset: ?i32 = null,
 };
 
-pub const Value = union(enum) {
-    local: u32,         // Index into function locals
-    constant: Constant,
-    temporary: u32,     // Temporary value (SSA register)
+pub const Value = struct {
+    kind: ValueKind,
+    ty: types.KLType,
+    
+    pub const ValueKind = union(enum) {
+        local: u32,         // Index into function locals
+        constant: Constant,
+        temporary: u32,     // Temporary value (SSA register)
+    };
 };
 
 pub const Constant = union(enum) {
-    int: i64,
-    uint: u64,
-    bool: bool,
-    string: []const u8,
+    int: i64,       // Signed integer literal
+    uint: u64,      // Unsigned integer literal
+    bool: bool,     // Boolean literal
+    string: []const u8, // String literal
+    
+    /// Get the default KL type for this constant
+    pub fn getDefaultType(self: Constant) types.KLType {
+        return switch (self) {
+            .int => .sint32,    // Integer literals default to sint32
+            .uint => .uint32,   // Unsigned literals default to uint32
+            .bool => .bool_type,
+            .string => .text,
+        };
+    }
 };
 
 pub const Instruction = union(enum) {

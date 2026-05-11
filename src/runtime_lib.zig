@@ -7,11 +7,11 @@ const std = @import("std");
 
 // Import and force compilation of runtime modules
 // The _ = comptime ensures the modules are analyzed and their exports are retained
-const system_runtime = @import("system_runtime.zig");
+const system = @import("runtime/system.zig");
 comptime {
-    _ = system_runtime;
+    _ = system;
 }
 
 // Future: Export other module native hooks
-// const mcli_runtime = @import("mcli_runtime.zig");
-// comptime { _ = mcli_runtime; }
+// const mcli = @import("runtime/mcli.zig");
+// comptime { _ = mcli; }

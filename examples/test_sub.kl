@@ -1,11 +1,11 @@
 {Test variadic arithmetic return values}
 
-Module TestVariadic
+Module TestVariadic;
 
-Command TestAdd
+Command Main;
     { Test Sub with 3 arguments: Sub[100, 30, 20] = 50 }
-    var result = Sub[100, 30, 20];
+    var result, sint32, Sub[100, 30, 20];
     { Result returned in rax }
-EndCommand
+EndCommand;
 
-EndModule
+EndModule;
