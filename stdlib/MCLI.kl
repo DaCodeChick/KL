@@ -1,0 +1,4 @@
+Module MCLI;
+
+{@native}
+Command Output[text: TText];
